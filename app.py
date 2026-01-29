@@ -5,7 +5,6 @@ import streamlit as st
 
 st.set_page_config(page_title="Land Watch", page_icon="🗺️", layout="wide")
 
-# ---------- theme-ish styling (works even without config.toml) ----------
 st.markdown(
     """
     <style>
@@ -20,7 +19,6 @@ st.markdown(
 st.title("Land Watch Dashboard")
 st.caption("Find land deals automatically — updated from your saved searches.")
 
-# ---------- load data ----------
 DATA_PATH = Path("data/listings.json")
 
 data = {"last_updated_utc": None, "criteria": {}, "items": []}
@@ -32,20 +30,19 @@ if DATA_PATH.exists():
 
 items = data.get("items", []) or []
 criteria = data.get("criteria", {}) or {}
-
 last_updated = data.get("last_updated_utc", None)
 
 min_acres = float(criteria.get("min_acres", 0) or 0)
 max_acres = float(criteria.get("max_acres", 0) or 0)
-max_price_default = int(criteria.get("max_price", 0) or 0)
+max_price_default = int(criteria.get("max_price", 600000) or 600000)
 
-# ---------- sidebar filters ----------
+# ---- sidebar filters ----
 st.sidebar.header("Filters")
 
 max_price = st.sidebar.number_input(
     "Max price",
     min_value=0,
-    value=max_price_default if max_price_default else 600000,
+    value=max_price_default,
     step=10000,
 )
 
@@ -55,39 +52,48 @@ show_n = st.sidebar.slider("Show how many", 10, 300, 120)
 
 show_table = st.sidebar.toggle("Show table view", value=False)
 
-# ---------- normalize + filter ----------
+# ---- helpers ----
 def safe_int(x):
     try:
-        return int(x)
+        if x is None:
+            return None
+        if isinstance(x, bool):
+            return None
+        return int(float(str(x).replace(",", "").replace("$", "").strip()))
     except Exception:
         return None
 
 def safe_float(x):
     try:
-        return float(x)
+        if x is None:
+            return None
+        return float(str(x).replace(",", "").strip())
     except Exception:
         return None
 
-filtered = []
+# ---- filter (but KEEP unknowns) ----
+rows = []
 for it in items:
     price = safe_int(it.get("price"))
     acres = safe_float(it.get("acres"))
+
     title = (it.get("title") or "Land listing").strip()
     source = (it.get("source") or "").strip()
     url = (it.get("url") or "").strip()
 
-    if price is None or acres is None:
-        continue
-
-    if price > max_price:
-        continue
-
+    # search filter
     if q:
         hay = f"{title} {source}".lower()
         if q.lower() not in hay:
             continue
 
-    filtered.append(
+    # price filter:
+    # - if price is known, apply the max_price filter
+    # - if price is unknown, keep it (so your old matches still show)
+    if price is not None and price > max_price:
+        continue
+
+    rows.append(
         {
             "price": price,
             "acres": acres,
@@ -97,15 +103,22 @@ for it in items:
         }
     )
 
-# sort cheapest first
-filtered.sort(key=lambda x: (x["price"], -x["acres"]))
+# Sort:
+# Known prices first (cheapest), unknown prices last
+def sort_key(x):
+    price = x["price"]
+    acres = x["acres"]
+    unknown_price = 1 if price is None else 0
+    price_val = price if price is not None else 10**18
+    acres_val = acres if acres is not None else -1
+    return (unknown_price, price_val, -acres_val)
 
-# cap results displayed
-displayed = filtered[:show_n]
+rows.sort(key=sort_key)
 
-# ---------- top metrics ----------
+displayed = rows[:show_n]
+
+# ---- metrics ----
 c1, c2, c3, c4 = st.columns(4)
-
 c1.metric("Saved matches", len(items))
 c2.metric("Showing now", len(displayed))
 c3.metric("Max price", f"${max_price:,.0f}")
@@ -116,17 +129,17 @@ if last_updated:
 
 st.divider()
 
-# ---------- results ----------
+# ---- results ----
 if not displayed:
     st.info("No matches yet with the current filters. Try raising max price or clearing the search box.")
 else:
-    # cards
     for it in displayed:
-        price_str = f"${it['price']:,.0f}"
-        acres_str = f"{it['acres']:g} acres"
         title = it["title"]
         source = it["source"] or "Source"
         url = it["url"]
+
+        price_str = f"${it['price']:,.0f}" if it["price"] is not None else "Unknown"
+        acres_str = f"{it['acres']:g} acres" if it["acres"] is not None else "Unknown"
 
         st.markdown(
             f"""
@@ -151,7 +164,7 @@ else:
             unsafe_allow_html=True,
         )
 
-# ---------- optional table ----------
+# ---- optional table ----
 if show_table and displayed:
     st.subheader("Table view")
     df = pd.DataFrame(displayed)
