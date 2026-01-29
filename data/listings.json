@@ -1,32 +1,66 @@
 {
-  "last_updated_utc": "2026-01-29T22:44:52.744400+00:00",
+  "last_updated_utc": "2026-01-29T22:52:45.123556+00:00",
   "criteria": {
     "min_acres": 11.0,
     "max_acres": 50.0,
-    "min_price": 10000,
     "max_price": 600000
   },
   "items": [
     {
       "source": "LandSearch",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/2202-belvedere-dr-king-george-va-22485/4996354",
-      "price": 330000,
-      "acres": 20.0
-    },
-    {
-      "source": "LandSearch",
-      "title": "Land listing",
+      "title": "37.3 Acres of Land with Home for Sale in King George, Virginia - LandSearch",
       "url": "https://www.landsearch.com/properties/10491-oak-tree-dr-king-george-va-22485/4515081",
       "price": 465000,
       "acres": 37.3
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "26.2 Acres of Recreational Land with Home for Sale in Nanjemoy, Maryland - LandSearch",
       "url": "https://www.landsearch.com/properties/11590-maryland-point-rd-nanjemoy-md-20662/4901267",
-      "price": 15100,
+      "price": 599900,
       "acres": 26.2
+    },
+    {
+      "source": "LandSearch",
+      "title": "20 Acres of Recreational Land with Home for Sale in King George, Virginia - LandSearch",
+      "url": "https://www.landsearch.com/properties/2202-belvedere-dr-king-george-va-22485/4996354",
+      "price": 330000,
+      "acres": 20.0
+    },
+    {
+      "source": "LandSearch",
+      "title": "29 Acres of Recreational Land for Sale in King George, Virginia - LandSearch",
+      "url": "https://www.landsearch.com/properties/james-madison-pkwy-king-george-va-22485/5009048",
+      "price": 350000,
+      "acres": 29.0
+    },
+    {
+      "source": "LandSearch",
+      "title": "18.5 Acres of Land for Sale in King George, Virginia - LandSearch",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995025",
+      "price": 299000,
+      "acres": 18.5
+    },
+    {
+      "source": "LandSearch",
+      "title": "14 Acres of Land for Sale in King George, Virginia - LandSearch",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995040",
+      "price": 249000,
+      "acres": 14.0
+    },
+    {
+      "source": "LandSearch",
+      "title": "14 Acres of Land for Sale in King George, Virginia - LandSearch",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995041",
+      "price": 199000,
+      "acres": 14.0
+    },
+    {
+      "source": "LandSearch",
+      "title": "30 Acres of Land for Sale in Rappahannock Academy, Virginia - LandSearch",
+      "url": "https://www.landsearch.com/properties/tidewater-trl-rappahannock-academy-va-22538/4418916",
+      "price": 549000,
+      "acres": 30.0
     }
   ]
 }
