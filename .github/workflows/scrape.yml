@@ -3,13 +3,18 @@ name: Run land scraper
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *"   # every 6 hours (UTC)
+    - cron: "0 13,22 * * *" # 8am and 5pm EST (during standard time)
+  push:
+    branches: ["main"]
+    paths-ignore:
+      - "data/listings.json"
 
 permissions:
   contents: write
 
 jobs:
   scrape:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     steps:
@@ -32,12 +37,11 @@ jobs:
 
       - name: Commit updates (only if changed)
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add data/listings.json
 
-          # If nothing changed, exit cleanly
           if git diff --staged --quiet; then
             echo "No changes to commit."
             exit 0
