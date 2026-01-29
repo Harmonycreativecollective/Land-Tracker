@@ -1,164 +1,246 @@
 import json
-import os
 import re
+import time
 from datetime import datetime, timezone
-from typing import Dict, List
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
 
-DATA_PATH = "data/listings.json"
 
-# ✅ Your filters 
-MAX_PRICE = 60000
-
-# ✅ Paste saved-search URLs here
-SEARCH_URLS = [
-    "https://www.landwatch.com/virginia-land-for-sale/king-george/acres-11-50/available",
-    "https://www.landsearch.com/properties/king-george-va/filter/format=sales,size[min]=10",
+# ====== YOUR SETTINGS ======
+SOURCES = [
+    {
+        "name": "LandWatch",
+        "url": "https://www.landwatch.com/virginia-land-for-sale/king-george/acres-11-50/available",
+        "base": "https://www.landwatch.com",
+    },
+    {
+        "name": "LandSearch",
+        "url": "https://www.landsearch.com/properties/king-george-va/filter/format=sales,size[min]=10",
+        "base": "https://www.landsearch.com",
+    },
 ]
 
+MIN_ACRES = 11.0
+MAX_ACRES = 50.0
+MAX_PRICE = 600_000  # <= you asked for 600k
 
-def money_to_int(text: str) -> int | None:
-    if not text:
+# If you want to require "land only" (no houses), add keyword rules later.
+# For now we keep it simple and just do acreage + max price.
+# ===========================
+
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Connection": "keep-alive",
+}
+
+PRICE_RE = re.compile(r"\$[\s]*([\d,]+)")
+ACRES_RE = re.compile(r"([\d,.]+)\s*acres?", re.IGNORECASE)
+
+def parse_price(text: str):
+    m = PRICE_RE.search(text or "")
+    if not m:
         return None
-    m = re.search(r"(\d[\d,]*)", text.replace("$", ""))
-    return int(m.group(1).replace(",", "")) if m else None
+    return int(m.group(1).replace(",", ""))
 
+def parse_acres(text: str):
+    m = ACRES_RE.search(text or "")
+    if not m:
+        return None
+    return float(m.group(1).replace(",", ""))
 
-def safe_get(url: str) -> str:
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; LandTracker/1.0)"}
-    r = requests.get(url, headers=headers, timeout=30)
-    r.raise_for_status()
-    return r.text
+def normalize_whitespace(s: str) -> str:
+    return re.sub(r"\s+", " ", (s or "")).strip()
 
+def fetch_html(url: str) -> str:
+    r = requests.get(url, headers=HEADERS, timeout=30)
+    return r.status_code, r.text
 
-def parse_landwatch(html: str, page_url: str) -> List[Dict]:
-    soup = BeautifulSoup(html, "lxml")
-    items: Dict[str, Dict] = {}
+def extract_candidates_generic(html: str, base_url: str):
+    """
+    Generic extraction:
+    - Collect likely listing blocks by scanning for repeated "$... • ... acres" patterns
+    - Also grab nearby links from the page
+    This is not perfect but is intentionally "robust" across minor site changes.
+    """
+    soup = BeautifulSoup(html, "html.parser")
 
-    # LandWatch property pages often contain "/property/" in hrefs
-    for a in soup.select("a[href*='/property/']"):
-        href = a.get("href")
-        if not href:
+    # Grab all links for later matching
+    links = []
+    for a in soup.select("a[href]"):
+        href = a.get("href", "")
+        text = normalize_whitespace(a.get_text(" "))
+        if not href or href.startswith("#"):
             continue
+        full = href if href.startswith("http") else urljoin(base_url, href)
+        links.append((full, text))
 
-        if href.startswith("/"):
-            href = urljoin(page_url, href)
+    # Find text chunks that contain price + acres
+    text = normalize_whitespace(soup.get_text(" "))
+    # This finds many, so we’ll build candidates from link texts too
+    candidates = []
 
-        text = a.get_text(" ", strip=True)
-        title = (text[:160] if text else "LandWatch listing").strip()
+    # Candidate approach 1: use link text blocks
+    for full, ltext in links:
+        if "$" in ltext and "acre" in ltext.lower():
+            price = parse_price(ltext)
+            acres = parse_acres(ltext)
+            candidates.append({
+                "title": ltext,
+                "url": full,
+                "price": price,
+                "acres": acres,
+                "raw": ltext,
+            })
 
-        price = None
-        m = re.search(r"\$[\d,]+", text)
-        if m:
-            price = money_to_int(m.group(0))
+    # Candidate approach 2: if link-text approach found nothing, try scanning page text
+    if not candidates:
+        # Pull snippets around each "$"
+        idxs = [m.start() for m in re.finditer(r"\$", text)]
+        for i in idxs[:200]:
+            snippet = text[max(0, i-120): i+180]
+            if "acre" not in snippet.lower():
+                continue
+            price = parse_price(snippet)
+            acres = parse_acres(snippet)
+            if price is None or acres is None:
+                continue
+            candidates.append({
+                "title": snippet,
+                "url": None,
+                "price": price,
+                "acres": acres,
+                "raw": snippet,
+            })
 
-        items[href] = {
-            "id": href,
-            "title": title,
-            "url": href,
-            "price": price,
-            "location": "",
-            "acres": "",
-            "source": "LandWatch",
-        }
-
-    return list(items.values())
-
-
-def parse_landsearch(html: str, page_url: str) -> List[Dict]:
-    soup = BeautifulSoup(html, "lxml")
-    items: Dict[str, Dict] = {}
-
-    # LandSearch listings often include "/properties/" links
-    for a in soup.select("a[href*='/properties/']"):
-        href = a.get("href")
-        if not href:
+    # Deduplicate by (price, acres, url/title)
+    seen = set()
+    deduped = []
+    for c in candidates:
+        key = (c.get("price"), c.get("acres"), c.get("url") or c.get("title"))
+        if key in seen:
             continue
+        seen.add(key)
+        deduped.append(c)
 
-        if href.startswith("/"):
-            href = urljoin(page_url, href)
+    return deduped
 
-        text = a.get_text(" ", strip=True)
-        title = (text[:160] if text else "LandSearch listing").strip()
+def passes_filters(item):
+    reasons = []
+    price = item.get("price")
+    acres = item.get("acres")
 
-        price = None
-        m = re.search(r"\$[\d,]+", text)
-        if m:
-            price = money_to_int(m.group(0))
+    if price is None:
+        reasons.append("missing_price")
+    if acres is None:
+        reasons.append("missing_acres")
 
-        items[href] = {
-            "id": href,
-            "title": title,
-            "url": href,
-            "price": price,
-            "location": "",
-            "acres": "",
-            "source": "LandSearch",
-        }
+    if acres is not None and acres < MIN_ACRES:
+        reasons.append("acres_too_small")
+    if acres is not None and acres > MAX_ACRES:
+        reasons.append("acres_too_big")
+    if price is not None and price > MAX_PRICE:
+        reasons.append("price_too_high")
 
-    return list(items.values())
-
-
-def parse_listings(html: str, page_url: str) -> List[Dict]:
-    host = urlparse(page_url).netloc.lower()
-
-    if "landwatch.com" in host:
-        return parse_landwatch(html, page_url)
-
-    if "landsearch.com" in host:
-        return parse_landsearch(html, page_url)
-
-    return []
-
-
-def load_data():
-    if not os.path.exists(DATA_PATH):
-        return {"last_updated_utc": None, "items": []}
-    with open(DATA_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def save_data(data):
-    os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
-    with open(DATA_PATH, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-
+    return (len(reasons) == 0), reasons
 
 def main():
-    data = load_data()
-    seen_ids = {item.get("id") for item in data.get("items", [])}
+    debug = {
+        "run_utc": datetime.now(timezone.utc).isoformat(),
+        "sources": [],
+        "totals": {
+            "candidates_found": 0,
+            "matches": 0,
+            "filtered_out": 0,
+        },
+        "filtered_reasons_count": {},
+        "notes": [],
+    }
 
-    all_listings: List[Dict] = []
+    matches = []
+    filtered_samples = []
 
-    for url in SEARCH_URLS:
-        try:
-            html = safe_get(url)
-            all_listings.extend(parse_listings(html, url))
-        except Exception as e:
-            print(f"Error scraping {url}: {e}")
+    for src in SOURCES:
+        status, html = fetch_html(src["url"])
+        src_debug = {
+            "name": src["name"],
+            "url": src["url"],
+            "http_status": status,
+            "candidates": 0,
+            "matches": 0,
+            "filtered_out": 0,
+        }
 
-    # Apply filters
-    matches: List[Dict] = []
-    for item in all_listings:
-        price = item.get("price")
-        if price is None:
+        if status != 200 or not html or len(html) < 5000:
+            src_debug["error"] = f"Bad response: status={status}, html_len={len(html) if html else 0}"
+            debug["sources"].append(src_debug)
             continue
-        if price <= MAX_PRICE:
-            matches.append(item)
 
-    # Only new ones
-    new_items = [m for m in matches if m.get("id") not in seen_ids]
+        candidates = extract_candidates_generic(html, src["base"])
+        src_debug["candidates"] = len(candidates)
+        debug["totals"]["candidates_found"] += len(candidates)
 
-    # Prepend new ones so newest show first
-    data["items"] = new_items + data.get("items", [])
-    data["last_updated_utc"] = datetime.now(timezone.utc).isoformat()
+        for c in candidates:
+            ok, reasons = passes_filters(c)
+            if ok:
+                c["source"] = src["name"]
+                matches.append(c)
+                src_debug["matches"] += 1
+            else:
+                src_debug["filtered_out"] += 1
+                debug["totals"]["filtered_out"] += 1
+                for r in reasons:
+                    debug["filtered_reasons_count"][r] = debug["filtered_reasons_count"].get(r, 0) + 1
 
-    save_data(data)
+                # keep a few examples to inspect later
+                if len(filtered_samples) < 25:
+                    filtered_samples.append({
+                        "source": src["name"],
+                        "price": c.get("price"),
+                        "acres": c.get("acres"),
+                        "url": c.get("url"),
+                        "raw": c.get("raw"),
+                        "reasons": reasons,
+                    })
 
-    print(f"Found {len(matches)} matches; added {len(new_items)} new.")
+        debug["sources"].append(src_debug)
+
+    # Deduplicate matches
+    seen = set()
+    final_matches = []
+    for m in matches:
+        key = (m.get("url"), m.get("price"), m.get("acres"), m.get("title"))
+        if key in seen:
+            continue
+        seen.add(key)
+        final_matches.append(m)
+
+    debug["totals"]["matches"] = len(final_matches)
+    debug["filtered_samples"] = filtered_samples
+
+    # Write outputs
+    out = {
+        "last_updated_utc": debug["run_utc"],
+        "criteria": {
+            "min_acres": MIN_ACRES,
+            "max_acres": MAX_ACRES,
+            "max_price": MAX_PRICE,
+        },
+        "matches": final_matches,
+    }
+
+    with open("data/listings.json", "w", encoding="utf-8") as f:
+        json.dump(out, f, indent=2)
+
+    with open("data/debug.json", "w", encoding="utf-8") as f:
+        json.dump(debug, f, indent=2)
+
+    print("Done.")
+    print(json.dumps(debug["totals"], indent=2))
 
 
 if __name__ == "__main__":
