@@ -1,164 +1,160 @@
 import json
 from pathlib import Path
-from datetime import datetime
-
 import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="Land Watch", page_icon="🗺️", layout="wide")
 
-# ---------- STYLE POLISH (optional but makes it feel like an app) ----------
+# ---------- theme-ish styling (works even without config.toml) ----------
 st.markdown(
     """
     <style>
-    .block-container { padding-top: 2rem; }
-    div[data-testid="metric-container"] {
-        background-color: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08);
-        padding: 16px;
-        border-radius: 18px;
-    }
-    .card {
-        background-color: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 18px;
-        padding: 16px;
-        margin-bottom: 12px;
-    }
-    .muted { opacity: 0.75; font-size: 0.95rem; }
-    .title { font-size: 1.15rem; font-weight: 600; }
+      .block-container { padding-top: 2rem; padding-bottom: 2rem; }
+      a { text-decoration: none; }
+      .small-muted { opacity: 0.75; font-size: 0.95rem; }
     </style>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
-# ---------- STEP 2: LOAD DATA ----------
+st.title("Land Watch Dashboard")
+st.caption("Find land deals automatically — updated from your saved searches.")
+
+# ---------- load data ----------
 DATA_PATH = Path("data/listings.json")
 
-def load_data():
-    if not DATA_PATH.exists():
-        return {
-            "last_updated_utc": None,
-            "criteria": {"min_acres": None, "max_acres": None, "max_price": None},
-            "items": []
-        }
-    with open(DATA_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+data = {"last_updated_utc": None, "criteria": {}, "items": []}
+if DATA_PATH.exists():
+    try:
+        data = json.loads(DATA_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        st.error("Could not read data/listings.json (invalid JSON).")
 
-data = load_data()
 items = data.get("items", []) or []
 criteria = data.get("criteria", {}) or {}
-last_updated_utc = data.get("last_updated_utc")
 
-# Convert items to dataframe for easy sorting/filtering
-df = pd.DataFrame(items)
-if not df.empty:
-    # standardize columns (in case any missing)
-    for col in ["title", "url", "price", "acres", "source"]:
-        if col not in df.columns:
-            df[col] = None
+last_updated = data.get("last_updated_utc", None)
 
-# ---------- HEADER ----------
-st.title("Land Watch Dashboard")
-st.caption("Your land matches — updated from your saved searches.")
+min_acres = float(criteria.get("min_acres", 0) or 0)
+max_acres = float(criteria.get("max_acres", 0) or 0)
+max_price_default = int(criteria.get("max_price", 0) or 0)
 
-if last_updated_utc:
-    try:
-        dt = datetime.fromisoformat(last_updated_utc.replace("Z", "+00:00"))
-        st.caption(f"Last updated (UTC): {dt.isoformat()}")
-    except Exception:
-        st.caption(f"Last updated (UTC): {last_updated_utc}")
-else:
-    st.caption("Last updated (UTC): —")
-
-# ---------- STEP 3: SIDEBAR FILTERS ----------
+# ---------- sidebar filters ----------
 st.sidebar.header("Filters")
 
-default_max_price = int(criteria.get("max_price") or 600000)
-default_min_acres = float(criteria.get("min_acres") or 11)
-default_max_acres = float(criteria.get("max_acres") or 50)
-
-max_price = st.sidebar.number_input("Max price", min_value=0, value=default_max_price, step=10000)
-min_acres = st.sidebar.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
-max_acres = st.sidebar.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
-
-sort_by = st.sidebar.selectbox(
-    "Sort by",
-    ["Newest (as-is)", "Price (low → high)", "Price (high → low)", "Acres (high → low)", "Acres (low → high)"]
+max_price = st.sidebar.number_input(
+    "Max price",
+    min_value=0,
+    value=max_price_default if max_price_default else 600000,
+    step=10000,
 )
 
-# Apply filters
-filtered = df.copy() if not df.empty else pd.DataFrame(columns=["title","url","price","acres","source"])
+q = st.sidebar.text_input("Search (title/source)")
 
-if not filtered.empty:
-    filtered = filtered.dropna(subset=["price", "acres", "url"])
-    filtered = filtered[(filtered["price"] <= max_price) & (filtered["acres"] >= min_acres) & (filtered["acres"] <= max_acres)]
+show_n = st.sidebar.slider("Show how many", 10, 300, 120)
 
-# Apply sorting
-if not filtered.empty:
-    if sort_by == "Price (low → high)":
-        filtered = filtered.sort_values("price", ascending=True)
-    elif sort_by == "Price (high → low)":
-        filtered = filtered.sort_values("price", ascending=False)
-    elif sort_by == "Acres (high → low)":
-        filtered = filtered.sort_values("acres", ascending=False)
-    elif sort_by == "Acres (low → high)":
-        filtered = filtered.sort_values("acres", ascending=True)
-    # "Newest (as-is)" keeps the file order
+show_table = st.sidebar.toggle("Show table view", value=False)
 
-# ---------- STEP 4: PRETTY DASHBOARD LAYOUT ----------
-sources = sorted(set((df["source"].dropna().tolist() if not df.empty else [])))
+# ---------- normalize + filter ----------
+def safe_int(x):
+    try:
+        return int(x)
+    except Exception:
+        return None
 
+def safe_float(x):
+    try:
+        return float(x)
+    except Exception:
+        return None
+
+filtered = []
+for it in items:
+    price = safe_int(it.get("price"))
+    acres = safe_float(it.get("acres"))
+    title = (it.get("title") or "Land listing").strip()
+    source = (it.get("source") or "").strip()
+    url = (it.get("url") or "").strip()
+
+    if price is None or acres is None:
+        continue
+
+    if price > max_price:
+        continue
+
+    if q:
+        hay = f"{title} {source}".lower()
+        if q.lower() not in hay:
+            continue
+
+    filtered.append(
+        {
+            "price": price,
+            "acres": acres,
+            "title": title,
+            "source": source,
+            "url": url,
+        }
+    )
+
+# sort cheapest first
+filtered.sort(key=lambda x: (x["price"], -x["acres"]))
+
+# cap results displayed
+displayed = filtered[:show_n]
+
+# ---------- top metrics ----------
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Saved matches", int(len(filtered)))
-c2.metric("Max price", f"${max_price:,.0f}")
-c3.metric("Acres range", f"{min_acres:g}–{max_acres:g}")
-c4.metric("Sources", ", ".join(sources) if sources else "—")
+
+c1.metric("Saved matches", len(items))
+c2.metric("Showing now", len(displayed))
+c3.metric("Max price", f"${max_price:,.0f}")
+c4.metric("Acres range", f"{min_acres:g}–{max_acres:g}" if max_acres else "—")
+
+if last_updated:
+    st.markdown(f"<div class='small-muted'>Last updated (UTC): {last_updated}</div>", unsafe_allow_html=True)
 
 st.divider()
 
-# Show results
-if filtered.empty:
-    st.markdown(
-        """
-        <div class="card">
-          <div class="title">No matches yet.</div>
-          <div class="muted">
-            Your scraper ran successfully, but nothing matched the current filter settings.
-            Try increasing Max price, lowering Min acres, or widening the acres range.
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+# ---------- results ----------
+if not displayed:
+    st.info("No matches yet with the current filters. Try raising max price or clearing the search box.")
 else:
-    st.subheader("Matches")
-
-    # Card view
-    for _, row in filtered.head(50).iterrows():
-        title = row.get("title") or "Land listing"
-        url = row.get("url")
-        price = row.get("price")
-        acres = row.get("acres")
-        source = row.get("source") or ""
+    # cards
+    for it in displayed:
+        price_str = f"${it['price']:,.0f}"
+        acres_str = f"{it['acres']:g} acres"
+        title = it["title"]
+        source = it["source"] or "Source"
+        url = it["url"]
 
         st.markdown(
             f"""
-            <div class="card">
-              <div class="title">{title}</div>
-              <div class="muted">{source}</div>
-              <div style="margin-top:10px; display:flex; gap:18px; flex-wrap:wrap;">
-                <div><b>Price:</b> ${int(price):,}</div>
-                <div><b>Acres:</b> {float(acres):g}</div>
-                <div><a href="{url}" target="_blank">Open listing ↗</a></div>
+            <div style="
+              border: 1px solid rgba(255,255,255,0.08);
+              border-radius: 18px;
+              padding: 16px 18px;
+              margin-bottom: 12px;
+              background: rgba(255,255,255,0.02);
+            ">
+              <div style="font-size: 1.15rem; font-weight: 700; margin-bottom: 2px;">{title}</div>
+              <div style="opacity: 0.75; margin-bottom: 10px;">{source}</div>
+              <div style="display:flex; gap:18px; align-items:center; flex-wrap:wrap;">
+                <div><b>Price:</b> {price_str}</div>
+                <div><b>Acres:</b> {acres_str}</div>
+                <div style="margin-left:auto;">
+                  <a href="{url}" target="_blank">Open listing ↗</a>
+                </div>
               </div>
             </div>
             """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
+# ---------- optional table ----------
+if show_table and displayed:
     st.subheader("Table view")
-    table = filtered.copy()
-    table["link"] = table["url"].apply(lambda u: f"[Open]({u})")
-    table = table[["price", "acres", "title", "source", "link"]]
-    st.dataframe(table, use_container_width=True, hide_index=True)
+    df = pd.DataFrame(displayed)
+    df["link"] = df["url"].apply(lambda u: f"[Open]({u})")
+    df = df.drop(columns=["url"])
+    st.dataframe(df, use_container_width=True, hide_index=True)
