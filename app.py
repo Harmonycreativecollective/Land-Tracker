@@ -1,303 +1,237 @@
 import json
-from datetime import datetime
-from typing import Any, Dict, List
+import re
+from datetime import datetime, timezone
+from pathlib import Path
+from urllib.parse import urlparse
 
 import streamlit as st
 
-# ---------------------------------------------------------
-# Page config
-# ---------------------------------------------------------
+# -----------------------------
+# Page setup
+# -----------------------------
 st.set_page_config(
     page_title="KB’s Land Tracker",
     page_icon="🗺️",
     layout="wide",
 )
 
-# ---------------------------------------------------------
-# Theme / Style (Grey aesthetic, clean dashboard look)
-# ---------------------------------------------------------
-st.markdown(
-    """
-    <style>
-      /* overall app background */
-      .stApp {
-        background: #f6f7f9;
-      }
-
-      /* remove the default top padding */
-      .block-container {
-        padding-top: 1.25rem;
-        padding-bottom: 3rem;
-      }
-
-      /* title styling */
-      h1 {
-        font-weight: 800 !important;
-        letter-spacing: -0.02em;
-      }
-
-      /* subtle caption */
-      .caption {
-        color: #6b7280;
-        font-size: 1rem;
-        margin-top: -0.6rem;
-        margin-bottom: 1rem;
-      }
-
-      /* card styling */
-      .kb-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 18px;
-        padding: 16px;
-        background: white;
-        box-shadow: 0px 2px 12px rgba(0,0,0,0.05);
-        margin-bottom: 12px;
-      }
-
-      .kb-card h3 {
-        margin: 0 0 6px 0;
-        font-size: 20px;
-        line-height: 1.2;
-      }
-
-      .kb-pill {
-        display: inline-block;
-        font-size: 12px;
-        font-weight: 600;
-        padding: 4px 10px;
-        border-radius: 999px;
-        border: 1px solid #e5e7eb;
-        background: #f3f4f6;
-        color: #374151;
-        margin-right: 6px;
-        margin-top: 6px;
-      }
-
-      .kb-muted {
-        color: #6b7280;
-        font-size: 0.95rem;
-      }
-
-      .kb-price {
-        font-weight: 800;
-        font-size: 22px;
-      }
-
-      .kb-btn a {
-        text-decoration: none !important;
-      }
-
-      /* make Streamlit widgets look cleaner */
-      [data-testid="stSlider"] {
-        padding-top: 8px;
-      }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# ---------------------------------------------------------
+# -----------------------------
 # Helpers
-# ---------------------------------------------------------
-def load_data(path: str = "data/listings.json") -> Dict[str, Any]:
+# -----------------------------
+DATA_PATH = Path("data/listings.json")
+
+def strip_html(s: str) -> str:
+    """Remove any HTML tags so we never render code-looking titles/snippets."""
+    if not s:
+        return ""
+    return re.sub(r"<[^>]+>", "", s).strip()
+
+def money(v):
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+        if v is None:
+            return "—"
+        return f"${int(v):,}"
     except Exception:
-        return {"items": [], "criteria": {}, "last_updated_utc": None}
+        return "—"
 
-def safe_int(x):
+def acres_fmt(v):
     try:
-        return int(x)
+        if v is None:
+            return "—"
+        v = float(v)
+        # prettier: 19.0 -> 19, 19.3 -> 19.3
+        return f"{v:g}"
     except Exception:
-        return None
+        return "—"
 
-def safe_float(x):
+def safe_dt_label(iso_str: str) -> str:
+    if not iso_str:
+        return "—"
     try:
-        return float(x)
-    except Exception:
-        return None
-
-def fmt_money(n: Any) -> str:
-    n = safe_int(n)
-    if n is None:
-        return "Price: Unknown"
-    return f"${n:,.0f}"
-
-def fmt_acres(a: Any) -> str:
-    a = safe_float(a)
-    if a is None:
-        return "Acres: Unknown"
-    return f"{a:g} acres"
-
-def fmt_dt(iso_utc: str) -> str:
-    if not iso_utc:
-        return "Unknown"
-    try:
-        dt = datetime.fromisoformat(iso_utc.replace("Z","+00:00"))
+        # Handles "2026-01-29T22:08:19.594685+00:00"
+        dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
         return dt.strftime("%b %d, %Y • %I:%M %p UTC")
     except Exception:
-        return iso_utc
+        return iso_str
 
-def is_strict_match(item: Dict[str, Any], max_price: int, min_acres: float, max_acres: float) -> bool:
-    price = safe_int(item.get("price"))
-    acres = safe_float(item.get("acres"))
-    if price is None or acres is None:
+def get_image(item: dict) -> str | None:
+    """Support multiple possible keys from different scrapers."""
+    for k in ("image", "image_url", "thumbnail", "thumbnail_url", "img", "photo"):
+        v = item.get(k)
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+    # Sometimes an images list exists
+    imgs = item.get("images")
+    if isinstance(imgs, list) and imgs:
+        v = imgs[0]
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+        if isinstance(v, dict):
+            for k in ("url", "src", "image", "thumbnail"):
+                vv = v.get(k)
+                if isinstance(vv, str) and vv.strip():
+                    return vv.strip()
+    return None
+
+def get_location(item: dict) -> str:
+    # Optional: you may have these fields
+    for k in ("location", "city", "county", "state"):
+        v = item.get(k)
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+    return ""
+
+def domain_from_url(u: str) -> str:
+    try:
+        return urlparse(u).netloc.replace("www.", "")
+    except Exception:
+        return ""
+
+def load_data() -> dict:
+    if not DATA_PATH.exists():
+        return {"last_updated_utc": "", "criteria": {}, "items": []}
+    try:
+        return json.loads(DATA_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {"last_updated_utc": "", "criteria": {}, "items": []}
+
+def is_strict_match(item: dict, criteria: dict, max_price_override: int | None = None) -> bool:
+    """
+    Strict match = has both price & acres and fits within criteria bounds.
+    If a listing has wonky/unknown price or acres, it will count only as "All found" not strict.
+    """
+    try:
+        price = item.get("price")
+        acres = item.get("acres")
+        if price is None or acres is None:
+            return False
+
+        min_acres = float(criteria.get("min_acres", 0) or 0)
+        max_acres = float(criteria.get("max_acres", 10**9) or 10**9)
+
+        max_price = int(max_price_override if max_price_override is not None else (criteria.get("max_price") or 10**12))
+
+        return (min_acres <= float(acres) <= max_acres) and (int(price) <= max_price)
+    except Exception:
         return False
-    return (min_acres <= acres <= max_acres) and (price <= max_price)
 
-# ---------------------------------------------------------
-# Load
-# ---------------------------------------------------------
+# -----------------------------
+# Load listings
+# -----------------------------
 data = load_data()
-items: List[Dict[str, Any]] = data.get("items", [])
-criteria = data.get("criteria", {})
-last_updated = data.get("last_updated_utc")
+items = data.get("items", []) or []
+criteria = data.get("criteria", {}) or {}
 
-# fallback criteria
-min_acres = float(criteria.get("min_acres", 11.0))
-max_acres = float(criteria.get("max_acres", 50.0))
-max_price_default = int(criteria.get("max_price", 600000))
+last_updated = safe_dt_label(data.get("last_updated_utc", ""))
 
-# ---------------------------------------------------------
+default_max_price = int(criteria.get("max_price", 600000) or 600000)
+
+# -----------------------------
 # Header
-# ---------------------------------------------------------
+# -----------------------------
 st.title("KB’s Land Tracker")
-st.markdown('<div class="caption">What’s meant for you is already in motion.</div>', unsafe_allow_html=True)
+st.caption("What’s meant for you is already in motion.")
 
-# ---------------------------------------------------------
-# Sidebar controls
-# ---------------------------------------------------------
-with st.sidebar:
-    st.subheader("Filters")
-
+# -----------------------------
+# Filters (hidden by default)
+# -----------------------------
+# These are collapsed so William won't see them unless someone expands
+with st.expander("Filters", expanded=False):
     max_price = st.number_input(
         "Max price (for STRICT matches)",
         min_value=0,
-        value=max_price_default,
-        step=10_000
+        value=default_max_price,
+        step=5000,
     )
+    search_q = st.text_input("Search (title/location/source)")
+    show_n = st.slider("Show how many", 5, 200, 60)
 
-    search = st.text_input("Search (title/location/source)")
-
-    show_n = st.slider("Show how many", 5, 200, 60, step=5)
-
-    st.divider()
-    st.caption("Tip: STRICT matches = within acres + max price.")
-
-# ---------------------------------------------------------
-# Stats row
-# ---------------------------------------------------------
-strict = [i for i in items if is_strict_match(i, max_price, min_acres, max_acres)]
-all_found_count = len(items)
-strict_count = len(strict)
-
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("All found", all_found_count)
-c2.metric("Strict matches", strict_count)
-c3.metric("Max price", f"${max_price:,.0f}")
-c4.metric("Acres range", f"{min_acres:g}–{max_acres:g}")
-
-st.caption(f"Last updated: {fmt_dt(last_updated)}")
-
-st.divider()
-
-# ---------------------------------------------------------
-# Listing display logic (Option A = show Strict first, then All Found)
-# ---------------------------------------------------------
-def matches_search(i: Dict[str, Any], q: str) -> bool:
+# -----------------------------
+# Apply search filter (for display only)
+# -----------------------------
+def matches_search(it: dict, q: str) -> bool:
     if not q:
         return True
     q = q.lower().strip()
-    blob = " ".join([
-        str(i.get("title","")),
-        str(i.get("source","")),
-        str(i.get("url",""))
-    ]).lower()
-    return q in blob
+    hay = " ".join(
+        [
+            strip_html(str(it.get("title", ""))),
+            str(get_location(it)),
+            str(it.get("source", "")),
+            str(domain_from_url(str(it.get("url", "")))),
+        ]
+    ).lower()
+    return q in hay
 
-strict_display = [i for i in strict if matches_search(i, search)]
-all_display = [i for i in items if matches_search(i, search)]
+filtered = [it for it in items if matches_search(it, search_q)]
 
-# sort: strict by lowest price first, unknown last
-def sort_key(i: Dict[str, Any]):
-    p = safe_int(i.get("price"))
-    if p is None:
-        return (1, 10**18)
-    return (0, p)
+# Strict matches count uses max_price from UI
+strict_count = sum(1 for it in items if is_strict_match(it, criteria, max_price_override=max_price))
 
-strict_display.sort(key=sort_key)
-all_display.sort(key=sort_key)
+# -----------------------------
+# Top KPIs
+# -----------------------------
+k1, k2, k3, k4 = st.columns(4)
+k1.metric("All found", len(items))
+k2.metric("Strict matches", strict_count)
+k3.metric("Max price", money(max_price))
+k4.metric("Acres range", f"{criteria.get('min_acres', '—')}–{criteria.get('max_acres', '—')}")
 
-# Limit
-strict_display = strict_display[:show_n]
-all_display = all_display[:show_n]
-
-# ---------------------------------------------------------
-# Card renderer
-# ---------------------------------------------------------
-def render_card(item: Dict[str, Any], tag: str):
-    title = item.get("title") or "Land listing"
-    source = item.get("source") or ""
-    url = item.get("url") or ""
-    thumb = item.get("thumbnail")  # optional
-
-    price = item.get("price")
-    acres = item.get("acres")
-
-    colA, colB = st.columns([1, 3], vertical_alignment="top")
-
-    # Thumbnail
-    with colA:
-        if thumb:
-            st.image(thumb, use_container_width=True)
-        else:
-            st.markdown(
-                """
-                <div class="kb-card" style="height:170px; display:flex; align-items:center; justify-content:center; background:#f3f4f6;">
-                  <div class="kb-muted">No preview</div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-    # Main card
-    with colB:
-        st.markdown(
-            f"""
-            <div class="kb-card">
-              <div class="kb-pill">{tag}</div>
-              <div class="kb-pill">{source}</div>
-              <h3>{title}</h3>
-
-              <div style="margin-top:10px;">
-                <span class="kb-price">{fmt_money(price)}</span>
-                <span class="kb-muted" style="margin-left:14px;">• {fmt_acres(acres)}</span>
-              </div>
-
-              <div style="margin-top:12px;" class="kb-btn">
-                <a href="{url}" target="_blank">Open listing ↗</a>
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-# ---------------------------------------------------------
-# Layout sections
-# ---------------------------------------------------------
-st.subheader("STRICT matches")
-if not strict_display:
-    st.info("No strict matches with the current max price filter.")
-else:
-    for i in strict_display:
-        render_card(i, "MATCHES")
+st.caption(f"Last updated: {last_updated}")
 
 st.divider()
 
-st.subheader("All found (including weird pricing)")
-if not all_display:
-    st.info("No listings found.")
+# -----------------------------
+# Cards grid
+# -----------------------------
+if not filtered:
+    st.info("No matches with the current search. Try clearing the search box.")
 else:
-    for i in all_display:
-        render_card(i, "ALL FOUND")
+    # Sort: strict matches first, then by price (unknown last)
+    def sort_key(it):
+        strict = is_strict_match(it, criteria, max_price_override=max_price)
+        price = it.get("price")
+        price_sort = int(price) if isinstance(price, (int, float)) else 10**15
+        return (0 if strict else 1, price_sort)
+
+    filtered_sorted = sorted(filtered, key=sort_key)[:show_n]
+
+    # Responsive-ish: 2 cols on mobile, 3 on desktop-ish
+    cols = st.columns(3)
+    for idx, it in enumerate(filtered_sorted):
+        col = cols[idx % 3]
+        with col:
+            title = strip_html(str(it.get("title") or "Land listing"))
+            url = str(it.get("url") or "").strip()
+            src = str(it.get("source") or "").strip()
+            loc = strip_html(get_location(it))
+            img = get_image(it)
+
+            # Card container
+            with st.container(border=True):
+                if img:
+                    st.image(img, use_container_width=True)
+
+                st.subheader(title)
+
+                meta_left, meta_right = st.columns(2)
+                with meta_left:
+                    st.write(f"**Price:** {money(v=it.get('price'))}")
+                with meta_right:
+                    st.write(f"**Acres:** {acres_fmt(v=it.get('acres'))}")
+
+                if loc:
+                    st.write(f"📍 {loc}")
+
+                if src:
+                    st.caption(src)
+
+                if url:
+                    st.link_button("Open listing ↗", url)
+
+# -----------------------------
+# Notes:
+# - No tables are shown.
+# - Filters/search are hidden in the expander.
+# - If images are not present in listings.json, cards still work.
+# -----------------------------
