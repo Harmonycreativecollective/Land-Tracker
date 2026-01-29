@@ -297,4 +297,80 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
     if "landsearch.com" in host:
         next_data = get_next_data_json(html)
         if next_data:
-            items.extend(extract_from
+            items.extend(extract_from_landsearch_next(url, next_data))
+
+    # fallback for anything else
+    if not items:
+        label = "LandSearch" if "landsearch.com" in host else "LandWatch"
+        items.extend(extract_from_html_fallback(url, html, label))
+
+    # Dedup
+    seen = set()
+    out = []
+    for it in items:
+        if it["url"] in seen:
+            continue
+        seen.add(it["url"])
+        out.append(it)
+    return out
+
+
+def load_existing_payload(path: str) -> Dict[str, Any]:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, dict):
+            return data
+    except Exception:
+        pass
+    return {"items": []}
+
+
+def main():
+    run_utc = datetime.now(timezone.utc).isoformat()
+    all_items: List[Dict[str, Any]] = []
+
+    for url in START_URLS:
+        try:
+            html = fetch_html(url)
+        except Exception as e:
+            print(f"Failed to fetch {url}: {e}")
+            continue
+
+        items = extract_listings(url, html)
+        all_items.extend(items)
+
+    # Final dedup
+    seen = set()
+    final = []
+    for x in all_items:
+        if x["url"] in seen:
+            continue
+        seen.add(x["url"])
+        final.append(x)
+
+    existing = load_existing_payload("data/listings.json")
+    existing_items = existing.get("items", []) if isinstance(existing.get("items"), list) else []
+
+    # Safety: never wipe existing matches
+    items_to_save = final if len(final) > 0 else existing_items
+
+    out = {
+        "last_updated_utc": run_utc,
+        "criteria": {
+            "min_acres": MIN_ACRES,
+            "max_acres": MAX_ACRES,
+            "min_price": MIN_PRICE,
+            "max_price": MAX_PRICE,
+        },
+        "items": items_to_save,
+    }
+
+    with open("data/listings.json", "w", encoding="utf-8") as f:
+        json.dump(out, f, indent=2)
+
+    print(f"Found {len(final)} new matches. Saved {len(items_to_save)} total.")
+
+
+if __name__ == "__main__":
+    main()
