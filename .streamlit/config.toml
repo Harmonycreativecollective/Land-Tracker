@@ -1,7 +1,14 @@
 [theme]
-base="dark"
-primaryColor="#BDBDBD"
-backgroundColor="#0E0E10"
-secondaryBackgroundColor="#16161A"
-textColor="#E6E6E6"
+base="light"
+
+# soft grey background
+backgroundColor="#F3F4F6"
+secondaryBackgroundColor="#FFFFFF"
+
+# text colors
+textColor="#111827"
+
+# nice slate accent
+primaryColor="#6B7280"
+
 font="sans serif"
