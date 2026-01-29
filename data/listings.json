@@ -1,87 +1,10 @@
 {
-  "last_updated_utc": "2026-01-29T17:55:28.796677+00:00",
+  "last_updated_utc": "2026-01-29T22:08:19.594685+00:00",
   "criteria": {
     "min_acres": 11.0,
     "max_acres": 50.0,
-    "max_price": 600000
+    "max_price": 600000,
+    "min_price": 1000
   },
-  "items": [
-    {
-      "source": "LandSearch (HTML)",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/james-madison-pkwy-king-george-va-22485/5009048",
-      "price": 3,
-      "acres": 29.0
-    },
-    {
-      "source": "LandSearch (HTML)",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995041",
-      "price": 12,
-      "acres": 14.0
-    },
-    {
-      "source": "LandSearch (HTML)",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995040",
-      "price": 12,
-      "acres": 14.0
-    },
-    {
-      "source": "LandSearch (HTML)",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995025",
-      "price": 12,
-      "acres": 18.5
-    },
-    {
-      "source": "LandSearch (HTML)",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/6269-caledon-rd-king-george-va-22485/5014554",
-      "price": 1,
-      "acres": 19.4
-    },
-    {
-      "source": "LandSearch (HTML)",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/2202-belvedere-dr-king-george-va-22485/4996354",
-      "price": 330000,
-      "acres": 20.0
-    },
-    {
-      "source": "LandSearch (HTML)",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/10491-oak-tree-dr-king-george-va-22485/4515081",
-      "price": 465000,
-      "acres": 37.3
-    },
-    {
-      "source": "LandSearch (HTML)",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/tidewater-trl-rappahannock-academy-va-22538/4418916",
-      "price": 9,
-      "acres": 30.0
-    },
-    {
-      "source": "LandSearch (HTML)",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/41-wood-landing-rd-fredericksburg-va-22405/4450546",
-      "price": 8,
-      "acres": 35.0
-    },
-    {
-      "source": "LandSearch (HTML)",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/11590-maryland-point-rd-nanjemoy-md-20662/4901267",
-      "price": 15100,
-      "acres": 26.2
-    },
-    {
-      "source": "LandSearch (HTML)",
-      "title": "Land listing",
-      "url": "https://www.landsearch.com/properties/25692-a-p-hill-blvd-port-royal-va-22535/4820007",
-      "price": 3,
-      "acres": 19.3
-    }
-  ]
+  "items": []
 }
