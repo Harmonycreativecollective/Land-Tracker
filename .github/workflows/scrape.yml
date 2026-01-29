@@ -1,12 +1,9 @@
 name: Run land scraper
 
 on:
-  schedule:
-    # 8:00 AM EST = 13:00 UTC
-    - cron: "0 13 * * *"
-    # 5:00 PM EST = 22:00 UTC
-    - cron: "0 22 * * *"
   workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"   # every 6 hours (UTC)
 
 permissions:
   contents: write
@@ -14,6 +11,7 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -23,22 +21,27 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run scraper
         run: |
           python scraper.py
 
-      - name: Commit updates
-  run: |
-    git config user.name "github-actions"
-    git config user.email "github-actions@github.com"
-    git add data/listings.json
-    if git diff --cached --quiet; then
-      echo "No changes to commit."
-      exit 0
-    fi
-    git commit -m "Update listings"
-    git push
+      - name: Commit updates (only if changed)
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add data/listings.json
+
+          # If nothing changed, exit cleanly
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Update listings"
+          git push
