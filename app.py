@@ -1,235 +1,238 @@
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
+import requests
 import streamlit as st
 
-# =========================
-# Page setup
-# =========================
+# -----------------------------
+# Page / Theme-y layout settings
+# -----------------------------
 st.set_page_config(
     page_title="KB’s Land Tracker",
     page_icon="🗺️",
     layout="wide",
 )
 
-# =========================
-# Small UI helpers
-# =========================
-def safe_int(x) -> Optional[int]:
-    try:
-        if x is None:
-            return None
-        return int(float(x))
-    except Exception:
-        return None
-
-def safe_float(x) -> Optional[float]:
-    try:
-        if x is None:
-            return None
-        return float(x)
-    except Exception:
-        return None
-
-def money(n: Optional[int]) -> str:
-    if n is None:
-        return "—"
-    return f"${n:,.0f}"
-
-def fmt_acres(a: Optional[float]) -> str:
-    if a is None:
-        return "—"
-    # show 1 decimal only when needed
-    return f"{a:.1f}".rstrip("0").rstrip(".")
-
-def parse_dt(dt_str: str) -> str:
-    # show a friendly timestamp
-    try:
-        # examples: "2026-01-29T22:08:19.594685+00:00"
-        dt = datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-        return dt.strftime("%b %d, %Y • %I:%M %p UTC")
-    except Exception:
-        return dt_str
-
-def pill(label: str, kind: str = "neutral"):
-    # IMPORTANT: renders HTML safely (won’t show code)
-    if kind == "match":
-        bg, bd, fg = "#E8F5E9", "#81C784", "#1B5E20"
-    elif kind == "warn":
-        bg, bd, fg = "#FFF7ED", "#FDBA74", "#7C2D12"
-    else:
-        bg, bd, fg = "#F3F4F6", "#D1D5DB", "#111827"
-
-    st.markdown(
-        f"""
-        <div style="
-          display:inline-block;
-          padding:4px 10px;
-          border-radius:999px;
-          background:{bg};
-          border:1px solid {bd};
-          color:{fg};
-          font-weight:800;
-          font-size:12px;
-          letter-spacing:.4px;">
-          {label}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-def card(title: str, source: str, price: Optional[int], acres: Optional[float], url: str, is_match: bool):
-    with st.container(border=True):
-        # header row
-        left, right = st.columns([0.75, 0.25], vertical_alignment="center")
-        with left:
-            st.markdown(f"### {title}")
-            st.caption(source)
-        with right:
-            if is_match:
-                pill("MATCH", "match")
-            else:
-                pill("FOUND", "neutral")
-
-        # stats row
-        c1, c2, c3 = st.columns([0.34, 0.33, 0.33])
-        c1.metric("Price", money(price))
-        c2.metric("Acres", fmt_acres(acres))
-        c3.markdown("")
-        st.link_button("Open listing ↗", url, use_container_width=True)
-
-# =========================
-# Load data
-# =========================
-DATA_PATH = Path("data/listings.json")
-
-if not DATA_PATH.exists():
-    st.error("No data file found at data/listings.json yet. Run the scraper workflow first.")
-    st.stop()
-
-with open(DATA_PATH, "r", encoding="utf-8") as f:
-    data = json.load(f)
-
-items: List[Dict[str, Any]] = data.get("items", []) or []
-criteria: Dict[str, Any] = data.get("criteria", {}) or {}
-
-min_acres = safe_float(criteria.get("min_acres")) or 11.0
-max_acres = safe_float(criteria.get("max_acres")) or 50.0
-max_price_default = safe_int(criteria.get("max_price")) or 600000
-
-last_updated = data.get("last_updated_utc", "")
-last_updated_pretty = parse_dt(last_updated) if last_updated else "—"
-
-# Normalize numeric fields once
-normalized: List[Dict[str, Any]] = []
-for it in items:
-    price = safe_int(it.get("price"))
-    acres = safe_float(it.get("acres"))
-    normalized.append({
-        "title": (it.get("title") or "Land listing").strip(),
-        "source": (it.get("source") or "Unknown").strip(),
-        "url": it.get("url") or "",
-        "price": price,
-        "acres": acres,
-    })
-
-# =========================
-# Header / Branding
-# =========================
 st.title("KB’s Land Tracker")
 st.caption("What’s meant for you is already in motion.")
 
-# =========================
-# Controls
-# =========================
-with st.container(border=True):
-    left, mid, right = st.columns([0.35, 0.35, 0.30], vertical_alignment="center")
+DATA_PATH = Path("data/listings.json")
 
-    with left:
-        max_price = st.number_input(
-            "Max price (for STRICT matches)",
-            min_value=0,
-            max_value=10_000_000,
-            value=max_price_default,
-            step=10_000,
-            format="%d",
+
+# -----------------------------
+# Helpers
+# -----------------------------
+TAG_RE = re.compile(r"<[^>]+>")
+
+def strip_html(text: str) -> str:
+    """Remove HTML tags so titles never show raw code."""
+    if not text:
+        return ""
+    return TAG_RE.sub("", text).strip()
+
+def money_fmt(value: Optional[Any]) -> str:
+    if value is None:
+        return "—"
+    try:
+        n = float(value)
+        # If it's tiny like 1, 3, 9 but clearly meant to be "$X,XXX" sometimes,
+        # don't guess here — just show it as-is and let the strict filter handle.
+        return f"${n:,.0f}"
+    except Exception:
+        return str(value)
+
+def acres_fmt(value: Optional[Any]) -> str:
+    if value is None:
+        return "—"
+    try:
+        n = float(value)
+        # show 1 decimal if needed
+        return f"{n:g}"
+    except Exception:
+        return str(value)
+
+def safe_host(url: str) -> str:
+    try:
+        return urlparse(url).netloc.replace("www.", "")
+    except Exception:
+        return ""
+
+@st.cache_data(show_spinner=False)
+def load_data() -> Dict[str, Any]:
+    if not DATA_PATH.exists():
+        return {"last_updated_utc": None, "criteria": {}, "items": []}
+    with DATA_PATH.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+def parse_last_updated(iso_str: Optional[str]) -> str:
+    if not iso_str:
+        return "—"
+    try:
+        # Handle "2026-01-29T22:08:19.594685+00:00"
+        dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+        return dt.strftime("%b %d, %Y • %I:%M %p UTC")
+    except Exception:
+        return iso_str
+
+def is_strict_match(item: Dict[str, Any], max_price: int, min_acres: float, max_acres: float) -> bool:
+    """Strict = within acres range AND price <= max_price, and both are parseable numbers."""
+    try:
+        p = float(item.get("price"))
+        a = float(item.get("acres"))
+    except Exception:
+        return False
+    return (min_acres <= a <= max_acres) and (p <= max_price)
+
+@st.cache_data(show_spinner=False)
+def fetch_thumbnail(url: str) -> Optional[str]:
+    """
+    Best-effort thumbnail:
+    - tries OpenGraph image (og:image)
+    - lightweight: only hits when card is rendered
+    NOTE: Some sites block this; if so it just returns None.
+    """
+    try:
+        r = requests.get(
+            url,
+            timeout=10,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml",
+            },
         )
+        if r.status_code != 200 or not r.text:
+            return None
 
-    with mid:
-        q = st.text_input("Search (title/location/source)", value="").strip().lower()
+        # super light OG parse without full bs4 dependency in app
+        m = re.search(r'<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']+)["\']', r.text, re.IGNORECASE)
+        if m:
+            return m.group(1).strip()
+    except Exception:
+        return None
 
-    with right:
+    return None
+
+
+# -----------------------------
+# Load data
+# -----------------------------
+data = load_data()
+items: List[Dict[str, Any]] = data.get("items", []) or []
+criteria = data.get("criteria", {}) or {}
+
+min_acres = float(criteria.get("min_acres", 11))
+max_acres = float(criteria.get("max_acres", 50))
+default_max_price = int(criteria.get("max_price", 600000))
+
+last_updated = parse_last_updated(data.get("last_updated_utc"))
+
+# -----------------------------
+# Controls (keep these visible)
+# -----------------------------
+with st.container():
+    c1, c2 = st.columns([2, 1])
+    with c1:
+        query = st.text_input("Search (title/location/source)", value="")
+    with c2:
         show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
-# =========================
-# Match logic
-# =========================
-def is_strict_match(price: Optional[int], acres: Optional[float]) -> bool:
-    if price is None or acres is None:
-        return False
-    return (min_acres <= acres <= max_acres) and (price <= max_price)
+# For STRICT filter only (kept but not shouted)
+max_price_strict = st.number_input(
+    "Max price (for STRICT matches)",
+    min_value=0,
+    max_value=5_000_000,
+    value=default_max_price,
+    step=10_000,
+)
 
-# Apply search filter (but do NOT delete items for having weird/missing price)
-def matches_search(it: Dict[str, Any]) -> bool:
+# -----------------------------
+# Filtering
+# -----------------------------
+q = (query or "").strip().lower()
+
+def matches_query(item: Dict[str, Any]) -> bool:
     if not q:
         return True
-    blob = f"{it['title']} {it['source']} {it['url']}".lower()
-    return q in blob
+    hay = " ".join(
+        [
+            str(item.get("title", "")),
+            str(item.get("source", "")),
+            str(item.get("location", "")),
+            safe_host(str(item.get("url", ""))),
+        ]
+    ).lower()
+    return q in hay
 
-filtered_all = [it for it in normalized if it["url"] and matches_search(it)]
+filtered_all = [it for it in items if matches_query(it)]
 
-# Strict matches are what YOU care about (your original “11”)
-filtered_strict = [it for it in filtered_all if is_strict_match(it["price"], it["acres"])]
+# STRICT subset (what you originally cared about)
+strict = [it for it in filtered_all if is_strict_match(it, max_price_strict, min_acres, max_acres)]
 
-# Sort: strict matches first, then price ascending, then acres desc
-def sort_key(it: Dict[str, Any]):
-    strict = is_strict_match(it["price"], it["acres"])
-    price = it["price"] if it["price"] is not None else 9_999_999_999
-    acres = it["acres"] if it["acres"] is not None else 0.0
-    return (0 if strict else 1, price, -acres)
+# -----------------------------
+# Advanced (hidden) stats panel
+# -----------------------------
+with st.expander("Advanced (stats & details)", expanded=False):
+    st.markdown(f"**Last updated:** {last_updated}")
+    st.markdown(f"**Acres range (strict):** {min_acres:g}–{max_acres:g}")
+    st.markdown(f"**Strict max price:** ${max_price_strict:,.0f}")
 
-filtered_all.sort(key=sort_key)
+    # These numbers are helpful for you, not for William — so they live here.
+    st.metric("All found (includes weird/unparsed prices)", len(filtered_all))
+    st.metric("Strict matches", len(strict))
 
-# =========================
-# Top stats
-# =========================
-s1, s2, s3, s4 = st.columns(4)
-s1.metric("All found", len(normalized))
-s2.metric("Strict matches", len([it for it in normalized if is_strict_match(it["price"], it["acres"])]))
-s3.metric("Max price", money(max_price))
-s4.metric("Acres range", f"{fmt_acres(min_acres)}–{fmt_acres(max_acres)}")
+    st.caption("Tip: If prices look weird but listings are real, they’ll still appear under All found.")
 
-st.caption(f"Last updated: {last_updated_pretty}")
 
-st.divider()
+# -----------------------------
+# Main output (what William sees)
+# -----------------------------
+st.subheader("Listings")
 
-# =========================
-# Results (cards)
-# =========================
-if not filtered_all:
-    st.info("No listings match your search text. Try clearing the search box.")
-    st.stop()
+# Prefer strict list first if it exists, otherwise show all.
+# This keeps the “good matches” front and center while still showing everything.
+display_list = strict if len(strict) > 0 else filtered_all
 
-# Show cards
-count = 0
-for it in filtered_all:
-    if count >= show_n:
-        break
+if not display_list:
+    st.info("No matches with the current search. Try clearing the search box.")
+else:
+    # Sort: strict matches by price ascending when possible
+    def sort_key(it: Dict[str, Any]):
+        try:
+            return float(it.get("price", 9e18))
+        except Exception:
+            return 9e18
 
-    strict = is_strict_match(it["price"], it["acres"])
+    display_list = sorted(display_list, key=sort_key)[:show_n]
 
-    # If you ONLY want strict ones displayed, flip this to: if not strict: continue
-    # Right now it shows ALL, but with MATCH vs FOUND.
-    card(
-        title=it["title"],
-        source=it["source"],
-        price=it["price"],
-        acres=it["acres"],
-        url=it["url"],
-        is_match=strict,
-    )
-    count += 1
+    for it in display_list:
+        title = strip_html(str(it.get("title") or "Land listing"))
+        url = str(it.get("url") or "")
+        source = str(it.get("source") or safe_host(url) or "Source")
+        price = it.get("price")
+        acres = it.get("acres")
 
-st.caption(f"Showing {count} listings • {len(filtered_strict)} strict matches in this view")
+        # Optional thumbnail (best-effort)
+        thumb = fetch_thumbnail(url) if url else None
+
+        with st.container(border=True):
+            cols = st.columns([1, 3, 1])
+            with cols[0]:
+                if thumb:
+                    st.image(thumb, use_container_width=True)
+                else:
+                    st.caption("")
+
+            with cols[1]:
+                st.markdown(f"### {title}")
+                st.caption(source)
+                st.markdown(f"**Price:** {money_fmt(price)} &nbsp;&nbsp; **Acres:** {acres_fmt(acres)}")
+
+            with cols[2]:
+                if url:
+                    st.link_button("Open ↗", url)
+                else:
+                    st.caption("No link")
