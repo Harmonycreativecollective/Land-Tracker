@@ -7,6 +7,24 @@ DATA_PATH = "data/listings.json"
 st.set_page_config(page_title="Land Watch Dashboard", layout="wide")
 st.title("Land Watch Dashboard")
 
+st.markdown(
+    """
+    <style>
+    .block-container {
+        padding-top: 2rem;
+    }
+    div[data-testid="metric-container"] {
+        background-color: #1A1A1A;
+        border: 1px solid #2A2A2A;
+        padding: 15px;
+        border-radius: 18px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
 with open(DATA_PATH, "r", encoding="utf-8") as f:
     data = json.load(f)
 
