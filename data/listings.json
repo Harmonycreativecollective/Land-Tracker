@@ -1,10 +1,10 @@
 {
-  "last_updated_utc": "2026-01-29T22:08:19.594685+00:00",
+  "last_updated_utc": "2026-01-29T22:19:58.670926+00:00",
   "criteria": {
     "min_acres": 11.0,
     "max_acres": 50.0,
-    "max_price": 600000,
-    "min_price": 1000
+    "min_price": 1000,
+    "max_price": 600000
   },
   "items": []
 }
