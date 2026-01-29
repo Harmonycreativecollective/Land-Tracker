@@ -1,173 +1,124 @@
 import json
-from pathlib import Path
-import pandas as pd
 import streamlit as st
+from datetime import datetime
 
 st.set_page_config(page_title="Land Watch", page_icon="🗺️", layout="wide")
 
-st.markdown(
-    """
-    <style>
-      .block-container { padding-top: 2rem; padding-bottom: 2rem; }
-      a { text-decoration: none; }
-      .small-muted { opacity: 0.75; font-size: 0.95rem; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+def load_data(path="data/listings.json"):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {"last_updated_utc": None, "criteria": {}, "items": []}
+
+data = load_data()
+items = data.get("items", [])
+criteria = data.get("criteria", {})
+
+last_updated = data.get("last_updated_utc")
+if last_updated:
+    try:
+        dt = datetime.fromisoformat(last_updated.replace("Z", "+00:00"))
+        last_updated_display = dt.strftime("%Y-%m-%d %H:%M UTC")
+    except Exception:
+        last_updated_display = str(last_updated)
+else:
+    last_updated_display = "Unknown"
+
+min_acres = criteria.get("min_acres", 11)
+max_acres = criteria.get("max_acres", 50)
+default_max_price = criteria.get("max_price", 600000)
 
 st.title("Land Watch Dashboard")
-st.caption("Find land deals automatically — updated from your saved searches.")
+st.caption(f"Last updated: {last_updated_display}")
 
-DATA_PATH = Path("data/listings.json")
-
-data = {"last_updated_utc": None, "criteria": {}, "items": []}
-if DATA_PATH.exists():
-    try:
-        data = json.loads(DATA_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        st.error("Could not read data/listings.json (invalid JSON).")
-
-items = data.get("items", []) or []
-criteria = data.get("criteria", {}) or {}
-last_updated = data.get("last_updated_utc", None)
-
-min_acres = float(criteria.get("min_acres", 0) or 0)
-max_acres = float(criteria.get("max_acres", 0) or 0)
-max_price_default = int(criteria.get("max_price", 600000) or 600000)
-
-# ---- sidebar filters ----
-st.sidebar.header("Filters")
-
-max_price = st.sidebar.number_input(
-    "Max price",
-    min_value=0,
-    value=max_price_default,
-    step=10000,
-)
-
-q = st.sidebar.text_input("Search (title/source)")
-
-show_n = st.sidebar.slider("Show how many", 10, 300, 120)
-
-show_table = st.sidebar.toggle("Show table view", value=False)
-
-# ---- helpers ----
-def safe_int(x):
-    try:
-        if x is None:
-            return None
-        if isinstance(x, bool):
-            return None
-        return int(float(str(x).replace(",", "").replace("$", "").strip()))
-    except Exception:
-        return None
-
-def safe_float(x):
-    try:
-        if x is None:
-            return None
-        return float(str(x).replace(",", "").strip())
-    except Exception:
-        return None
-
-# ---- filter (but KEEP unknowns) ----
-rows = []
-for it in items:
-    price = safe_int(it.get("price"))
-    acres = safe_float(it.get("acres"))
-
-    title = (it.get("title") or "Land listing").strip()
-    source = (it.get("source") or "").strip()
-    url = (it.get("url") or "").strip()
-
-    # search filter
-    if q:
-        hay = f"{title} {source}".lower()
-        if q.lower() not in hay:
-            continue
-
-    # price filter:
-    # - if price is known, apply the max_price filter
-    # - if price is unknown, keep it (so your old matches still show)
-    if price is not None and price > max_price:
-        continue
-
-    rows.append(
-        {
-            "price": price,
-            "acres": acres,
-            "title": title,
-            "source": source,
-            "url": url,
-        }
-    )
-
-# Sort:
-# Known prices first (cheapest), unknown prices last
-def sort_key(x):
-    price = x["price"]
-    acres = x["acres"]
-    unknown_price = 1 if price is None else 0
-    price_val = price if price is not None else 10**18
-    acres_val = acres if acres is not None else -1
-    return (unknown_price, price_val, -acres_val)
-
-rows.sort(key=sort_key)
-
-displayed = rows[:show_n]
-
-# ---- metrics ----
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Saved matches", len(items))
-c2.metric("Showing now", len(displayed))
-c3.metric("Max price", f"${max_price:,.0f}")
-c4.metric("Acres range", f"{min_acres:g}–{max_acres:g}" if max_acres else "—")
-
-if last_updated:
-    st.markdown(f"<div class='small-muted'>Last updated (UTC): {last_updated}</div>", unsafe_allow_html=True)
+# Top stats
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Total listings saved", len(items))
+col2.metric("Target max price", f"${default_max_price:,.0f}")
+col3.metric("Target acres", f"{min_acres}–{max_acres}")
+statuses = sorted(set([i.get("status", "unknown") for i in items]))
+col4.metric("Statuses", ", ".join(statuses) if statuses else "—")
 
 st.divider()
 
-# ---- results ----
-if not displayed:
-    st.info("No matches yet with the current filters. Try raising max price or clearing the search box.")
+# Filters
+with st.container():
+    f1, f2, f3 = st.columns([2, 2, 2])
+
+    max_price_filter = f1.slider(
+        "Max price filter (keeps Unknown too)",
+        min_value=1000,
+        max_value=int(default_max_price),
+        value=int(default_max_price),
+        step=1000,
+    )
+
+    status_filter = f2.multiselect(
+        "Status filter",
+        options=sorted(set([i.get("status", "unknown") for i in items])),
+        default=sorted(set([i.get("status", "unknown") for i in items])),
+    )
+
+    query = f3.text_input("Search (title/url)")
+
+show_n = st.slider("Show how many", 1, max(1, len(items)), min(50, len(items)) if items else 1)
+
+def matches_filters(i):
+    # status
+    if status_filter and i.get("status", "unknown") not in status_filter:
+        return False
+
+    # query
+    if query:
+        blob = f"{i.get('title','')} {i.get('url','')}".lower()
+        if query.lower() not in blob:
+            return False
+
+    # price filter: keep unknown prices
+    p = i.get("price")
+    if p is not None and p > max_price_filter:
+        return False
+
+    return True
+
+filtered = [i for i in items if matches_filters(i)]
+filtered = filtered[:show_n]
+
+st.divider()
+
+def fmt_price(i):
+    if i.get("price") is not None:
+        return f"${int(i['price']):,}"
+    # fall back to captured text if present
+    if i.get("price_text"):
+        return str(i["price_text"]).strip()
+    return "Unknown / Contact for price"
+
+def fmt_acres(i):
+    if i.get("acres") is not None:
+        return f"{float(i['acres']):g}"
+    if i.get("acres_text"):
+        return str(i["acres_text"]).strip()
+    return "Unknown"
+
+# Cards
+if not items:
+    st.info("No listings found yet. Once the scraper runs and saves data, results will appear here.")
+elif not filtered:
+    st.warning("No listings match the current filters. Try widening filters or clearing the search box.")
 else:
-    for it in displayed:
-        title = it["title"]
-        source = it["source"] or "Source"
-        url = it["url"]
+    for i in filtered:
+        with st.container(border=True):
+            top = st.columns([4, 2])
+            top[0].markdown(f"### {i.get('title','Land listing')}")
+            top[1].markdown(f"**Status:** `{i.get('status','unknown')}`")
 
-        price_str = f"${it['price']:,.0f}" if it["price"] is not None else "Unknown"
-        acres_str = f"{it['acres']:g} acres" if it["acres"] is not None else "Unknown"
+            meta = st.columns(4)
+            meta[0].markdown(f"**Source:** {i.get('source','—')}")
+            meta[1].markdown(f"**Price:** {fmt_price(i)}")
+            meta[2].markdown(f"**Acres:** {fmt_acres(i)}")
+            meta[3].markdown(f"[Open listing ↗]({i.get('url','')})")
 
-        st.markdown(
-            f"""
-            <div style="
-              border: 1px solid rgba(255,255,255,0.08);
-              border-radius: 18px;
-              padding: 16px 18px;
-              margin-bottom: 12px;
-              background: rgba(255,255,255,0.02);
-            ">
-              <div style="font-size: 1.15rem; font-weight: 700; margin-bottom: 2px;">{title}</div>
-              <div style="opacity: 0.75; margin-bottom: 10px;">{source}</div>
-              <div style="display:flex; gap:18px; align-items:center; flex-wrap:wrap;">
-                <div><b>Price:</b> {price_str}</div>
-                <div><b>Acres:</b> {acres_str}</div>
-                <div style="margin-left:auto;">
-                  <a href="{url}" target="_blank">Open listing ↗</a>
-                </div>
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-# ---- optional table ----
-if show_table and displayed:
-    st.subheader("Table view")
-    df = pd.DataFrame(displayed)
-    df["link"] = df["url"].apply(lambda u: f"[Open]({u})")
-    df = df.drop(columns=["url"])
-    st.dataframe(df, use_container_width=True, hide_index=True)
+st.divider()
+st.caption(f"Showing {len(filtered)} of {len(items)} saved listings.")
