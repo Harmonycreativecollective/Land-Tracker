@@ -10,10 +10,10 @@ from bs4 import BeautifulSoup
 
 DATA_PATH = "data/listings.json"
 
-# ✅ Your filters (you can change these later)
-MAX_PRICE = 20000
+# ✅ Your filters 
+MAX_PRICE = 60000
 
-# ✅ Paste your saved-search URLs here
+# ✅ Paste saved-search URLs here
 SEARCH_URLS = [
     "https://www.landwatch.com/virginia-land-for-sale/king-george/acres-11-50/available",
     "https://www.landsearch.com/properties/king-george-va/filter/format=sales,size[min]=10",
