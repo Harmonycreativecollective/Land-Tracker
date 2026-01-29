@@ -1,7 +1,8 @@
 import json
 import re
+import time
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urlparse, urljoin
 
 import requests
@@ -15,9 +16,11 @@ START_URLS = [
 
 MIN_ACRES = 11.0
 MAX_ACRES = 50.0
-
 MAX_PRICE = 600_000
-MIN_PRICE = 10_000  # blocks junk like $3, $8, $12
+
+# safety/anti-rate-limit
+MAX_LISTINGS_TO_CHECK_PER_SOURCE = 80  # increase if you want
+REQUEST_DELAY_SECONDS = 0.35
 # ===========================
 
 HEADERS = {
@@ -27,6 +30,8 @@ HEADERS = {
 TIMEOUT = 40
 
 
+# ---------------- Helpers ----------------
+
 def fetch_html(url: str) -> str:
     r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
     r.raise_for_status()
@@ -34,7 +39,6 @@ def fetch_html(url: str) -> str:
 
 
 def walk(obj: Any):
-    """Yield all dicts/lists in a nested structure."""
     stack = [obj]
     while stack:
         cur = stack.pop()
@@ -47,57 +51,75 @@ def walk(obj: Any):
                 stack.append(v)
 
 
+def normalize_url(base_url: str, u: str) -> str:
+    if not u:
+        return ""
+    return urljoin(base_url, u)
+
+
 def parse_money(value: Any) -> Optional[int]:
     """
     Parses prices like:
       599000, "$599,000", "$599K", "599K", "$1.2M", "From $350K"
-    Ignores per-acre prices like "$8/acre".
     Returns integer dollars.
     """
     if value is None:
         return None
 
     if isinstance(value, (int, float)):
-        return int(value)
+        p = int(value)
+        return p if p >= 1000 else None
 
     s = str(value).strip().lower()
     if not s:
         return None
 
-    # Ignore per-acre / rate prices
-    if "/acre" in s or "per acre" in s or "/ac" in s or "per ac" in s:
-        return None
-
-    if "contact" in s or "call" in s or "tbd" in s:
+    if any(w in s for w in ["contact", "call", "tbd", "auction", "bid"]):
         return None
 
     s = re.sub(r"(from|starting at|starting|approx\.?|about)", "", s).strip()
-    s = s.replace(",", "").replace("$", "").replace("usd", "").strip()
 
-    m = re.search(r"(\d+(?:\.\d+)?)\s*([km])?\b", s)
+    # must have at least a $ or a K/M suffix OR the word price nearby
+    if ("$" not in s) and (re.search(r"\b\d+(\.\d+)?\s*[km]\b", s) is None) and ("price" not in s):
+        return None
+
+    m = re.search(r"(\d+(?:\.\d+)?)\s*([km])?\b", s.replace(",", ""))
     if not m:
         return None
 
     num = float(m.group(1))
-    suffix = m.group(2)
+    suf = m.group(2)
 
-    if suffix == "k":
+    if suf == "k":
         num *= 1000
-    elif suffix == "m":
+    elif suf == "m":
         num *= 1_000_000
 
-    return int(num)
+    p = int(num)
+    return p if p >= 1000 else None
+
+
+def parse_acres_from_text(text: str) -> Optional[float]:
+    if not text:
+        return None
+    t = text.lower().replace(",", "")
+    m = re.search(r"(\d+(?:\.\d+)?)\s*acres?\b", t)
+    if m:
+        try:
+            return float(m.group(1))
+        except Exception:
+            return None
+    return None
 
 
 def parse_acres(value: Any) -> Optional[float]:
     if value is None:
         return None
-
     if isinstance(value, (int, float)):
         return float(value)
 
     if isinstance(value, dict):
-        for k in ["acres", "acreage", "lotSizeAcres", "sizeAcres", "lotSize", "size", "area"]:
+        for k in ["acres", "acreage", "lotSizeAcres", "sizeAcres", "landSizeAcres"]:
             if k in value:
                 v = parse_acres(value.get(k))
                 if v is not None:
@@ -106,17 +128,15 @@ def parse_acres(value: Any) -> Optional[float]:
         val = value.get("value") or value.get("amount") or value.get("number")
         unit = (value.get("unit") or value.get("unitText") or value.get("unitCode") or "").lower()
 
-        if val is None:
-            return None
-
         try:
             vnum = float(str(val).replace(",", "").strip())
         except Exception:
             return None
 
-        if "acr" in unit or "acre" in unit:
+        if "acre" in unit or "acr" in unit:
             return float(vnum)
 
+        # sqft -> acres
         if "sq" in unit or "ft" in unit:
             return float(vnum) / 43560.0
 
@@ -125,29 +145,12 @@ def parse_acres(value: Any) -> Optional[float]:
 
         return float(vnum)
 
-    s = str(value).strip().lower().replace(",", "")
-    if not s:
-        return None
-
-    m = re.search(r"(\d+(?:\.\d+)?)", s)
-    if not m:
-        return None
-
-    num = float(m.group(1))
-
-    if "sq" in s and ("ft" in s or "feet" in s):
-        return num / 43560.0
-
-    if num > 5000:
-        return num / 43560.0
-
-    return num
+    s = str(value).strip()
+    return parse_acres_from_text(s)
 
 
 def passes(price: Optional[int], acres: Optional[float]) -> bool:
     if price is None or acres is None:
-        return False
-    if price < MIN_PRICE:
         return False
     return (MIN_ACRES <= acres <= MAX_ACRES) and (price <= MAX_PRICE)
 
@@ -163,9 +166,9 @@ def get_next_data_json(html: str) -> Optional[dict]:
         return None
 
 
-def get_json_ld(html: str) -> List[dict]:
+def get_json_ld_blocks(html: str) -> List[dict]:
     soup = BeautifulSoup(html, "html.parser")
-    out: List[dict] = []
+    out = []
     for tag in soup.find_all("script", type="application/ld+json"):
         if not tag.string:
             continue
@@ -176,200 +179,234 @@ def get_json_ld(html: str) -> List[dict]:
     return out
 
 
-def normalize_url(base_url: str, u: str) -> str:
-    if not u:
-        return ""
-    return urljoin(base_url, u)
-
-
-def best_title(d: dict) -> str:
-    return (d.get("title") or d.get("name") or d.get("headline") or "Land listing").strip()
-
-
-def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[str, Any]]:
-    items: List[Dict[str, Any]] = []
-
-    for d in walk(next_data):
-        if not isinstance(d, dict):
-            continue
-
-        raw_url = d.get("url") or d.get("href") or d.get("canonicalUrl") or d.get("link") or d.get("landingPage") or ""
-        url = normalize_url(base_url, str(raw_url)) if raw_url else ""
-
-        price = parse_money(
-            d.get("price")
-            or d.get("listPrice")
-            or d.get("priceValue")
-            or d.get("amount")
-            or (d.get("offers", {}) or {}).get("price") if isinstance(d.get("offers"), dict) else None
-        )
-
-        acres = parse_acres(
-            d.get("acres")
-            or d.get("acreage")
-            or d.get("lotSizeAcres")
-            or d.get("sizeAcres")
-            or d.get("lotSize")
-            or d.get("size")
-            or d.get("area")
-        )
-
-        if url and passes(price, acres):
-            items.append(
-                {
-                    "source": "LandSearch",
-                    "title": best_title(d),
-                    "url": url,
-                    "price": price,
-                    "acres": acres,
-                }
-            )
-
-    # Dedup
-    seen = set()
-    out = []
-    for it in items:
-        if it["url"] in seen:
-            continue
-        seen.add(it["url"])
-        out.append(it)
-    return out
-
-
-def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> List[Dict[str, Any]]:
+def best_title_from_ld_or_page(html: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
-    items: List[Dict[str, Any]] = []
+    if soup.title and soup.title.string:
+        return soup.title.string.strip()
+    h1 = soup.find(["h1"])
+    if h1:
+        txt = h1.get_text(" ", strip=True)
+        if txt:
+            return txt
+    return "Land listing"
 
-    links = soup.find_all("a", href=True)
-    for a in links:
-        href = a["href"]
-        full = normalize_url(base_url, href)
 
-        host = urlparse(base_url).netloc.lower()
-        if "landsearch.com" in host:
-            if "/properties/" not in full and "/property/" not in full:
+# ---------------- Step 1: Collect listing URLs from search pages ----------------
+
+def collect_listing_urls_from_landsearch(search_url: str, html: str) -> List[str]:
+    urls: Set[str] = set()
+    next_data = get_next_data_json(html)
+
+    if next_data:
+        for d in walk(next_data):
+            if not isinstance(d, dict):
                 continue
-        if "landwatch.com" in host:
-            if "/property/" not in full:
+            raw = d.get("href") or d.get("url") or d.get("canonicalUrl") or d.get("permalink")
+            if not raw:
                 continue
+            u = normalize_url(search_url, str(raw))
+            # keep property detail pages
+            if "landsearch.com" in u and ("/properties/" in u or "/property/" in u):
+                urls.add(u)
 
-        card_text = a.get_text(" ", strip=True)
-        parent = a.parent
-        for _ in range(4):
-            if parent is None:
-                break
-            card_text = (parent.get_text(" ", strip=True) or card_text)
-            parent = parent.parent
+    # HTML backup for links
+    soup = BeautifulSoup(html, "html.parser")
+    for a in soup.find_all("a", href=True):
+        u = normalize_url(search_url, a["href"])
+        if "landsearch.com" in u and ("/properties/" in u or "/property/" in u):
+            urls.add(u)
 
-        price = parse_money(card_text)
-
-        acres = None
-        m = re.search(r"(\d+(?:\.\d+)?)\s*acres?\b", card_text.lower())
-        if m:
-            acres = float(m.group(1))
-
-        if passes(price, acres):
-            items.append(
-                {
-                    "source": source_name,
-                    "title": a.get_text(" ", strip=True) or "Land listing",
-                    "url": full,
-                    "price": price,
-                    "acres": acres,
-                }
-            )
-
-    # Dedup
-    seen = set()
-    out = []
-    for it in items:
-        if it["url"] in seen:
-            continue
-        seen.add(it["url"])
-        out.append(it)
-    return out
+    return sorted(urls)
 
 
-def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
-    host = urlparse(url).netloc.lower()
-    items: List[Dict[str, Any]] = []
+def collect_listing_urls_from_landwatch(search_url: str, html: str) -> List[str]:
+    urls: Set[str] = set()
+    soup = BeautifulSoup(html, "html.parser")
+    for a in soup.find_all("a", href=True):
+        u = normalize_url(search_url, a["href"])
+        if "landwatch.com" in u and "/property/" in u:
+            urls.add(u)
+    return sorted(urls)
 
+
+def collect_listing_urls(search_url: str, html: str) -> List[str]:
+    host = urlparse(search_url).netloc.lower()
     if "landsearch.com" in host:
-        next_data = get_next_data_json(html)
-        if next_data:
-            items.extend(extract_from_landsearch_next(url, next_data))
-
-    # fallback for anything else
-    if not items:
-        label = "LandSearch" if "landsearch.com" in host else "LandWatch"
-        items.extend(extract_from_html_fallback(url, html, label))
-
-    # Dedup
-    seen = set()
-    out = []
-    for it in items:
-        if it["url"] in seen:
-            continue
-        seen.add(it["url"])
-        out.append(it)
-    return out
+        return collect_listing_urls_from_landsearch(search_url, html)
+    if "landwatch.com" in host:
+        return collect_listing_urls_from_landwatch(search_url, html)
+    return []
 
 
-def load_existing_payload(path: str) -> Dict[str, Any]:
+# ---------------- Step 2: Fetch listing detail pages & extract price/acres correctly ----------------
+
+def extract_price_acres_from_jsonld(blocks: List[dict]) -> (Optional[int], Optional[float]):
+    """
+    Try to find price + acres from any JSON-LD block.
+    """
+    price = None
+    acres = None
+
+    for block in blocks:
+        for d in walk(block):
+            if not isinstance(d, dict):
+                continue
+
+            # PRICE:
+            if price is None:
+                # common: offers.price
+                offers = d.get("offers")
+                if isinstance(offers, dict):
+                    price = parse_money(offers.get("price"))
+
+                # sometimes a direct price field exists
+                if price is None:
+                    price = parse_money(d.get("price") or d.get("listPrice"))
+
+            # ACRES:
+            if acres is None:
+                acres = parse_acres(
+                    d.get("acres")
+                    or d.get("acreage")
+                    or d.get("lotSizeAcres")
+                    or d.get("landSizeAcres")
+                    or d.get("lotSize")
+                    or d.get("landSize")
+                    or d.get("size")
+                    or d.get("area")
+                )
+
+            if price is not None and acres is not None:
+                return price, acres
+
+    return price, acres
+
+
+def extract_price_acres_from_page_text(html: str) -> (Optional[int], Optional[float]):
+    """
+    Fallback: look for '$123,456' + '12.3 acres' in visible text.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    text = soup.get_text(" ", strip=True)
+
+    acres = parse_acres_from_text(text)
+
+    # Try to locate a $price in text
+    price = None
+    m = re.search(r"\$\s*([\d,]+)", text)
+    if m:
+        price = parse_money("$" + m.group(1))
+
+    return price, acres
+
+
+def get_listing_details(url: str) -> Optional[Dict[str, Any]]:
+    """
+    Fetch detail page and extract price/acres/title reliably.
+    """
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        if isinstance(data, dict):
-            return data
-    except Exception:
-        pass
-    return {"items": []}
+        html = fetch_html(url)
+    except Exception as e:
+        print(f"Failed detail fetch: {url} -> {e}")
+        return None
 
+    blocks = get_json_ld_blocks(html)
+    price, acres = extract_price_acres_from_jsonld(blocks)
+
+    if price is None or acres is None:
+        p2, a2 = extract_price_acres_from_page_text(html)
+        price = price if price is not None else p2
+        acres = acres if acres is not None else a2
+
+    title = best_title_from_ld_or_page(html)
+
+    if price is None or acres is None:
+        # still can’t validate—skip so we don’t save junk
+        return None
+
+    return {
+        "title": title,
+        "url": url,
+        "price": price,
+        "acres": acres,
+    }
+
+
+# ---------------- Main ----------------
 
 def main():
     run_utc = datetime.now(timezone.utc).isoformat()
-    all_items: List[Dict[str, Any]] = []
 
-    for url in START_URLS:
+    all_matches: List[Dict[str, Any]] = []
+    seen_detail_urls: Set[str] = set()
+
+    for search_url in START_URLS:
         try:
-            html = fetch_html(url)
+            search_html = fetch_html(search_url)
         except Exception as e:
-            print(f"Failed to fetch {url}: {e}")
+            print(f"Failed to fetch search page {search_url}: {e}")
             continue
 
-        items = extract_listings(url, html)
-        all_items.extend(items)
+        host = urlparse(search_url).netloc.lower()
+        source_name = "LandSearch" if "landsearch.com" in host else ("LandWatch" if "landwatch.com" in host else host)
 
-    # Final dedup
+        candidate_urls = collect_listing_urls(search_url, search_html)
+        if not candidate_urls:
+            print(f"{source_name}: No candidate listing URLs found on search page.")
+            continue
+
+        # limit to reduce requests
+        candidate_urls = candidate_urls[:MAX_LISTINGS_TO_CHECK_PER_SOURCE]
+        print(f"{source_name}: Checking up to {len(candidate_urls)} listing detail pages...")
+
+        for detail_url in candidate_urls:
+            if detail_url in seen_detail_urls:
+                continue
+            seen_detail_urls.add(detail_url)
+
+            time.sleep(REQUEST_DELAY_SECONDS)
+
+            details = get_listing_details(detail_url)
+            if not details:
+                continue
+
+            price = details["price"]
+            acres = details["acres"]
+
+            if passes(price, acres):
+                all_matches.append(
+                    {
+                        "source": source_name,
+                        "title": details["title"],
+                        "url": details["url"],
+                        "price": price,
+                        "acres": acres,
+                    }
+                )
+
+    # Final dedup by URL
+    out_items = []
     seen = set()
-    final = []
-    for x in all_items:
+    for x in all_matches:
         if x["url"] in seen:
             continue
         seen.add(x["url"])
-        final.append(x)
-
-    existing = load_existing_payload("data/listings.json")
-    existing_items = existing.get("items", []) if isinstance(existing.get("items"), list) else []
-
-    # Safety: never wipe existing matches
-    items_to_save = final if len(final) > 0 else existing_items
+        out_items.append(x)
 
     out = {
         "last_updated_utc": run_utc,
         "criteria": {
             "min_acres": MIN_ACRES,
             "max_acres": MAX_ACRES,
-            "min_price": MIN_PRICE,
             "max_price": MAX_PRICE,
         },
-        "items": items_to_save,
+        "items": out_items,
     }
 
     with open("data/listings.json", "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
 
-    print(f"Found {len(final)} new matches. Saved {len(items_to_save)} total.")
+    print(f"Saved {len(out_items)} matches.")
 
 
 if __name__ == "__main__":
