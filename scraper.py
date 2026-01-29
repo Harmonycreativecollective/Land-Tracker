@@ -13,10 +13,10 @@ START_URLS = [
 
 MIN_ACRES = 11.0
 MAX_ACRES = 50.0
-MAX_PRICE = 600_000
 
-# helps avoid saving junk like "$8/acre" becoming "$8"
-MIN_PRICE = 1000
+# Price filters
+MAX_PRICE = 600_000
+MIN_PRICE = 1_000  # prevents weird $3 / $8 / junk values from being treated as real
 # ===========================
 
 HEADERS = {
@@ -24,10 +24,12 @@ HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
 
+
 def fetch_html(url: str) -> str:
     r = requests.get(url, headers=HEADERS, timeout=40)
     r.raise_for_status()
     return r.text
+
 
 def get_next_data_json(html: str) -> Optional[dict]:
     soup = BeautifulSoup(html, "html.parser")
@@ -38,6 +40,7 @@ def get_next_data_json(html: str) -> Optional[dict]:
         return json.loads(tag.string)
     except Exception:
         return None
+
 
 def get_json_ld(html: str) -> List[dict]:
     soup = BeautifulSoup(html, "html.parser")
@@ -52,6 +55,7 @@ def get_json_ld(html: str) -> List[dict]:
             continue
     return out
 
+
 def walk(obj: Any):
     """Yield all dicts/lists in a nested structure."""
     stack = [obj]
@@ -65,6 +69,7 @@ def walk(obj: Any):
             for v in cur:
                 stack.append(v)
 
+
 def to_float(x) -> Optional[float]:
     try:
         if x is None:
@@ -77,10 +82,14 @@ def to_float(x) -> Optional[float]:
     except Exception:
         return None
 
+
 def to_int(x) -> Optional[int]:
     """
-    Parse integer prices safely.
-    Avoid capturing rate prices like "$8/acre" or "$120/mo".
+    Robust money parsing:
+    - 399000, "$399,000"
+    - "$399K", "399k"
+    - "$1.2M", "1.25m"
+    - "From $450K" / "Price: $399,000"
     """
     try:
         if x is None:
@@ -91,16 +100,32 @@ def to_int(x) -> Optional[int]:
             return int(x)
 
         s = str(x).strip().lower()
+        s = s.replace(",", "").replace("$", "").replace("usd", "").strip()
 
-        # Ignore rate prices like "$8/acre", "per acre", "/mo", etc.
-        if any(token in s for token in ["/acre", "per acre", "/ac", "per ac", "/mo", "per month", "monthly"]):
-            return None
+        # Exact like: 399k / 1.2m / 399000
+        m = re.match(r"^(\d+(\.\d+)?)\s*([km])?$", s)
+        if m:
+            num = float(m.group(1))
+            suffix = m.group(3)
+            if suffix == "k":
+                return int(num * 1000)
+            if suffix == "m":
+                return int(num * 1_000_000)
+            return int(num)
 
-        s = s.replace(",", "")
-        m = re.search(r"\d+", s)
-        return int(m.group(0)) if m else None
+        # Inside text like: "from 399k" or "price: 1.2m"
+        m2 = re.search(r"(\d+(\.\d+)?)\s*([km])", s)
+        if m2:
+            num = float(m2.group(1))
+            suffix = m2.group(3)
+            return int(num * (1000 if suffix == "k" else 1_000_000))
+
+        # Fallback: first whole-number chunk
+        m3 = re.search(r"\d+", s)
+        return int(m3.group(0)) if m3 else None
     except Exception:
         return None
+
 
 def passes(price: Optional[int], acres: Optional[float]) -> bool:
     if price is None or acres is None:
@@ -108,6 +133,7 @@ def passes(price: Optional[int], acres: Optional[float]) -> bool:
     if price < MIN_PRICE:
         return False
     return (MIN_ACRES <= acres <= MAX_ACRES) and (price <= MAX_PRICE)
+
 
 def normalize_url(u: str) -> str:
     if not u:
@@ -117,6 +143,7 @@ def normalize_url(u: str) -> str:
     if u.startswith("/"):
         return "https://www.landsearch.com" + u
     return u
+
 
 def extract_listings(html: str) -> List[Dict[str, Any]]:
     matches: List[Dict[str, Any]] = []
@@ -132,7 +159,6 @@ def extract_listings(html: str) -> List[Dict[str, Any]]:
 
     for source, blob in blobs:
         for d in walk(blob):
-            # URL
             url = normalize_url(
                 d.get("url")
                 or d.get("landingPage")
@@ -141,7 +167,6 @@ def extract_listings(html: str) -> List[Dict[str, Any]]:
                 or ""
             )
 
-            # Title
             title = (
                 d.get("title")
                 or d.get("name")
@@ -149,23 +174,24 @@ def extract_listings(html: str) -> List[Dict[str, Any]]:
                 or ""
             )
 
-            # Price (try common fields)
+            offers = d.get("offers")
+            offer_price = offers.get("price") if isinstance(offers, dict) else None
+
             price = to_int(
                 d.get("price")
                 or d.get("listPrice")
-                or (d.get("offers", {}) or {}).get("price") if isinstance(d.get("offers"), dict) else None
+                or offer_price
             )
 
-            # Acres (try common fields)
             acres = to_float(
                 d.get("acres")
-                or d.get("lotSize")
                 or d.get("lotSizeAcres")
+                or d.get("lotSize")
                 or d.get("size")
                 or d.get("area")
             )
 
-            # Convert sq ft to acres if it looks like sq ft
+            # Convert square feet to acres if it looks huge
             if acres and acres > 5000:
                 acres = acres / 43560.0
 
@@ -187,6 +213,7 @@ def extract_listings(html: str) -> List[Dict[str, Any]]:
         seen.add(m["url"])
         out.append(m)
     return out
+
 
 def main():
     run_utc = datetime.now(timezone.utc).isoformat()
@@ -211,8 +238,8 @@ def main():
         "criteria": {
             "min_acres": MIN_ACRES,
             "max_acres": MAX_ACRES,
-            "max_price": MAX_PRICE,
             "min_price": MIN_PRICE,
+            "max_price": MAX_PRICE,
         },
         "items": final,
     }
@@ -221,6 +248,7 @@ def main():
         json.dump(out, f, indent=2)
 
     print(f"Saved {len(final)} matches.")
+
 
 if __name__ == "__main__":
     main()
