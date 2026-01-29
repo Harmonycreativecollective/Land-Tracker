@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-01-29T15:05:00.261169+00:00",
+  "last_updated_utc": "2026-01-29T17:55:28.796677+00:00",
   "criteria": {
     "min_acres": 11.0,
     "max_acres": 50.0,
@@ -38,7 +38,7 @@
       "source": "LandSearch (HTML)",
       "title": "Land listing",
       "url": "https://www.landsearch.com/properties/6269-caledon-rd-king-george-va-22485/5014554",
-      "price": 23,
+      "price": 1,
       "acres": 19.4
     },
     {
