@@ -1,7 +1,7 @@
 import json
 import re
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse, urljoin
 
 import requests
@@ -10,20 +10,22 @@ from bs4 import BeautifulSoup
 # ====== YOUR SETTINGS ======
 START_URLS = [
     "https://www.landsearch.com/properties/king-george-va/filter/format=sales,size[min]=10",
-    # If you want LandWatch too, add it here. (It may be more JS-heavy, but we’ll still try.)
+    # LandWatch can be more JS-heavy. We'll still try.
     "https://www.landwatch.com/virginia-land-for-sale/king-george/acres-11-50/available",
 ]
 
 MIN_ACRES = 11.0
 MAX_ACRES = 50.0
 MAX_PRICE = 600_000
+
+# ✅ Prevents junk “$3 / $8” type prices from being treated like real list prices
+MIN_PRICE = 10_000
 # ===========================
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
-
 TIMEOUT = 40
 
 
@@ -55,8 +57,9 @@ def parse_money(value: Any) -> Optional[int]:
     """
     if value is None:
         return None
+
     if isinstance(value, (int, float)):
-        # If it's already numeric, assume dollars
+        # Already numeric. Assume dollars.
         return int(value)
 
     s = str(value).strip().lower()
@@ -70,7 +73,7 @@ def parse_money(value: Any) -> Optional[int]:
     # Remove words like "from", "starting at"
     s = re.sub(r"(from|starting at|starting|approx\.?|about)", "", s).strip()
 
-    # Find something like 599, 599k, 1.2m
+    # find like 599, 599k, 1.2m
     m = re.search(r"(\d+(?:\.\d+)?)\s*([km])?\b", s.replace(",", ""))
     if not m:
         return None
@@ -89,23 +92,21 @@ def parse_money(value: Any) -> Optional[int]:
 def parse_acres(value: Any) -> Optional[float]:
     """
     Parses acres from:
-      14.2, "14.2 acres", {"value": 14.2, "unit": "acre"}, {"acres": 14.2}, sqft conversions, etc.
+      14.2, "14.2 acres", {"value": 14.2, "unit": "acre"}, sqft conversions, etc.
     """
     if value is None:
         return None
+
     if isinstance(value, (int, float)):
         return float(value)
 
-    # If dict-like, try common patterns
     if isinstance(value, dict):
-        # direct keys
         for k in ["acres", "acreage", "lotSizeAcres", "lotSize_acres", "sizeAcres", "size_acres"]:
             if k in value:
                 v = parse_acres(value.get(k))
                 if v is not None:
                     return v
 
-        # value/unit style
         val = value.get("value") or value.get("amount") or value.get("number")
         unit = (value.get("unit") or value.get("unitText") or value.get("unitCode") or "").lower()
 
@@ -119,37 +120,30 @@ def parse_acres(value: Any) -> Optional[float]:
         if vnum is None:
             return None
 
-        # if unit hints acres
         if "acr" in unit or "acre" in unit:
             return float(vnum)
 
-        # if unit hints sqft
         if "sq" in unit or "ft" in unit:
             return float(vnum) / 43560.0
 
-        # unknown unit, but if huge it's probably sqft
         if vnum > 5000:
             return float(vnum) / 43560.0
 
         return float(vnum)
 
-    # string
     s = str(value).strip().lower().replace(",", "")
     if not s:
         return None
 
-    # "14.2 acres"
     m = re.search(r"(\d+(?:\.\d+)?)", s)
     if not m:
         return None
 
     num = float(m.group(1))
 
-    # if string mentions sqft, convert
     if "sq" in s and ("ft" in s or "feet" in s):
         return num / 43560.0
 
-    # if num is absurdly large, assume sqft
     if num > 5000:
         return num / 43560.0
 
@@ -158,6 +152,8 @@ def parse_acres(value: Any) -> Optional[float]:
 
 def passes(price: Optional[int], acres: Optional[float]) -> bool:
     if price is None or acres is None:
+        return False
+    if price < MIN_PRICE:
         return False
     return (MIN_ACRES <= acres <= MAX_ACRES) and (price <= MAX_PRICE)
 
@@ -197,17 +193,12 @@ def best_title(d: dict) -> str:
 
 
 def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[str, Any]]:
-    """
-    LandSearch is Next.js. The goods are usually inside __NEXT_DATA__ somewhere.
-    We hunt for dicts that look like listing cards: have a URL-ish field AND price/acres-ish fields.
-    """
     items: List[Dict[str, Any]] = []
 
     for d in walk(next_data):
         if not isinstance(d, dict):
             continue
 
-        # Try to get a URL-ish thing
         raw_url = (
             d.get("url")
             or d.get("href")
@@ -218,14 +209,6 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
         )
         url = normalize_url(base_url, str(raw_url)) if raw_url else ""
 
-        # Filter to likely property links
-        # LandSearch property pages commonly contain "/properties/" or "/property/"
-        if url and ("landsearch.com" in url):
-            if ("/properties/" not in url) and ("/property/" not in url):
-                # Not a property detail link; skip unless it still has clear listing data
-                pass
-
-        # Pull price/acres from many possible shapes
         price = parse_money(
             d.get("price")
             or d.get("listPrice")
@@ -246,7 +229,6 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
             or d.get("landSize")
         )
 
-        # Sometimes the URL is nested under a different key; try common ones
         if not url:
             for k in ["permalink", "detailUrl", "detailURL", "propertyUrl", "propertyURL"]:
                 if d.get(k):
@@ -264,7 +246,6 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
                 }
             )
 
-    # Dedup
     seen = set()
     out = []
     for it in items:
@@ -312,7 +293,6 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
                     }
                 )
 
-    # Dedup
     seen = set()
     out = []
     for it in items:
@@ -324,30 +304,22 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
 
 
 def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> List[Dict[str, Any]]:
-    """
-    Fallback: scrape visible text on listing cards.
-    Not perfect, but often catches stuff if JSON approaches fail.
-    """
     soup = BeautifulSoup(html, "html.parser")
     items: List[Dict[str, Any]] = []
 
-    # Grab any link that looks like a property detail link
     links = soup.find_all("a", href=True)
     for a in links:
         href = a["href"]
         full = normalize_url(base_url, href)
 
-        # Heuristics per site
         host = urlparse(base_url).netloc.lower()
         if "landsearch.com" in host:
             if "/properties/" not in full and "/property/" not in full:
                 continue
         if "landwatch.com" in host:
-            # LandWatch property links often contain "/property/"
             if "/property/" not in full:
                 continue
 
-        # Use nearby text as a rough card block
         card_text = a.get_text(" ", strip=True)
         parent = a.parent
         for _ in range(4):
@@ -357,9 +329,9 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
             parent = parent.parent
 
         price = parse_money(card_text)
-        acres = None
 
-        # Try to find acres like "14.2 acres" in the card text
+        # acres like "14.2 acres"
+        acres = None
         m = re.search(r"(\d+(?:\.\d+)?)\s*acres?\b", card_text.lower())
         if m:
             acres = float(m.group(1))
@@ -375,7 +347,6 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
                 }
             )
 
-    # Dedup
     seen = set()
     out = []
     for it in items:
@@ -398,13 +369,23 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
         items.extend(extract_from_landsearch_next(url, next_data))
 
     if json_ld_blocks:
-        items.extend(extract_from_jsonld(url, json_ld_blocks, "LandSearch" if "landsearch.com" in host else "LandWatch"))
+        items.extend(
+            extract_from_jsonld(
+                url,
+                json_ld_blocks,
+                "LandSearch" if "landsearch.com" in host else "LandWatch",
+            )
+        )
 
-    # If we still got nothing, do a light HTML fallback
     if not items:
-        items.extend(extract_from_html_fallback(url, html, "LandSearch" if "landsearch.com" in host else "LandWatch"))
+        items.extend(
+            extract_from_html_fallback(
+                url,
+                html,
+                "LandSearch" if "landsearch.com" in host else "LandWatch",
+            )
+        )
 
-    # Final dedup
     seen = set()
     out = []
     for it in items:
@@ -413,6 +394,17 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
         seen.add(it["url"])
         out.append(it)
     return out
+
+
+def load_existing_items(path: str) -> List[Dict[str, Any]]:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, dict) and isinstance(data.get("items"), list):
+            return data["items"]
+    except Exception:
+        pass
+    return []
 
 
 def main():
@@ -431,12 +423,16 @@ def main():
 
     # Final dedup
     seen = set()
-    final = []
+    final: List[Dict[str, Any]] = []
     for x in all_items:
         if x["url"] in seen:
             continue
         seen.add(x["url"])
         final.append(x)
+
+    # ✅ SAFETY: if the scraper finds 0 (because JS or blocked), keep last good results
+    existing_items = load_existing_items("data/listings.json")
+    items_to_save = final if len(final) > 0 else existing_items
 
     out = {
         "last_updated_utc": run_utc,
@@ -444,16 +440,21 @@ def main():
             "min_acres": MIN_ACRES,
             "max_acres": MAX_ACRES,
             "max_price": MAX_PRICE,
+            "min_price": MIN_PRICE,
         },
-        "items": final,
+        "items": items_to_save,
+        "run_info": {
+            "new_matches_found": len(final),
+            "saved_items_count": len(items_to_save),
+        },
     }
 
     with open("data/listings.json", "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
 
-    print(f"Saved {len(final)} matches.")
+    print(f"Found {len(final)} new matches. Saved {len(items_to_save)} total.")
     if len(final) == 0:
-        print("NOTE: 0 matches usually means the site is rendering listings via JavaScript or listing data isn't exposed in HTML/JSON.")
+        print("NOTE: 0 new matches this run. Kept previous saved results.")
 
 
 if __name__ == "__main__":
