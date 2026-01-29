@@ -31,17 +31,14 @@ jobs:
         run: |
           python scraper.py
 
-      - name: Commit updates (only if changed)
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-          git add data/listings.json
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-
-          git commit -m "Update listings"
-          git push
+      - name: Commit updates
+  run: |
+    git config user.name "github-actions"
+    git config user.email "github-actions@github.com"
+    git add data/listings.json
+    if git diff --cached --quiet; then
+      echo "No changes to commit."
+      exit 0
+    fi
+    git commit -m "Update listings"
+    git push
