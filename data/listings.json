@@ -1,36 +1,32 @@
 {
-  "last_updated_utc": "2026-01-29T22:38:10.327606+00:00",
+  "last_updated_utc": "2026-01-29T22:44:52.744400+00:00",
   "criteria": {
     "min_acres": 11.0,
     "max_acres": 50.0,
-    "max_price": 600000,
-    "min_price": 10000
+    "min_price": 10000,
+    "max_price": 600000
   },
   "items": [
     {
-      "source": "LandSearch (HTML)",
+      "source": "LandSearch",
       "title": "Land listing",
       "url": "https://www.landsearch.com/properties/2202-belvedere-dr-king-george-va-22485/4996354",
       "price": 330000,
       "acres": 20.0
     },
     {
-      "source": "LandSearch (HTML)",
+      "source": "LandSearch",
       "title": "Land listing",
       "url": "https://www.landsearch.com/properties/10491-oak-tree-dr-king-george-va-22485/4515081",
       "price": 465000,
       "acres": 37.3
     },
     {
-      "source": "LandSearch (HTML)",
+      "source": "LandSearch",
       "title": "Land listing",
       "url": "https://www.landsearch.com/properties/11590-maryland-point-rd-nanjemoy-md-20662/4901267",
       "price": 15100,
       "acres": 26.2
     }
-  ],
-  "run_info": {
-    "new_matches_found": 3,
-    "saved_items_count": 3
-  }
+  ]
 }
