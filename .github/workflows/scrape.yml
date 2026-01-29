@@ -2,7 +2,8 @@ name: Run land scraper
 
 on:
   schedule:
-    - cron: "15 * * * *"   # every hour at minute 15 (UTC)
+    - cron: "0 13 * * *"   # 8:00 AM EST
+    - cron: "0 22 * * *"   # 5:00 PM EST
   workflow_dispatch:
 
 permissions:
