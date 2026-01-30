@@ -1,11 +1,13 @@
 import json
 import re
+import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+
 
 # ====== YOUR SETTINGS ======
 START_URLS = [
@@ -23,7 +25,10 @@ HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
 }
-TIMEOUT = 40
+TIMEOUT = 45
+
+# Limit how many “detail page” requests we do per run (keeps it fast + less likely to get blocked)
+DETAIL_FETCH_LIMIT = 25
 
 
 # ---------------------------
@@ -42,7 +47,6 @@ def normalize_url(base_url: str, u: str) -> str:
 
 
 def walk(obj: Any):
-    """Yield all dicts/lists in a nested structure."""
     stack = [obj]
     while stack:
         cur = stack.pop()
@@ -59,7 +63,7 @@ def clean_title(s: str) -> str:
     if not s:
         return ""
     t = " ".join(str(s).split()).strip()
-    # Filter out common junk
+
     bad = {
         "skip to navigation",
         "skip to content",
@@ -83,11 +87,6 @@ def best_title_from_dict(d: dict) -> str:
 
 
 def parse_money(value: Any) -> Optional[int]:
-    """
-    Parses prices like:
-      599000, "$599,000", "$599K", "599K", "$1.2M", "From $350K", etc.
-    Returns integer dollars.
-    """
     if value is None:
         return None
     if isinstance(value, (int, float)):
@@ -97,14 +96,10 @@ def parse_money(value: Any) -> Optional[int]:
     if not s:
         return None
 
-    # "contact for price" / "call"
     if any(x in s for x in ("contact", "call", "tbd", "request", "inquire")):
         return None
 
-    # Remove words like "from", "starting at"
     s = re.sub(r"(from|starting at|starting|approx\.?|about)", "", s).strip()
-
-    # Find number + suffix (k/m)
     m = re.search(r"(\d+(?:\.\d+)?)\s*([km])?\b", s.replace(",", ""))
     if not m:
         return None
@@ -120,10 +115,6 @@ def parse_money(value: Any) -> Optional[int]:
 
 
 def parse_acres(value: Any) -> Optional[float]:
-    """
-    Parses acres from:
-      14.2, "14.2 acres", {"value": 14.2, "unit": "acre"}, etc.
-    """
     if value is None:
         return None
     if isinstance(value, (int, float)):
@@ -174,6 +165,79 @@ def is_strict_match(price: Optional[int], acres: Optional[float]) -> bool:
     return (MIN_ACRES <= float(acres) <= MAX_ACRES) and (int(price) <= int(MAX_PRICE))
 
 
+def get_meta_content(soup: BeautifulSoup, key: str, attr: str = "property") -> str:
+    tag = soup.find("meta", attrs={attr: key})
+    if tag and tag.get("content"):
+        return tag["content"].strip()
+    return ""
+
+
+def should_enrich_title(title: str) -> bool:
+    t = (title or "").strip().lower()
+    if not t:
+        return True
+    if t in {"land listing", "skip to navigation", "skip to content"}:
+        return True
+    # Sometimes it returns extremely short junk
+    if len(t) < 6:
+        return True
+    return False
+
+
+def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
+    """
+    Fetch listing detail page once and try to extract a real title + thumbnail.
+    Returns dict with keys: title, thumbnail (each can be None).
+    """
+    try:
+        html = fetch_html(url)
+    except Exception:
+        return {"title": None, "thumbnail": None}
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    # Title priority: og:title -> twitter:title -> h1 -> <title>
+    og_title = get_meta_content(soup, "og:title", attr="property")
+    if og_title:
+        title = clean_title(og_title)
+        if title:
+            pass
+        else:
+            title = None
+    else:
+        title = None
+
+    if not title:
+        tw_title = get_meta_content(soup, "twitter:title", attr="name")
+        title = clean_title(tw_title) if tw_title else ""
+
+    if not title:
+        h1 = soup.find("h1")
+        if h1:
+            title = clean_title(h1.get_text(" ", strip=True))
+
+    if not title:
+        if soup.title and soup.title.string:
+            title = clean_title(soup.title.string)
+
+    # Thumbnail priority: og:image -> twitter:image -> first reasonable <img>
+    og_img = get_meta_content(soup, "og:image", attr="property")
+    thumb = og_img.strip() if og_img else ""
+
+    if not thumb:
+        tw_img = get_meta_content(soup, "twitter:image", attr="name")
+        thumb = tw_img.strip() if tw_img else ""
+
+    if not thumb:
+        img = soup.find("img")
+        if img and img.get("src"):
+            thumb = img["src"].strip()
+
+    thumb = thumb or None
+
+    return {"title": title or None, "thumbnail": thumb}
+
+
 # ---------------------------
 # Parsers
 # ---------------------------
@@ -202,14 +266,11 @@ def get_json_ld(html: str) -> List[dict]:
 
 
 def extract_thumbnail_from_dict(base_url: str, d: dict) -> Optional[str]:
-    # Common keys
     for k in ("thumbnail", "image", "img", "photo", "primaryImage", "primary_image"):
         v = d.get(k)
         if isinstance(v, str) and v.strip():
-            u = normalize_url(base_url, v.strip())
-            return u
+            return normalize_url(base_url, v.strip())
 
-    # JSON-LD style: image can be list/dict
     img = d.get("image")
     if isinstance(img, list) and img:
         if isinstance(img[0], str) and img[0].strip():
@@ -228,43 +289,37 @@ def extract_thumbnail_from_dict(base_url: str, d: dict) -> Optional[str]:
 
 
 def extract_from_landsearch_cards(base_url: str, html: str) -> List[Dict[str, Any]]:
-    """
-    LandSearch search results pages often have repeated card-like blocks.
-    This is a practical extractor so titles/thumbnails behave more consistently
-    than walking raw __NEXT_DATA__.
-    """
     soup = BeautifulSoup(html, "html.parser")
     items: List[Dict[str, Any]] = []
 
-    # Property links on LandSearch commonly contain /properties/
     for a in soup.select('a[href*="/properties/"], a[href*="/property/"]'):
         href = a.get("href", "")
         url = normalize_url(base_url, href)
-        if not url or "landsearch.com" not in url:
+        if not url:
+            continue
+        if "landsearch.com" not in url:
             continue
 
-        # Try to find the nearest "card" container
+        # card-ish container heuristic
         card = a
         for _ in range(6):
             if card.parent is None:
                 break
             card = card.parent
-            # heuristic: cards often have images or price text
             txt = card.get_text(" ", strip=True).lower()
             if "acres" in txt or "$" in txt:
                 break
 
         card_text = card.get_text(" ", strip=True)
 
-        # Title: prefer link text; else look for heading tags in card
         title = clean_title(a.get_text(" ", strip=True))
         if not title:
             h = card.find(["h1", "h2", "h3"])
             if h:
                 title = clean_title(h.get_text(" ", strip=True))
 
-        # Price/acres from card text
         price = parse_money(card_text)
+
         acres = None
         m = re.search(r"(\d+(?:\.\d+)?)\s*acres?\b", card_text.lower())
         if m:
@@ -273,7 +328,6 @@ def extract_from_landsearch_cards(base_url: str, html: str) -> List[Dict[str, An
             except Exception:
                 acres = None
 
-        # Thumbnail: nearest img
         thumb = None
         img = card.find("img")
         if img and img.get("src"):
@@ -337,10 +391,6 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
 
 
 def extract_from_next_data(base_url: str, next_data: dict, source_name: str) -> List[Dict[str, Any]]:
-    """
-    Generic NEXT_DATA walker. Less consistent than card parsing, but catches items
-    that don't render cleanly in HTML.
-    """
     items: List[Dict[str, Any]] = []
 
     for d in walk(next_data):
@@ -355,15 +405,11 @@ def extract_from_next_data(base_url: str, next_data: dict, source_name: str) -> 
         if not url:
             continue
 
-        # Avoid nav/search URLs
-        if any(x in url for x in ("/filter/", "#nav", "#", "sort=", "format=")):
-            # allow real property pages still
+        if any(x in url for x in ("/filter/", "#nav", "sort=", "format=")):
             if ("/properties/" not in url) and ("/property/" not in url):
                 continue
 
-        title = best_title_from_dict(d)
-        if not title:
-            title = "Land listing"
+        title = best_title_from_dict(d) or "Land listing"
 
         price = parse_money(
             d.get("price")
@@ -409,7 +455,6 @@ def dedupe_and_clean(items: List[Dict[str, Any]], base_url: str) -> List[Dict[st
         if not url:
             continue
 
-        # Normalize URL a bit
         url = normalize_url(base_url, url)
         it["url"] = url
 
@@ -417,10 +462,8 @@ def dedupe_and_clean(items: List[Dict[str, Any]], base_url: str) -> List[Dict[st
             continue
         seen.add(url)
 
-        # Clean title
         it["title"] = clean_title(it.get("title", "")) or "Land listing"
 
-        # Remove obvious junk links
         if any(x in url for x in ("#nav", "skip", "/filter/")) and ("/properties/" not in url and "/property/" not in url):
             continue
 
@@ -433,17 +476,14 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
 
     items: List[Dict[str, Any]] = []
 
-    # 1) Prefer card parsing for LandSearch search pages
     if "landsearch.com" in host:
         items.extend(extract_from_landsearch_cards(url, html))
 
-    # 2) JSON-LD (both sites)
     json_ld_blocks = get_json_ld(html)
     if json_ld_blocks:
         src = "LandSearch" if "landsearch.com" in host else "LandWatch"
         items.extend(extract_from_jsonld(url, json_ld_blocks, src))
 
-    # 3) NEXT_DATA (mostly LandSearch)
     next_data = get_next_data_json(html)
     if next_data:
         src = "LandSearch" if "landsearch.com" in host else "LandWatch"
@@ -451,7 +491,6 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
 
     items = dedupe_and_clean(items, url)
 
-    # If a link points to a search/filter page, drop it
     cleaned = []
     for it in items:
         u = it.get("url", "")
@@ -468,7 +507,7 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
 
 def main():
     run_utc = datetime.now(timezone.utc).isoformat()
-    found_utc = run_utc  # stamp each item this run
+    found_utc = run_utc
 
     all_items: List[Dict[str, Any]] = []
 
@@ -482,11 +521,10 @@ def main():
         items = extract_listings(url, html)
         for it in items:
             it["found_utc"] = found_utc
-            # Add a computed "match" flag for dashboard filtering
             it["match"] = is_strict_match(it.get("price"), it.get("acres"))
         all_items.extend(items)
 
-    # Dedup across all sources
+    # Dedup across sources
     seen = set()
     final: List[Dict[str, Any]] = []
     for x in all_items:
@@ -495,6 +533,26 @@ def main():
             continue
         seen.add(u)
         final.append(x)
+
+    # --- DETAIL PAGE ENRICHMENT (fix “Land listing”) ---
+    enriched = 0
+    for it in final:
+        if enriched >= DETAIL_FETCH_LIMIT:
+            break
+
+        title = it.get("title") or ""
+        if not should_enrich_title(title):
+            continue
+
+        detail = enrich_from_detail_page(it["url"])
+        if detail.get("title"):
+            it["title"] = detail["title"]
+
+        # If we don’t have a thumbnail, try to fill it from the detail page
+        if not it.get("thumbnail") and detail.get("thumbnail"):
+            it["thumbnail"] = detail["thumbnail"]
+
+        enriched += 1
 
     out = {
         "last_updated_utc": run_utc,
@@ -506,15 +564,12 @@ def main():
         "items": final,
     }
 
-    # Ensure folder exists
-    import os
     os.makedirs("data", exist_ok=True)
-
     with open("data/listings.json", "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
 
     matches = sum(1 for it in final if it.get("match") is True)
-    print(f"Saved {len(final)} total listings. Strict matches: {matches}.")
+    print(f"Saved {len(final)} total listings. Strict matches: {matches}. Enriched titles: {enriched}.")
 
 
 if __name__ == "__main__":
