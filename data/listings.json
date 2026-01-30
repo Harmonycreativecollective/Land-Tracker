@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-01-29T23:43:29.638446+00:00",
+  "last_updated_utc": "2026-01-30T14:06:33.624704+00:00",
   "criteria": {
     "min_acres": 11.0,
     "max_acres": 50.0,
@@ -58,7 +58,7 @@
       "source": "LandSearch",
       "title": "Land listing",
       "url": "https://www.landsearch.com/properties/8528-worman-dr-king-george-va-22485/4979196",
-      "price": 20,
+      "price": 21,
       "acres": 10.9,
       "thumbnail": "https://cdn.landsearch.com/listings/4QspB/small/king-george-va-158609119.jpg"
     },
@@ -74,7 +74,7 @@
       "source": "LandSearch",
       "title": "Land listing",
       "url": "https://www.landsearch.com/properties/king-george-va-22485/4995042",
-      "price": 12,
+      "price": 13,
       "acres": 10.0,
       "thumbnail": null
     },
@@ -82,7 +82,7 @@
       "source": "LandSearch",
       "title": "Land listing",
       "url": "https://www.landsearch.com/properties/king-george-va-22485/4995024",
-      "price": 12,
+      "price": 13,
       "acres": 10.0,
       "thumbnail": null
     },
@@ -90,7 +90,7 @@
       "source": "LandSearch",
       "title": "Land listing",
       "url": "https://www.landsearch.com/properties/king-george-va-22485/4995041",
-      "price": 12,
+      "price": 13,
       "acres": 14.0,
       "thumbnail": null
     },
@@ -98,7 +98,7 @@
       "source": "LandSearch",
       "title": "Land listing",
       "url": "https://www.landsearch.com/properties/king-george-va-22485/4995040",
-      "price": 12,
+      "price": 13,
       "acres": 14.0,
       "thumbnail": null
     },
@@ -122,7 +122,7 @@
       "source": "LandSearch",
       "title": "Land listing",
       "url": "https://www.landsearch.com/properties/king-george-va-22485/4995025",
-      "price": 12,
+      "price": 13,
       "acres": 18.5,
       "thumbnail": null
     },
