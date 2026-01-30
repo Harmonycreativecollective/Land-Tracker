@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
@@ -17,8 +18,8 @@ MIN_ACRES = 11.0
 MAX_ACRES = 50.0
 MAX_PRICE = 600_000
 
-# If title comes through as "Land listing" or "Skip to navigation", we’ll fetch a few detail pages to recover real titles.
-DETAIL_ENRICH_LIMIT = 15
+# Enrich missing titles/thumbs by visiting a few detail pages (does NOT remove listings)
+DETAIL_ENRICH_LIMIT = 10
 # ===========================
 
 HEADERS = {
@@ -27,6 +28,7 @@ HEADERS = {
 }
 
 TIMEOUT = 40
+DATA_FILE = "data/listings.json"
 
 
 def fetch_html(url: str) -> str:
@@ -50,13 +52,14 @@ def walk(obj: Any):
 
 def parse_money(value: Any) -> Optional[int]:
     """
-    Keep your original behavior, but avoid bogus tiny numbers.
-    IMPORTANT: returning None does NOT remove the listing; it just avoids showing wrong prices.
+    Parses price-ish values; returns integer dollars or None.
+    NOTE: returning None will NOT remove the listing, it just avoids wrong price labels.
     """
     if value is None:
         return None
     if isinstance(value, (int, float)):
         v = int(value)
+        # avoid tiny bogus numbers
         return v if v >= 1000 else None
 
     s = str(value).strip().lower()
@@ -166,55 +169,11 @@ def normalize_url(base_url: str, u: str) -> str:
     return urljoin(base_url, u)
 
 
-def is_landsearch_detail_url(u: str) -> bool:
-    """
-    Only accept true LandSearch property detail URLs:
-    https://www.landsearch.com/properties/<slug>/<numeric-id>
-    Rejects /filter/ and #nav URLs that cause “Skip to navigation” titles.
-    """
-    try:
-        p = urlparse(u)
-    except Exception:
-        return False
-
-    if "landsearch.com" not in p.netloc.lower():
-        return False
-
-    if p.fragment:  # kills #nav
-        return False
-
-    parts = p.path.strip("/").split("/")
-    # Expect ["properties", "<slug>", "<id>"]
-    if len(parts) < 3:
-        return False
-    if parts[0] != "properties":
-        return False
-    if "filter" in parts:
-        return False
-    if not parts[-1].isdigit():
-        return False
-
-    return True
-
-
-def is_landwatch_detail_url(u: str) -> bool:
-    """
-    LandWatch detail pages usually contain /property/.
-    """
-    try:
-        p = urlparse(u)
-    except Exception:
-        return False
-    if "landwatch.com" not in p.netloc.lower():
-        return False
-    return "/property/" in p.path
-
-
 def best_title(d: dict) -> str:
     t = (d.get("title") or d.get("name") or d.get("headline") or "").strip()
     if not t:
         return "Land listing"
-    low = t.lower()
+    low = t.lower().strip()
     if low in {"skip to navigation", "skip to content"}:
         return "Land listing"
     return t
@@ -233,11 +192,10 @@ def try_thumbnail_from_dict(d: dict) -> Optional[str]:
     return None
 
 
-def should_enrich_title(t: str) -> bool:
-    if not t:
-        return True
-    low = t.strip().lower()
-    return low in {"land listing", "skip to navigation", "skip to content"} or len(low) < 6
+def should_enrich(it: Dict[str, Any]) -> bool:
+    title = (it.get("title") or "").strip().lower()
+    thumb = it.get("thumbnail")
+    return (title in {"", "land listing", "skip to navigation", "skip to content"}) or (not thumb)
 
 
 def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
@@ -268,7 +226,6 @@ def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
 
     thumb = meta("og:image", "property") or meta("twitter:image", "name")
 
-    # Clean title
     if title:
         title = " ".join(title.split()).strip()
     if title and title.lower() in {"skip to navigation", "skip to content"}:
@@ -278,6 +235,11 @@ def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
 
 
 def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[str, Any]]:
+    """
+    Pull listing-ish objects out of LandSearch's __NEXT_DATA__.
+    We keep anything that looks like a property URL. We DO NOT filter by acres/price here
+    because you want “All found” in the dashboard.
+    """
     items: List[Dict[str, Any]] = []
 
     for d in walk(next_data):
@@ -297,9 +259,14 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
         if not url:
             continue
 
-        # ✅ Only keep true LandSearch detail URLs (fixes titles)
+        # Keep only property detail pages (LandSearch)
         if "landsearch.com" in url:
-            if not is_landsearch_detail_url(url):
+            p = urlparse(url)
+            if p.fragment:
+                continue
+            parts = p.path.strip("/").split("/")
+            # expects /properties/<slug>/<id>
+            if len(parts) < 3 or parts[0] != "properties" or not parts[-1].isdigit():
                 continue
 
         price = parse_money(
@@ -323,7 +290,6 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
 
         thumb = try_thumbnail_from_dict(d)
 
-        # Keep even if price is weird or missing
         items.append(
             {
                 "source": "LandSearch",
@@ -363,12 +329,17 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
 
             host = urlparse(base_url).netloc.lower()
 
-            # ✅ Keep only detail pages
+            # Keep only detail pages
             if "landsearch.com" in host:
-                if not is_landsearch_detail_url(url):
+                p = urlparse(url)
+                if p.fragment:
                     continue
+                parts = p.path.strip("/").split("/")
+                if len(parts) < 3 or parts[0] != "properties" or not parts[-1].isdigit():
+                    continue
+
             if "landwatch.com" in host:
-                if not is_landwatch_detail_url(url):
+                if "/property/" not in urlparse(url).path:
                     continue
 
             price = parse_money(
@@ -398,6 +369,7 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
                 }
             )
 
+    # Dedup
     seen = set()
     out = []
     for it in items:
@@ -419,10 +391,15 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
 
         host = urlparse(base_url).netloc.lower()
         if "landsearch.com" in host:
-            if not is_landsearch_detail_url(full):
+            p = urlparse(full)
+            if p.fragment:
                 continue
+            parts = p.path.strip("/").split("/")
+            if len(parts) < 3 or parts[0] != "properties" or not parts[-1].isdigit():
+                continue
+
         if "landwatch.com" in host:
-            if not is_landwatch_detail_url(full):
+            if "/property/" not in urlparse(full).path:
                 continue
 
         card_text = a.get_text(" ", strip=True)
@@ -455,6 +432,7 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
             }
         )
 
+    # Dedup
     seen = set()
     out = []
     for it in items:
@@ -496,12 +474,38 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
             continue
         seen.add(it["url"])
         out.append(it)
-
     return out
 
 
+def load_existing_found_map() -> Dict[str, str]:
+    """
+    Long-term: keep first-seen timestamps across runs.
+    We reuse data/listings.json if it exists, so you don't need another file.
+    """
+    try:
+        if not os.path.exists(DATA_FILE):
+            return {}
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            old = json.load(f)
+        out = {}
+        for it in old.get("items", []) or []:
+            url = it.get("url")
+            found = it.get("found_utc")
+            if url and found:
+                out[url] = found
+        return out
+    except Exception:
+        return {}
+
+
 def main():
+    os.makedirs("data", exist_ok=True)
+
     run_utc = datetime.now(timezone.utc).isoformat()
+
+    # ✅ persistent first-seen timestamps
+    found_map = load_existing_found_map()
+
     all_items: List[Dict[str, Any]] = []
 
     for url in START_URLS:
@@ -514,28 +518,36 @@ def main():
         items = extract_listings(url, html)
         all_items.extend(items)
 
-    # Dedup across all sources
+    # Dedup across sources by URL
     seen = set()
-    final = []
+    final: List[Dict[str, Any]] = []
     for x in all_items:
-        if x["url"] in seen:
+        u = x.get("url")
+        if not u or u in seen:
             continue
-        seen.add(x["url"])
+        seen.add(u)
+
+        # ✅ attach found_utc (first time ever seen)
+        if u in found_map:
+            x["found_utc"] = found_map[u]
+        else:
+            x["found_utc"] = run_utc
+            found_map[u] = run_utc
+
         final.append(x)
 
-    # ✅ Enrich a few “Land listing” titles by visiting detail pages (limited)
+    # ✅ optional enrichment: fix "Land listing" titles / missing thumbnails (limited)
     enriched = 0
     for it in final:
         if enriched >= DETAIL_ENRICH_LIMIT:
             break
-        if "landsearch.com" in it["url"] or "landwatch.com" in it["url"]:
-            if should_enrich_title(it.get("title", "")):
-                info = enrich_from_detail_page(it["url"])
-                if info.get("title"):
-                    it["title"] = info["title"]
-                if not it.get("thumbnail") and info.get("thumbnail"):
-                    it["thumbnail"] = info["thumbnail"]
-                enriched += 1
+        if should_enrich(it):
+            info = enrich_from_detail_page(it["url"])
+            if info.get("title") and (it.get("title") in [None, "", "Land listing"]):
+                it["title"] = info["title"]
+            if (not it.get("thumbnail")) and info.get("thumbnail"):
+                it["thumbnail"] = info["thumbnail"]
+            enriched += 1
 
     out = {
         "last_updated_utc": run_utc,
@@ -547,14 +559,10 @@ def main():
         "items": final,
     }
 
-    # Make sure data folder exists
-    import os
-    os.makedirs("data", exist_ok=True)
-
-    with open("data/listings.json", "w", encoding="utf-8") as f:
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
 
-    print(f"Saved {len(final)} listings found. Enriched titles: {enriched}.")
+    print(f"Saved {len(final)} listings found. Enriched: {enriched}.")
 
 
 if __name__ == "__main__":
