@@ -70,9 +70,9 @@ def render_header():
             margin-bottom: 0.2rem;
           }}
           .kb-logo {{
-            width:130px;
-            height:130px;
-            flex: 0 0 130px;
+            width:140px;
+            height:140px;
+            flex: 0 0 140px;
             border-radius: 16px;
             object-fit: contain;
           }}
