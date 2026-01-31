@@ -15,17 +15,17 @@ st.set_page_config(
     layout="wide",
 )
 
-# ---------- Header (Logo + Title) ----------
-col1, col2 = st.columns([2, 7], vertical_alignment="center")
+# ---------- Header (Dashboard style: logo left, title right) ----------
+col1, col2 = st.columns([1.2, 6], vertical_alignment="center")
 
 with col1:
-    st.image("assets/kblogo.png", width=140)
+    st.image("assets/kblogo.png", width=105)
 
 with col2:
     st.markdown(
         f"""
-        <div style="line-height:1.05; padding-top: 14px;">
-            <h1 style="margin:0;">{TITLE}</h1>
+        <div style="line-height:1.1; padding-top: 4px;">
+            <h2 style="margin:0; font-size: 2.05rem;">{TITLE}</h2>
         </div>
         """,
         unsafe_allow_html=True,
@@ -33,10 +33,10 @@ with col2:
 
 st.divider()
 
-# Bigger caption (instead of st.caption)
+# ---------- Caption (cleaner, dashboard-sized) ----------
 st.markdown(
     f"""
-    <p style="font-size:1.45rem; color:#6b7280; margin-top:-6px; margin-bottom:18px;">
+    <p style="font-size:1.10rem; color:#6b7280; margin-top:-8px; margin-bottom:18px;">
         {CAPTION}
     </p>
     """,
