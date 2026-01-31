@@ -1,140 +1,121 @@
 import json
-from datetime import datetime, timezone, timedelta
+import base64
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 
 import streamlit as st
 
+
+# -----------------------------
+# Config
+# -----------------------------
 DATA_PATH = Path("data/listings.json")
+LOGO_PATH = Path("assets/kblogo.png")
 
 TITLE = "KB’s Land Tracker"
 CAPTION = "What’s meant for you is already in motion."
 
 
-# ---------------- Page config ----------------
 st.set_page_config(
     page_title=TITLE,
-    page_icon="🗺️",
+    page_icon="assets/kblogo.png",
     layout="wide",
 )
 
 
-# ---------------- Load data ----------------
-def load_data() -> Dict[str, Any]:
+# -----------------------------
+# Helpers
+# -----------------------------
+def load_data():
     if not DATA_PATH.exists():
         return {"items": [], "criteria": {}, "last_updated_utc": None}
     with open(DATA_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
+def pretty_utc(iso_str: str) -> str:
+    """Format last_updated_utc nicely."""
+    try:
+        dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+        return dt.strftime("%b %d, %Y • %I:%M %p UTC")
+    except Exception:
+        return iso_str
+
+
+def logo_base64(path: Path) -> str:
+    if not path.exists():
+        return ""
+    return base64.b64encode(path.read_bytes()).decode("utf-8")
+
+
+def searchable_text(it):
+    return " ".join([
+        str(it.get("title", "")),
+        str(it.get("source", "")),
+        str(it.get("url", "")),
+    ]).lower()
+
+
+def parse_dt(it):
+    # Works if/when scraper adds found_utc later
+    return it.get("found_utc") or ""
+
+
+# -----------------------------
+# Load
+# -----------------------------
 data = load_data()
-items: List[Dict[str, Any]] = data.get("items", []) or []
+items = data.get("items", [])
+criteria = data.get("criteria", {}) or {}
 last_updated_raw = data.get("last_updated_utc")
 
 
-# ---------------- Helpers ----------------
-def safe_float(x) -> Optional[float]:
-    try:
-        if x is None:
-            return None
-        return float(x)
-    except Exception:
-        return None
+# -----------------------------
+# Defaults (criteria)
+# -----------------------------
+DEFAULT_MAX_PRICE = int(criteria.get("max_price") or 600000)
+DEFAULT_MIN_ACRES = float(criteria.get("min_acres") or 11.0)
+DEFAULT_MAX_ACRES = float(criteria.get("max_acres") or 50.0)
 
 
-def safe_int(x) -> Optional[int]:
-    try:
-        if x is None:
-            return None
-        return int(float(x))
-    except Exception:
-        return None
+# -----------------------------
+# Header (Branded)
+# -----------------------------
+logo_b64 = logo_base64(LOGO_PATH)
 
-
-def pretty_utc(ts: str) -> str:
-    # Accepts ISO timestamps; shows "Jan 31, 2026 • 07:26 PM UTC"
-    try:
-        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-        return dt.astimezone(timezone.utc).strftime("%b %d, %Y • %I:%M %p UTC")
-    except Exception:
-        return str(ts)
-
-
-def is_top_match(it: Dict[str, Any], min_acres: float, max_acres: float, max_price: int) -> bool:
-    price = safe_int(it.get("price"))
-    acres = safe_float(it.get("acres"))
-    if price is None or acres is None:
-        return False
-    return (min_acres <= acres <= max_acres) and (price <= max_price)
-
-
-def searchable_text(it: Dict[str, Any]) -> str:
-    return " ".join(
-        [
-            str(it.get("title", "")),
-            str(it.get("source", "")),
-            str(it.get("url", "")),
-        ]
-    ).lower()
-
-
-def get_first_seen_dt(it: Dict[str, Any]) -> Optional[datetime]:
-    # Only works if your scraper adds first_seen_utc
-    raw = it.get("first_seen_utc")
-    if not raw:
-        return None
-    try:
-        return datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
-    except Exception:
-        return None
-
-
-def is_new(it: Dict[str, Any], window_hours: int = 48) -> Optional[bool]:
-    """
-    Returns:
-      True/False if first_seen_utc exists,
-      None if we cannot determine.
-    """
-    dt = get_first_seen_dt(it)
-    if not dt:
-        return None
-    now = datetime.now(timezone.utc)
-    return dt >= (now - timedelta(hours=window_hours))
-
-
-def sort_key_newest(it: Dict[str, Any]) -> str:
-    # Sort by first_seen_utc if available; otherwise fall back to empty
-    dt = get_first_seen_dt(it)
-    if dt:
-        return dt.isoformat()
-    return ""
-
-
-# ---------------- Header ----------------
-st.title(TITLE)
-
-# Bigger caption
 st.markdown(
     f"""
-    <div style="font-size:1.15rem; color: rgba(49, 51, 63, 0.75); margin-top:-6px;">
-        {CAPTION}
+    <div style="display:flex; align-items:center; gap:16px; margin-top:10px; margin-bottom:4px;">
+        <div style="flex:0 0 auto;">
+            {"<img src='data:image/png;base64," + logo_b64 + "' style='height:72px; width:auto; border-radius:14px;'/>" if logo_b64 else ""}
+        </div>
+        <div style="flex:1 1 auto;">
+            <div style="font-size:3rem; font-weight:900; line-height:1.05; color:#0f172a;">
+                {TITLE}
+            </div>
+            <div style="font-size:1.25rem; color: rgba(49, 51, 63, 0.78); margin-top:10px;">
+                {CAPTION}
+            </div>
+        </div>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-# Last updated — small, subtle, NOT inside details/filters
 if last_updated_raw:
     st.markdown(
         f"""
-        <div style="font-size:0.85rem; color: rgba(49, 51, 63, 0.55); margin-top:6px; margin-bottom:10px;">
+        <div style="font-size:0.88rem; color: rgba(49, 51, 63, 0.55); margin-top:10px; margin-bottom:14px;">
             Last updated: {pretty_utc(last_updated_raw)}
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-# Search OUTSIDE filters/details
+
+# -----------------------------
+# Search (OUTSIDE filters)
+# -----------------------------
 search_query = st.text_input(
     "Search (title / location / source)",
     value="",
@@ -142,25 +123,27 @@ search_query = st.text_input(
 )
 
 
-# ---------------- Advanced / Filters / Details dropdowns ----------------
-# Default criteria
-default_max_price = 600_000
-default_min_acres = 11.0
-default_max_acres = 50.0
+# -----------------------------
+# Filters + Details (dropdowns)
+# -----------------------------
+# ✅ Defaults
+show_top_matches_only_default = True
+new_only_default = False
+newest_first_default = True
 
-# Put filters + details into two dropdown sections (expander)
+
 with st.expander("Filters", expanded=False):
     max_price = st.number_input(
         "Max price (Top match)",
         min_value=0,
-        value=default_max_price,
-        step=10_000,
+        value=DEFAULT_MAX_PRICE,
+        step=10000,
     )
 
     min_acres = st.number_input(
         "Min acres",
         min_value=0.0,
-        value=default_min_acres,
+        value=DEFAULT_MIN_ACRES,
         step=1.0,
         format="%.2f",
     )
@@ -168,128 +151,162 @@ with st.expander("Filters", expanded=False):
     max_acres = st.number_input(
         "Max acres",
         min_value=0.0,
-        value=default_max_acres,
+        value=DEFAULT_MAX_ACRES,
         step=1.0,
         format="%.2f",
     )
 
-    # Toggles
-    colA, colB = st.columns(2)
-    with colA:
-        top_matches_only = st.toggle("Top matches only", value=True)
-    with colB:
-        new_only = st.toggle("New only", value=False)
+    show_top_matches_only = st.toggle("Top matches only", value=show_top_matches_only_default)
+    new_only = st.toggle("New only", value=new_only_default)
+    newest_first = st.toggle("Newest first", value=newest_first_default)
 
-    newest_first = st.toggle("Newest first", value=True)
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
 
-# Details dropdown (counts / overview)
-# Compute these based on current filter settings for top-match definition
-top_match_count_all = sum(1 for it in items if is_top_match(it, min_acres, max_acres, max_price))
+def is_top_match(it):
+    """Top match = price is present AND <= max_price AND acres within range."""
+    price = it.get("price")
+    acres = it.get("acres")
+    if price is None or acres is None:
+        return False
+    try:
+        return (min_acres <= float(acres) <= max_acres) and (int(price) <= int(max_price))
+    except Exception:
+        return False
 
-# New count (only if first_seen_utc exists)
-new_flags = [is_new(it) for it in items]
-new_known = [x for x in new_flags if x is not None]
-new_count = sum(1 for x in new_known if x is True) if new_known else None
+
+def is_new(it):
+    """
+    NEW badge logic:
+    If your scraper later adds found_utc, we can compare it to last_updated
+    or a rolling window.
+    For now: treat everything as NEW if new_only toggle is used (simple MVP).
+    """
+    # If you later add found_utc, use it here.
+    return True
+
+
+strict_top_matches = [it for it in items if is_top_match(it)]
+
 
 with st.expander("Details", expanded=False):
-    st.metric("All found", f"{len(items)}")
-    st.metric("Top matches", f"{top_match_count_all}")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("All found", f"{len(items)}")
+    col2.metric("Top matches", f"{len(strict_top_matches)}")
+    col3.metric("Max price", f"${int(max_price):,}")
 
-    # If we can compute NEW, show it; otherwise show a note
-    if new_count is not None:
-        st.metric("New", f"{new_count}")
-    else:
-        st.caption("🆕 New: available once the scraper writes `first_seen_utc` (optional upgrade).")
+    st.caption(f"Acre range: {min_acres:g}–{max_acres:g}")
 
 
-# ---------------- Apply filters ----------------
+st.divider()
+
+
+# -----------------------------
+# Apply filters
+# -----------------------------
 filtered = items[:]
 
-# Search
+# Search (OUTSIDE filters)
 if search_query.strip():
     q = search_query.strip().lower()
     filtered = [it for it in filtered if q in searchable_text(it)]
 
-# Top matches only
-if top_matches_only:
-    filtered = [it for it in filtered if is_top_match(it, min_acres, max_acres, max_price)]
+# Top matches filter
+if show_top_matches_only:
+    filtered = [it for it in filtered if is_top_match(it)]
 
-# New only (only works if we can determine)
+# New only filter
 if new_only:
-    filtered = [it for it in filtered if is_new(it) is True]
+    filtered = [it for it in filtered if is_new(it)]
 
-# Sort
+# Sorting
 if newest_first:
-    filtered = sorted(filtered, key=sort_key_newest, reverse=True)
+    filtered = sorted(filtered, key=parse_dt, reverse=True)
 
 # Limit
 filtered = filtered[:show_n]
 
 
-# ---------------- Listing cards ----------------
-def listing_card(it: Dict[str, Any]):
-    title = (it.get("title") or "").strip()
-    if not title or title.lower() == "land listing":
-        # smarter fallback
-        src = (it.get("source") or "Listing").strip()
-        title = f"{src} listing"
+# -----------------------------
+# Listing Cards
+# -----------------------------
+def badge_html(text: str, bg: str, fg: str = "white"):
+    return f"""
+        <span style="
+            display:inline-block;
+            padding:4px 10px;
+            border-radius:999px;
+            background:{bg};
+            color:{fg};
+            font-size:12px;
+            font-weight:700;
+            margin-right:6px;
+        ">{text}</span>
+    """
 
+
+def listing_card(it):
+    title = it.get("title") or f"{it.get('source','Listing')} listing"
     url = it.get("url") or ""
-    source = it.get("source") or ""
-    price = safe_int(it.get("price"))
-    acres = safe_float(it.get("acres"))
+    source = it.get("source") or "Unknown"
+    price = it.get("price")
+    acres = it.get("acres")
     thumb = it.get("thumbnail")
 
-    top_match = is_top_match(it, min_acres, max_acres, max_price)
-    new_flag = is_new(it)  # True / False / None
-
-    # Badges line
-    badges = []
-    if top_match:
-        badges.append("⭐ Top match")
-    if new_flag is True:
-        badges.append("🆕 NEW")
-    if not badges:
-        badges.append("FOUND")
+    top_match = is_top_match(it)
+    new_flag = is_new(it)
 
     with st.container(border=True):
+        # thumbnail
         if thumb:
             st.image(thumb, use_container_width=True)
         else:
             st.markdown(
                 """
-                <div style="width:100%; height:220px; background:#f2f2f2; border-radius:16px;
-                            display:flex; align-items:center; justify-content:center; color:#777;
-                            font-weight:600;">
+                <div style="width:100%; height:220px; background:#f1f3f5; border-radius:16px;
+                            display:flex; align-items:center; justify-content:center; color:#666;
+                            font-weight:700; font-size:1.05rem;">
                     No preview available
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
+        # title
         st.subheader(title)
-        st.caption(f"{' • '.join(badges)} • {source}")
 
+        # badges
+        badges = ""
+        if top_match:
+            badges += badge_html("⭐ Top match", "#2563eb")
+        if new_flag:
+            badges += badge_html("🆕 NEW", "#16a34a")
+        if not top_match:
+            badges += badge_html("FOUND", "#64748b")
+
+        st.markdown(badges, unsafe_allow_html=True)
+        st.caption(source)
+
+        # details
         if price is None:
             st.write("**Price:** —")
         else:
-            st.write(f"**Price:** ${price:,}")
+            st.write(f"**Price:** ${int(price):,}")
 
         if acres is None:
             st.write("**Acres:** —")
         else:
-            st.write(f"**Acres:** {acres:g}")
+            st.write(f"**Acres:** {float(acres):g}")
 
         if url:
             st.link_button("Open listing ↗", url, use_container_width=True)
 
 
+# grid layout
+cols = st.columns(2)
+for idx, it in enumerate(filtered):
+    with cols[idx % 2]:
+        listing_card(it)
+
 if not filtered:
     st.info("No listings matched your current search/filters.")
-else:
-    cols = st.columns(2)
-    for idx, it in enumerate(filtered):
-        with cols[idx % 2]:
-            listing_card(it)
