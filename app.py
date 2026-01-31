@@ -16,19 +16,16 @@ st.set_page_config(
 )
 
 # ---------- Header (Logo + Title) ----------
-col1, col2 = st.columns([1, 7], vertical_alignment="center")
+col1, col2 = st.columns([2, 7], vertical_alignment="center")
 
 with col1:
-    st.image("assets/kblogo.png", width=90)
+    st.image("assets/kblogo.png", width=140)
 
 with col2:
     st.markdown(
         f"""
-        <div style="line-height:1.1; padding-top: 6px;">
+        <div style="line-height:1.05; padding-top: 14px;">
             <h1 style="margin:0;">{TITLE}</h1>
-            <p style="margin:4px 0 0 0; color:#6b7280; font-size: 0.95rem;">
-                KB scouting listings 🧭🐾
-            </p>
         </div>
         """,
         unsafe_allow_html=True,
