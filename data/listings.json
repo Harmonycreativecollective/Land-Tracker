@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-01-31T01:45:48.334212+00:00",
+  "last_updated_utc": "2026-01-31T04:48:42.798128+00:00",
   "criteria": {
     "min_acres": 11.0,
     "max_acres": 50.0,
@@ -8,7 +8,7 @@
   "items": [
     {
       "source": "LandSearch",
-      "title": "10.8 Acres of Land with Home for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/13467-ellis-way-king-george-va-22485/4865687",
       "price": null,
       "acres": 10.8,
@@ -17,7 +17,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "29 Acres of Recreational Land for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/james-madison-pkwy-king-george-va-22485/5009048",
       "price": null,
       "acres": 29.0,
@@ -26,7 +26,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "10 Acres of Land with Home for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/16725-bald-eagle-dr-king-george-va-22485/4855285",
       "price": null,
       "acres": 10.0,
@@ -35,7 +35,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "228 Acres of Recreational Land with Home for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/18134-green-blvd-king-george-va-22485/4531399",
       "price": null,
       "acres": 228.0,
@@ -44,7 +44,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "10.9 Acres of Land with Home for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/8528-worman-dr-king-george-va-22485/4979196",
       "price": null,
       "acres": 10.9,
@@ -53,7 +53,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "10.3 Acres of Land with Home for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/14851-azurite-dr-king-george-va-22485/4770583",
       "price": null,
       "acres": 10.3,
@@ -62,7 +62,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "10 Acres of Residential Land for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/king-george-va-22485/4995042",
       "price": null,
       "acres": 10.0,
@@ -71,7 +71,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "10 Acres of Residential Land for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/king-george-va-22485/4995024",
       "price": null,
       "acres": 10.0,
@@ -80,7 +80,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "14 Acres of Land for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/king-george-va-22485/4995041",
       "price": null,
       "acres": 14.0,
@@ -89,7 +89,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "14 Acres of Land for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/king-george-va-22485/4995040",
       "price": null,
       "acres": 14.0,
@@ -98,52 +98,52 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/8991-fletchers-chapel-rd-king-george-va-22485/4993717",
       "price": null,
       "acres": 10.0,
-      "thumbnail": null,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QzH7/large/king-george-va-159033896.jpg",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/round-hill-road-and-ridge-rd-king-george-va-22485/4011539",
       "price": null,
       "acres": 52.2,
-      "thumbnail": null,
+      "thumbnail": "https://cdn.landsearch.com/listings/4DHq5/large/king-george-va-152064090.jpg",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/king-george-va-22485/4995025",
       "price": null,
       "acres": 18.5,
-      "thumbnail": null,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QBgn/large/king-george-va-159069112.jpg",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/compass-court-lot-24-king-george-va-22485/2220814",
       "price": null,
       "acres": 10.9,
-      "thumbnail": null,
+      "thumbnail": "https://cdn.landsearch.com/listings/4jwbj/large/king-george-va-152070533.jpg",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/6269-caledon-rd-king-george-va-22485/5014554",
       "price": null,
       "acres": 19.4,
-      "thumbnail": null,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QMKd/large/king-george-va-159614756.jpg",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/mathias-point-rd-king-george-va-22485/4818738",
       "price": 700000,
       "acres": 162.0,
@@ -152,7 +152,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/ridge-rd-king-george-va-22485/4400303",
       "price": 66000,
       "acres": 70.0,
@@ -161,7 +161,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/16526-bald-eagle-dr-king-george-va-22485/4974293",
       "price": 709900,
       "acres": 10.0,
@@ -170,7 +170,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/2202-belvedere-dr-king-george-va-22485/4996354",
       "price": 330000,
       "acres": 20.0,
@@ -179,7 +179,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/salem-church-road-lot-17-king-george-va-22485/4565976",
       "price": 174900,
       "acres": 10.0,
@@ -188,7 +188,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/salem-church-road-lot-3-king-george-va-22485/4565763",
       "price": 129900,
       "acres": 10.0,
@@ -197,7 +197,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/salem-church-road-lot-2-king-george-va-22485/4565558",
       "price": 129900,
       "acres": 10.0,
@@ -206,7 +206,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/10491-oak-tree-dr-king-george-va-22485/4515081",
       "price": 465000,
       "acres": 37.3,
@@ -215,7 +215,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/tidewater-trl-rappahannock-academy-va-22538/4418916",
       "price": null,
       "acres": 30.0,
@@ -224,7 +224,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/23348-tidewater-trl-rappahannock-academy-va-22535/4715129",
       "price": null,
       "acres": 352.0,
@@ -233,7 +233,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/41-wood-landing-rd-fredericksburg-va-22405/4450546",
       "price": null,
       "acres": 35.0,
@@ -242,7 +242,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/11590-maryland-point-rd-nanjemoy-md-20662/4901267",
       "price": 15100,
       "acres": 26.2,
@@ -251,7 +251,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "Land listing",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/25692-a-p-hill-blvd-port-royal-va-22535/4820007",
       "price": null,
       "acres": 19.3,
