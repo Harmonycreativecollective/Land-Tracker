@@ -166,18 +166,17 @@ def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> 
         return False
     return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
 
-def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
-    # price missing, but acres fits and it isn't unavailable
+def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
+    # Possible = acres fits, price missing, and it isn't unavailable
     status = get_status(it)
     if is_unavailable(status):
         return False
     if not meets_acres(it, min_a, max_a):
         return False
-    # price is missing or non-parseable
     return it.get("price") is None
 
-def is_former_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
-    # Former top match = ever was top match + now unavailable (under contract/pending/sold)
+def is_former_top_match(it: Dict[str, Any]) -> bool:
+    # Former top match = ever was top match + now unavailable
     status = get_status(it)
     if not is_unavailable(status):
         return False
@@ -193,7 +192,6 @@ def searchable_text(it: Dict[str, Any]) -> str:
     ).lower()
 
 def parse_dt(it: Dict[str, Any]) -> str:
-    # scraper provides found_utc; if missing, fall back to empty string
     return it.get("found_utc") or ""
 
 def is_new(it: Dict[str, Any]) -> bool:
@@ -226,18 +224,25 @@ with st.expander("Filters", expanded=False):
     )
 
     # ✅ Top matches default ON
-    show_top_matches_only = st.toggle("Top matches only", value=True)
-    # ✅ Former matches toggle default OFF
-    show_former_top_matches = st.toggle("Former top matches", value=False)
-    show_new_only = st.toggle("New only", value=False)
+    show_top_matches_only = st.toggle("✨ Top matches only", value=True)
+
+    # ✅ Possible is its own toggle (default OFF)
+    # (If Top-only is ON, this will include possibles beneath top matches)
+    show_possible_matches = st.toggle("🧩 Include possible matches", value=False)
+
+    # ✅ Former is its own toggle (default OFF)
+    # (Only applies when Top-only is OFF)
+    show_former_top_matches = st.toggle("⭐ Former top matches", value=False)
+
+    show_new_only = st.toggle("🆕 New only", value=False)
     sort_newest = st.toggle("Newest first", value=True)
 
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
 # counts for details
 top_matches_all = [it for it in items if is_top_match(it, min_acres, max_acres, max_price)]
-possible_all = [it for it in items if is_possible_match(it, min_acres, max_acres, max_price)]
-former_all = [it for it in items if is_former_top_match(it, min_acres, max_acres, max_price)]
+possible_all = [it for it in items if is_possible_match(it, min_acres, max_acres)]
+former_all = [it for it in items if is_former_top_match(it)]
 new_all = [it for it in items if is_new(it)]
 
 with st.expander("Details", expanded=False):
@@ -250,7 +255,7 @@ with st.expander("Details", expanded=False):
     c4.metric("New", f"{len(new_all)}")
 
     if len(former_all) > 0:
-        st.caption(f"Former top matches in results: {len(former_all)} (toggle in Filters)")
+        st.caption(f"Former top matches available: {len(former_all)} (toggle in Filters)")
 
 st.divider()
 
@@ -266,27 +271,46 @@ if search_query.strip():
 if show_new_only:
     filtered = [it for it in filtered if is_new(it)]
 
-# Mode logic:
-# - If Top matches only ON: show Top + Possible (but NOT Former)
-# - If Former top matches ON (and Top matches only OFF): show Former
-# - If both OFF: show everything (🔎 Found etc)
+# Core mode logic:
+# ✅ If Top-only ON: show ONLY Top matches, plus Possible ONLY if toggle ON
 if show_top_matches_only:
-    filtered = [
-        it for it in filtered
-        if is_top_match(it, min_acres, max_acres, max_price)
-        or is_possible_match(it, min_acres, max_acres, max_price)
-    ]
-    # explicitly remove former in this mode
-    filtered = [it for it in filtered if not is_former_top_match(it, min_acres, max_acres, max_price)]
-else:
-    if show_former_top_matches:
-        # show ONLY former top matches (clean, intentional)
-        filtered = [it for it in filtered if is_former_top_match(it, min_acres, max_acres, max_price)]
-    # else: leave as-is (everything)
+    allowed = []
+    for it in filtered:
+        if is_top_match(it, min_acres, max_acres, max_price):
+            allowed.append(it)
+        elif show_possible_matches and is_possible_match(it, min_acres, max_acres):
+            allowed.append(it)
+    filtered = allowed
 
-# Sorting
+    # Never show former in Top-only mode
+    filtered = [it for it in filtered if not is_former_top_match(it)]
+
+# ✅ If Top-only OFF:
+# - show Former only if its toggle is ON (but still allows everything else to exist if you want)
+else:
+    # If Former toggle ON, include former results in the pool; if OFF, remove them
+    if not show_former_top_matches:
+        filtered = [it for it in filtered if not is_former_top_match(it)]
+
+    # If Possible toggle OFF, remove possibles (keeps it clean)
+    if not show_possible_matches:
+        filtered = [it for it in filtered if not is_possible_match(it, min_acres, max_acres)]
+
+# ---------- Sorting: Top first, then Possible, then Former, then everything else ----------
+def sort_key(it: Dict[str, Any]):
+    if is_top_match(it, min_acres, max_acres, max_price):
+        tier = 4
+    elif is_possible_match(it, min_acres, max_acres):
+        tier = 3
+    elif is_former_top_match(it):
+        tier = 2
+    else:
+        tier = 1
+
+    return (tier, parse_dt(it))
+
 if sort_newest:
-    filtered = sorted(filtered, key=parse_dt, reverse=True)
+    filtered = sorted(filtered, key=sort_key, reverse=True)
 
 # Limit
 filtered = filtered[:show_n]
@@ -304,8 +328,8 @@ def listing_card(it: Dict[str, Any]):
     status_badge = STATUS_EMOJI.get(status, STATUS_EMOJI["unknown"])
 
     top = is_top_match(it, min_acres, max_acres, max_price)
-    possible = is_possible_match(it, min_acres, max_acres, max_price)
-    former = is_former_top_match(it, min_acres, max_acres, max_price)
+    possible = is_possible_match(it, min_acres, max_acres)
+    former = is_former_top_match(it)
     new_flag = is_new(it)
 
     # badges (priority)
