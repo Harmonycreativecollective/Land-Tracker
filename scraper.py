@@ -14,7 +14,7 @@ START_URLS = [
     "https://www.landwatch.com/virginia-land-for-sale/king-george/acres-11-50/available",
 ]
 
-MIN_ACRES = 11.0
+MIN_ACRES = 10.0
 MAX_ACRES = 50.0
 MAX_PRICE = 600_000
 
