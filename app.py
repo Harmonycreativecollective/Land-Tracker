@@ -6,14 +6,45 @@ import streamlit as st
 
 DATA_PATH = Path("data/listings.json")
 
+TITLE = "KB’s Land Tracker"
+CAPTION = "What’s meant for you is already in motion."
+
 st.set_page_config(
-    page_title="KB’s Land Tracker",
-    page_icon="🗺️",
+    page_title=TITLE,
+    page_icon="assets/kblogo.png",
     layout="wide",
 )
 
-TITLE = "KB’s Land Tracker"
-CAPTION = "What’s meant for you is already in motion."
+# ---------- Header (Logo + Title) ----------
+col1, col2 = st.columns([1, 7], vertical_alignment="center")
+
+with col1:
+    st.image("assets/kblogo.png", width=90)
+
+with col2:
+    st.markdown(
+        f"""
+        <div style="line-height:1.1; padding-top: 6px;">
+            <h1 style="margin:0;">{TITLE}</h1>
+            <p style="margin:4px 0 0 0; color:#6b7280; font-size: 0.95rem;">
+                KB scouting listings 🧭🐾
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+st.divider()
+
+# Bigger caption (instead of st.caption)
+st.markdown(
+    f"""
+    <p style="font-size:1.45rem; color:#6b7280; margin-top:-6px; margin-bottom:18px;">
+        {CAPTION}
+    </p>
+    """,
+    unsafe_allow_html=True,
+)
 
 # ---------- Load data ----------
 def load_data():
@@ -25,19 +56,6 @@ def load_data():
 data = load_data()
 items = data.get("items", [])
 last_updated = data.get("last_updated_utc")
-
-# ---------- Header ----------
-st.title(TITLE)
-
-# Bigger caption (instead of st.caption)
-st.markdown(
-    f"""
-    <p style="font-size:1.45rem; color:#6b7280; margin-top:-10px; margin-bottom:18px;">
-        {CAPTION}
-    </p>
-    """,
-    unsafe_allow_html=True,
-)
 
 # ✅ Search OUTSIDE filters (top-of-page)
 search_query = st.text_input(
