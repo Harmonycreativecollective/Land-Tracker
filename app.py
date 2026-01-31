@@ -81,7 +81,7 @@ def render_header():
             min-width: 0; /* critical: allows text to wrap instead of overflow */
           }}
           .kb-title {{
-            font-size: clamp(2.0rem, 4.5vw, 2.6rem);
+            font-size: clamp(1.8rem, 4vw, 2.35rem);
             font-weight: 900;
             line-height: 1.05;
             margin: 0;
