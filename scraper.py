@@ -25,14 +25,18 @@ DETAIL_ENRICH_LIMIT = 10
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
 }
 
 TIMEOUT = 40
 DATA_FILE = "data/listings.json"
 
+session = requests.Session()
+session.headers.update(HEADERS)
+
 
 def fetch_html(url: str) -> str:
-    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+    r = session.get(url, timeout=TIMEOUT)
     r.raise_for_status()
     return r.text
 
@@ -59,7 +63,6 @@ def parse_money(value: Any) -> Optional[int]:
         return None
     if isinstance(value, (int, float)):
         v = int(value)
-        # avoid tiny bogus numbers
         return v if v >= 1000 else None
 
     s = str(value).strip().lower()
@@ -169,13 +172,24 @@ def normalize_url(base_url: str, u: str) -> str:
     return urljoin(base_url, u)
 
 
-def best_title(d: dict) -> str:
+BAD_TITLE_SET = {
+    "",
+    "land listing",
+    "skip to navigation",
+    "skip to content",
+    "listing",
+}
+
+
+def is_bad_title(title: Optional[str]) -> bool:
+    t = (title or "").strip().lower()
+    return t in BAD_TITLE_SET
+
+
+def best_title(d: dict, source_name: str) -> str:
     t = (d.get("title") or d.get("name") or d.get("headline") or "").strip()
-    if not t:
-        return "Land listing"
-    low = t.lower().strip()
-    if low in {"skip to navigation", "skip to content"}:
-        return "Land listing"
+    if is_bad_title(t):
+        return f"{source_name} listing"
     return t
 
 
@@ -193,9 +207,8 @@ def try_thumbnail_from_dict(d: dict) -> Optional[str]:
 
 
 def should_enrich(it: Dict[str, Any]) -> bool:
-    title = (it.get("title") or "").strip().lower()
-    thumb = it.get("thumbnail")
-    return (title in {"", "land listing", "skip to navigation", "skip to content"}) or (not thumb)
+    # enrich if title is generic OR missing thumb
+    return is_bad_title(it.get("title")) or (not it.get("thumbnail"))
 
 
 def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
@@ -210,8 +223,8 @@ def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
 
     soup = BeautifulSoup(html, "html.parser")
 
-    def meta(prop: str, attr: str = "property") -> str:
-        tag = soup.find("meta", attrs={attr: prop})
+    def meta(tag_key: str, attr: str = "property") -> str:
+        tag = soup.find("meta", attrs={attr: tag_key})
         if tag and tag.get("content"):
             return tag["content"].strip()
         return ""
@@ -228,7 +241,7 @@ def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
 
     if title:
         title = " ".join(title.split()).strip()
-    if title and title.lower() in {"skip to navigation", "skip to content"}:
+    if is_bad_title(title):
         title = None
 
     return {"title": title or None, "thumbnail": thumb or None}
@@ -237,8 +250,7 @@ def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
 def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[str, Any]]:
     """
     Pull listing-ish objects out of LandSearch's __NEXT_DATA__.
-    We keep anything that looks like a property URL. We DO NOT filter by acres/price here
-    because you want “All found” in the dashboard.
+    Keep anything that looks like a property URL. Do NOT filter by criteria here.
     """
     items: List[Dict[str, Any]] = []
 
@@ -293,7 +305,7 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
         items.append(
             {
                 "source": "LandSearch",
-                "title": best_title(d),
+                "title": best_title(d, "LandSearch"),
                 "url": url,
                 "price": price,
                 "acres": acres,
@@ -361,7 +373,7 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
             items.append(
                 {
                     "source": source_name,
-                    "title": best_title(d),
+                    "title": best_title(d, source_name),
                     "url": url,
                     "price": price,
                     "acres": acres,
@@ -421,10 +433,13 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
         if img and img.get("src"):
             thumb = img.get("src")
 
+        raw_title = a.get_text(" ", strip=True)
+        title = raw_title if not is_bad_title(raw_title) else f"{source_name} listing"
+
         items.append(
             {
                 "source": source_name,
-                "title": a.get_text(" ", strip=True) or "Land listing",
+                "title": title,
                 "url": full,
                 "price": price,
                 "acres": acres,
@@ -464,7 +479,13 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
         )
 
     if not items:
-        items.extend(extract_from_html_fallback(url, html, "LandSearch" if "landsearch.com" in host else "LandWatch"))
+        items.extend(
+            extract_from_html_fallback(
+                url,
+                html,
+                "LandSearch" if "landsearch.com" in host else "LandWatch",
+            )
+        )
 
     # Final dedup
     seen = set()
@@ -480,7 +501,7 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
 def load_existing_found_map() -> Dict[str, str]:
     """
     Long-term: keep first-seen timestamps across runs.
-    We reuse data/listings.json if it exists, so you don't need another file.
+    Reuse data/listings.json if it exists.
     """
     try:
         if not os.path.exists(DATA_FILE):
@@ -534,19 +555,28 @@ def main():
             x["found_utc"] = run_utc
             found_map[u] = run_utc
 
+        # ✅ never allow "Land listing" into the saved file
+        if is_bad_title(x.get("title")):
+            x["title"] = f"{x.get('source','Listing')} listing"
+
         final.append(x)
 
-    # ✅ optional enrichment: fix "Land listing" titles / missing thumbnails (limited)
+    # ✅ optional enrichment: fix generic titles / missing thumbnails (limited)
     enriched = 0
     for it in final:
         if enriched >= DETAIL_ENRICH_LIMIT:
             break
         if should_enrich(it):
             info = enrich_from_detail_page(it["url"])
-            if info.get("title") and (it.get("title") in [None, "", "Land listing"]):
+
+            # Replace any bad title with real one if found
+            if info.get("title") and is_bad_title(it.get("title")):
                 it["title"] = info["title"]
+
+            # Fill missing thumbnail
             if (not it.get("thumbnail")) and info.get("thumbnail"):
                 it["thumbnail"] = info["thumbnail"]
+
             enriched += 1
 
     out = {
