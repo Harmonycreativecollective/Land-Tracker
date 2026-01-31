@@ -14,11 +14,10 @@ START_URLS = [
     "https://www.landwatch.com/virginia-land-for-sale/king-george/acres-11-50/available",
 ]
 
-MIN_ACRES = 10.0
+MIN_ACRES = 11.0
 MAX_ACRES = 50.0
 MAX_PRICE = 600_000
 
-# Enrich missing titles/thumbs by visiting a few detail pages (does NOT remove listings)
 DETAIL_ENRICH_LIMIT = 10
 # ===========================
 
@@ -35,6 +34,9 @@ session = requests.Session()
 session.headers.update(HEADERS)
 
 
+# ---------------------------
+# Helpers
+# ---------------------------
 def fetch_html(url: str) -> str:
     r = session.get(url, timeout=TIMEOUT)
     r.raise_for_status()
@@ -54,141 +56,10 @@ def walk(obj: Any):
                 stack.append(v)
 
 
-def parse_money(value: Any) -> Optional[int]:
-    """
-    Parses price-ish values; returns integer dollars or None.
-    NOTE: returning None will NOT remove the listing, it just avoids wrong price labels.
-    """
-    if value is None:
-        return None
-    if isinstance(value, (int, float)):
-        v = int(value)
-        return v if v >= 1000 else None
-
-    s = str(value).strip().lower()
-    if not s:
-        return None
-
-    if "contact" in s or "call" in s or "tbd" in s:
-        return None
-
-    s = re.sub(r"(from|starting at|starting|approx\.?|about)", "", s).strip()
-    s = s.replace(",", "")
-
-    m = re.search(r"(\d+(?:\.\d+)?)\s*([km])?\b", s)
-    if not m:
-        return None
-
-    num = float(m.group(1))
-    suffix = m.group(2)
-
-    if suffix == "k":
-        num *= 1000
-    elif suffix == "m":
-        num *= 1_000_000
-
-    v = int(num)
-    return v if v >= 1000 else None
-
-
-# --- FIX: LandSearch includes "15.1k drop" etc. We must avoid that and keep the real list price. ---
-EXCLUDE_PRICE_KEYS = {
-    "pricedrop", "price_drop", "drop", "reduction", "reduced", "change", "delta",
-    "diff", "difference", "saved", "savings", "discount", "cut"
-}
-
-
-def _key_is_drop_like(k: str) -> bool:
-    k2 = (k or "").lower().replace("-", "_")
-    return any(bad in k2 for bad in EXCLUDE_PRICE_KEYS)
-
-
-def best_price_from_dict(d: dict) -> Optional[int]:
-    """
-    Best-effort selection of the actual list price:
-      - gather candidates from keys containing price/amount (excluding drop-like keys)
-      - include offers.price when present
-      - pick the MAX candidate (list price is usually the largest)
-    """
-    candidates: List[int] = []
-
-    # direct keys
-    for k, v in d.items():
-        kl = (k or "").lower()
-        if _key_is_drop_like(kl):
-            continue
-        if "price" in kl or "amount" in kl or kl in {"listprice", "list_price"}:
-            pv = parse_money(v)
-            if pv is not None:
-                candidates.append(pv)
-
-    # nested offers
-    offers = d.get("offers")
-    if isinstance(offers, dict):
-        for k, v in offers.items():
-            kl = (k or "").lower()
-            if _key_is_drop_like(kl):
-                continue
-            if "price" in kl or "amount" in kl:
-                pv = parse_money(v)
-                if pv is not None:
-                    candidates.append(pv)
-
-    if not candidates:
-        return None
-
-    return max(candidates)
-
-
-def parse_acres(value: Any) -> Optional[float]:
-    if value is None:
-        return None
-    if isinstance(value, (int, float)):
-        return float(value)
-
-    if isinstance(value, dict):
-        for k in ["acres", "acreage", "lotSizeAcres", "sizeAcres", "landSize"]:
-            if k in value:
-                v = parse_acres(value.get(k))
-                if v is not None:
-                    return v
-
-        val = value.get("value") or value.get("amount") or value.get("number")
-        unit = (value.get("unit") or value.get("unitText") or value.get("unitCode") or "").lower()
-
-        try:
-            vnum = float(str(val).replace(",", "").strip())
-        except Exception:
-            return None
-
-        if "acre" in unit or "acr" in unit:
-            return vnum
-
-        if "sq" in unit or "ft" in unit:
-            return vnum / 43560.0
-
-        if vnum > 5000:
-            return vnum / 43560.0
-
-        return vnum
-
-    s = str(value).strip().lower().replace(",", "")
-    if not s:
-        return None
-
-    m = re.search(r"(\d+(?:\.\d+)?)", s)
-    if not m:
-        return None
-
-    num = float(m.group(1))
-
-    if "sq" in s and ("ft" in s or "feet" in s):
-        return num / 43560.0
-
-    if num > 5000:
-        return num / 43560.0
-
-    return num
+def normalize_url(base_url: str, u: str) -> str:
+    if not u:
+        return ""
+    return urljoin(base_url, u)
 
 
 def get_next_data_json(html: str) -> Optional[dict]:
@@ -215,19 +86,10 @@ def get_json_ld(html: str) -> List[dict]:
     return out
 
 
-def normalize_url(base_url: str, u: str) -> str:
-    if not u:
-        return ""
-    return urljoin(base_url, u)
-
-
-BAD_TITLE_SET = {
-    "",
-    "land listing",
-    "skip to navigation",
-    "skip to content",
-    "listing",
-}
+# ---------------------------
+# Title + thumbnail
+# ---------------------------
+BAD_TITLE_SET = {"", "land listing", "skip to navigation", "skip to content", "listing"}
 
 
 def is_bad_title(title: Optional[str]) -> bool:
@@ -260,14 +122,10 @@ def should_enrich(it: Dict[str, Any]) -> bool:
 
 
 def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
-    """
-    Fetch a listing page and extract a reliable title + thumbnail.
-    Uses meta og:title and og:image when available.
-    """
     try:
         html = fetch_html(url)
     except Exception:
-        return {"title": None, "thumbnail": None}
+        return {"title": None, "thumbnail": None, "status": None}
 
     soup = BeautifulSoup(html, "html.parser")
 
@@ -287,19 +145,236 @@ def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
 
     thumb = meta("og:image", "property") or meta("twitter:image", "name")
 
+    # crude status from page text if needed
+    page_text = soup.get_text(" ", strip=True).lower()
+    status = normalize_status(page_text)
+
     if title:
         title = " ".join(title.split()).strip()
     if is_bad_title(title):
         title = None
 
-    return {"title": title or None, "thumbnail": thumb or None}
+    return {"title": title or None, "thumbnail": thumb or None, "status": status or None}
 
 
+# ---------------------------
+# PRICE parsing (your fixed version)
+# ---------------------------
+def parse_money(value: Any) -> Optional[int]:
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        v = int(value)
+        return v if v >= 1000 else None
+
+    s = str(value).strip().lower()
+    if not s:
+        return None
+    if "contact" in s or "call" in s or "tbd" in s:
+        return None
+
+    s = re.sub(r"(from|starting at|starting|approx\.?|about)", "", s).strip()
+    s = s.replace(",", "")
+
+    m = re.search(r"(\d+(?:\.\d+)?)\s*([km])?\b", s)
+    if not m:
+        return None
+
+    num = float(m.group(1))
+    suffix = m.group(2)
+    if suffix == "k":
+        num *= 1000
+    elif suffix == "m":
+        num *= 1_000_000
+
+    v = int(num)
+    return v if v >= 1000 else None
+
+
+EXCLUDE_PRICE_KEYS = {
+    "pricedrop", "price_drop", "drop", "reduction", "reduced", "change", "delta",
+    "diff", "difference", "saved", "savings", "discount", "cut"
+}
+
+
+def _key_is_drop_like(k: str) -> bool:
+    k2 = (k or "").lower().replace("-", "_")
+    return any(bad in k2 for bad in EXCLUDE_PRICE_KEYS)
+
+
+def best_price_from_dict(d: dict) -> Optional[int]:
+    candidates: List[int] = []
+
+    for k, v in d.items():
+        kl = (k or "").lower()
+        if _key_is_drop_like(kl):
+            continue
+        if "price" in kl or "amount" in kl or kl in {"listprice", "list_price"}:
+            pv = parse_money(v)
+            if pv is not None:
+                candidates.append(pv)
+
+    offers = d.get("offers")
+    if isinstance(offers, dict):
+        for k, v in offers.items():
+            kl = (k or "").lower()
+            if _key_is_drop_like(kl):
+                continue
+            if "price" in kl or "amount" in kl:
+                pv = parse_money(v)
+                if pv is not None:
+                    candidates.append(pv)
+
+    if not candidates:
+        return None
+    return max(candidates)
+
+
+# ---------------------------
+# ACRES parsing
+# ---------------------------
+def parse_acres(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+
+    if isinstance(value, dict):
+        for k in ["acres", "acreage", "lotSizeAcres", "sizeAcres", "landSize"]:
+            if k in value:
+                v = parse_acres(value.get(k))
+                if v is not None:
+                    return v
+
+        val = value.get("value") or value.get("amount") or value.get("number")
+        unit = (value.get("unit") or value.get("unitText") or value.get("unitCode") or "").lower()
+
+        try:
+            vnum = float(str(val).replace(",", "").strip())
+        except Exception:
+            return None
+
+        if "acre" in unit or "acr" in unit:
+            return vnum
+        if "sq" in unit or "ft" in unit:
+            return vnum / 43560.0
+        if vnum > 5000:
+            return vnum / 43560.0
+        return vnum
+
+    s = str(value).strip().lower().replace(",", "")
+    if not s:
+        return None
+
+    m = re.search(r"(\d+(?:\.\d+)?)", s)
+    if not m:
+        return None
+
+    num = float(m.group(1))
+    if "sq" in s and ("ft" in s or "feet" in s):
+        return num / 43560.0
+    if num > 5000:
+        return num / 43560.0
+    return num
+
+
+# ---------------------------
+# ✅ STATUS parsing (THE IMPORTANT FIX)
+# ---------------------------
+STATUS_KEY_HINTS = [
+    "status",
+    "listingstatus",
+    "listing_status",
+    "availability",
+    "propertystatus",
+    "property_status",
+    "saleStatus",
+    "sale_status",
+    "mktStatus",
+    "mkt_status",
+    "marketStatus",
+    "market_status",
+    "mlsStatus",
+    "mls_status",
+]
+
+
+def normalize_status(raw: Any) -> str:
+    """
+    Returns one of:
+      available | under_contract | pending | sold | unknown
+    """
+    if raw is None:
+        return "unknown"
+
+    s = str(raw).strip().lower()
+
+    # strongest signals first
+    if "sold" in s or "closed" in s:
+        return "sold"
+    if "under contract" in s or "under_contract" in s:
+        return "under_contract"
+    if "pending" in s:
+        return "pending"
+
+    # "active" / "available" style
+    if "active" in s or "available" in s or "for sale" in s:
+        return "available"
+
+    return "unknown"
+
+
+def best_status_from_dict(d: dict) -> str:
+    """
+    Try to pull a status from common keys or text values.
+    """
+    # direct keys
+    for k, v in d.items():
+        kl = (k or "").lower()
+        if any(hint in kl for hint in STATUS_KEY_HINTS):
+            st = normalize_status(v)
+            if st != "unknown":
+                return st
+
+    # schema offers.availability
+    offers = d.get("offers")
+    if isinstance(offers, dict):
+        av = offers.get("availability") or offers.get("availabilityStarts") or offers.get("availabilityEnds")
+        st = normalize_status(av)
+        if st != "unknown":
+            return st
+
+    # sometimes buried in "label", "badge", "tags"
+    for k in ["label", "badge", "badges", "tags", "tag", "state", "phase"]:
+        if k in d:
+            st = normalize_status(d.get(k))
+            if st != "unknown":
+                return st
+
+    return "unknown"
+
+
+def status_from_html_text(html: str) -> str:
+    """
+    LAST RESORT: scan raw text for status words.
+    """
+    txt = BeautifulSoup(html, "html.parser").get_text(" ", strip=True).lower()
+    # make sure we check "under contract" before "active"
+    if "under contract" in txt:
+        return "under_contract"
+    if "pending" in txt:
+        return "pending"
+    if "sold" in txt:
+        return "sold"
+    if "active" in txt or "available" in txt:
+        return "available"
+    return "unknown"
+
+
+# ---------------------------
+# Extractors
+# ---------------------------
 def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[str, Any]]:
-    """
-    Pull listing-ish objects out of LandSearch's __NEXT_DATA__.
-    Keep anything that looks like a property URL. Do NOT filter by criteria here.
-    """
     items: List[Dict[str, Any]] = []
 
     for d in walk(next_data):
@@ -319,17 +394,14 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
         if not url:
             continue
 
-        # Keep only property detail pages (LandSearch)
         if "landsearch.com" in url:
             p = urlparse(url)
             if p.fragment:
                 continue
             parts = p.path.strip("/").split("/")
-            # expects /properties/<slug>/<id>
             if len(parts) < 3 or parts[0] != "properties" or not parts[-1].isdigit():
                 continue
 
-        # ✅ FIXED PRICE: pick the actual list price, not "15.1k drop"
         price = best_price_from_dict(d)
 
         acres = parse_acres(
@@ -345,6 +417,8 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
 
         thumb = try_thumbnail_from_dict(d)
 
+        status = best_status_from_dict(d)
+
         items.append(
             {
                 "source": "LandSearch",
@@ -353,10 +427,10 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
                 "price": price,
                 "acres": acres,
                 "thumbnail": thumb,
+                "status": status,
             }
         )
 
-    # Dedup by URL
     seen = set()
     out = []
     for it in items:
@@ -384,7 +458,6 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
 
             host = urlparse(base_url).netloc.lower()
 
-            # Keep only detail pages
             if "landsearch.com" in host:
                 p = urlparse(url)
                 if p.fragment:
@@ -397,7 +470,6 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
                 if "/property/" not in urlparse(url).path:
                     continue
 
-            # ✅ FIXED PRICE here too
             price = best_price_from_dict(d)
 
             acres = parse_acres(
@@ -410,6 +482,8 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
 
             thumb = try_thumbnail_from_dict(d)
 
+            status = best_status_from_dict(d)
+
             items.append(
                 {
                     "source": source_name,
@@ -418,10 +492,10 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
                     "price": price,
                     "acres": acres,
                     "thumbnail": thumb,
+                    "status": status,
                 }
             )
 
-    # Dedup
     seen = set()
     out = []
     for it in items:
@@ -462,8 +536,8 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
             card_text = (parent.get_text(" ", strip=True) or card_text)
             parent = parent.parent
 
-        # fallback is messy: keep existing behavior
         price = parse_money(card_text)
+
         acres = None
         m = re.search(r"(\d+(?:\.\d+)?)\s*acres?\b", card_text.lower())
         if m:
@@ -477,6 +551,8 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
         raw_title = a.get_text(" ", strip=True)
         title = raw_title if not is_bad_title(raw_title) else f"{source_name} listing"
 
+        status = normalize_status(card_text)
+
         items.append(
             {
                 "source": source_name,
@@ -485,10 +561,10 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
                 "price": price,
                 "acres": acres,
                 "thumbnail": thumb,
+                "status": status,
             }
         )
 
-    # Dedup
     seen = set()
     out = []
     for it in items:
@@ -528,7 +604,13 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
             )
         )
 
-    # Final dedup
+    # If anything still has unknown status, try a light-weight html scan (for LIST pages)
+    page_status_hint = status_from_html_text(html)
+    if page_status_hint != "unknown":
+        for it in items:
+            if (it.get("status") or "unknown") == "unknown":
+                it["status"] = page_status_hint
+
     seen = set()
     out = []
     for it in items:
@@ -540,10 +622,6 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
 
 
 def load_existing_found_map() -> Dict[str, str]:
-    """
-    Long-term: keep first-seen timestamps across runs.
-    Reuse data/listings.json if it exists.
-    """
     try:
         if not os.path.exists(DATA_FILE):
             return {}
@@ -565,9 +643,7 @@ def main():
 
     run_utc = datetime.now(timezone.utc).isoformat()
 
-    # ✅ persistent first-seen timestamps
     found_map = load_existing_found_map()
-
     all_items: List[Dict[str, Any]] = []
 
     for url in START_URLS:
@@ -580,7 +656,6 @@ def main():
         items = extract_listings(url, html)
         all_items.extend(items)
 
-    # Dedup across sources by URL
     seen = set()
     final: List[Dict[str, Any]] = []
     for x in all_items:
@@ -589,34 +664,38 @@ def main():
             continue
         seen.add(u)
 
-        # ✅ attach found_utc (first time ever seen)
+        # attach found_utc (first time ever seen)
         if u in found_map:
             x["found_utc"] = found_map[u]
         else:
             x["found_utc"] = run_utc
             found_map[u] = run_utc
 
-        # ✅ never allow "Land listing" into the saved file
+        # never allow "Land listing" into saved file
         if is_bad_title(x.get("title")):
             x["title"] = f"{x.get('source','Listing')} listing"
 
+        # normalize status
+        x["status"] = normalize_status(x.get("status"))
+
         final.append(x)
 
-    # ✅ optional enrichment: fix generic titles / missing thumbnails (limited)
+    # optional enrichment (title/thumb/status)
     enriched = 0
     for it in final:
         if enriched >= DETAIL_ENRICH_LIMIT:
             break
-        if should_enrich(it):
+        if should_enrich(it) or (it.get("status") in {None, "", "unknown"}):
             info = enrich_from_detail_page(it["url"])
 
-            # Replace any bad title with real one if found
             if info.get("title") and is_bad_title(it.get("title")):
                 it["title"] = info["title"]
 
-            # Fill missing thumbnail
             if (not it.get("thumbnail")) and info.get("thumbnail"):
                 it["thumbnail"] = info["thumbnail"]
+
+            if (it.get("status") in {None, "", "unknown"}) and info.get("status"):
+                it["status"] = normalize_status(info["status"])
 
             enriched += 1
 
