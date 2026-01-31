@@ -1,4 +1,5 @@
 import json
+import base64
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -15,25 +16,38 @@ st.set_page_config(
     layout="wide",
 )
 
-# ---------- Header (Dashboard style: logo left, title right) ----------
-col1, col2 = st.columns([1.2, 6], vertical_alignment="center")
+def img_to_data_uri(path: str) -> str:
+    with open(path, "rb") as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode("utf-8")
+    return f"data:image/png;base64,{b64}"
 
-with col1:
-    st.image("assets/kblogo.png", width=105)
+# ---------- Header (FORCED side-by-side on mobile) ----------
+logo_uri = img_to_data_uri("assets/kblogo.png")
 
-with col2:
-    st.markdown(
-        f"""
-        <div style="line-height:1.1; padding-top: 4px;">
-            <h2 style="margin:0; font-size: 2.05rem;">{TITLE}</h2>
+st.markdown(
+    f"""
+    <div style="
+        display:flex;
+        align-items:center;
+        gap:14px;
+        margin-top:6px;
+        margin-bottom:10px;
+    ">
+        <img src="{logo_uri}" style="width:120px; height:auto; display:block;" />
+        <div style="display:flex; flex-direction:column;">
+            <div style="font-size:1.75rem; font-weight:800; line-height:1.1; margin:0; padding:0;">
+                {TITLE}
+            </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 st.divider()
 
-# ---------- Caption (cleaner, dashboard-sized) ----------
+# ---------- Caption (clean, not huge) ----------
 st.markdown(
     f"""
     <p style="font-size:1.10rem; color:#6b7280; margin-top:-8px; margin-bottom:18px;">
