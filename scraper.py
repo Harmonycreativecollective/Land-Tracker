@@ -18,7 +18,6 @@ MIN_ACRES = 11.0
 MAX_ACRES = 50.0
 MAX_PRICE = 600_000
 
-# Enrich missing titles/thumbs/status by visiting a few detail pages (does NOT remove listings)
 DETAIL_ENRICH_LIMIT = 10
 # ===========================
 
@@ -34,13 +33,12 @@ DATA_FILE = "data/listings.json"
 session = requests.Session()
 session.headers.update(HEADERS)
 
-# ---------- Fetch ----------
+# ---------- Helpers ----------
 def fetch_html(url: str) -> str:
     r = session.get(url, timeout=TIMEOUT)
     r.raise_for_status()
     return r.text
 
-# ---------- Walk nested json ----------
 def walk(obj: Any):
     stack = [obj]
     while stack:
@@ -53,12 +51,35 @@ def walk(obj: Any):
             for v in cur:
                 stack.append(v)
 
-# ---------- Parsers ----------
+def normalize_url(base_url: str, u: str) -> str:
+    if not u:
+        return ""
+    return urljoin(base_url, u)
+
+BAD_TITLE_SET = {"", "land listing", "skip to navigation", "skip to content", "listing"}
+
+def is_bad_title(title: Optional[str]) -> bool:
+    return (title or "").strip().lower() in BAD_TITLE_SET
+
+def best_title(d: dict, source_name: str) -> str:
+    t = (d.get("title") or d.get("name") or d.get("headline") or "").strip()
+    if is_bad_title(t):
+        return f"{source_name} listing"
+    return t
+
+def try_thumbnail_from_dict(d: dict) -> Optional[str]:
+    for k in ["image", "thumbnail", "thumbnailUrl", "photo", "photoUrl", "imageUrl"]:
+        if d.get(k):
+            v = d.get(k)
+            if isinstance(v, str):
+                return v
+            if isinstance(v, list) and v and isinstance(v[0], str):
+                return v[0]
+            if isinstance(v, dict) and v.get("url"):
+                return v.get("url")
+    return None
+
 def parse_money(value: Any) -> Optional[int]:
-    """
-    Parses price-ish values; returns integer dollars or None.
-    NOTE: returning None will NOT remove the listing.
-    """
     if value is None:
         return None
     if isinstance(value, (int, float)):
@@ -103,7 +124,6 @@ def parse_acres(value: Any) -> Optional[float]:
 
         val = value.get("value") or value.get("amount") or value.get("number")
         unit = (value.get("unit") or value.get("unitText") or value.get("unitCode") or "").lower()
-
         try:
             vnum = float(str(val).replace(",", "").strip())
         except Exception:
@@ -132,7 +152,42 @@ def parse_acres(value: Any) -> Optional[float]:
         return num / 43560.0
     return num
 
-# ---------- JSON extraction helpers ----------
+# ---------- Status inference ----------
+def normalize_status(raw: str) -> str:
+    t = (raw or "").strip().lower()
+    if "under contract" in t or t in {"under_contract", "undercontract"}:
+        return "under_contract"
+    if "pending" in t:
+        return "pending"
+    if "sold" in t:
+        return "sold"
+    if "available" in t or "active" in t:
+        return "available"
+    return "unknown"
+
+def infer_status_from_text(text: str) -> str:
+    t = (text or "").lower()
+    if "under contract" in t:
+        return "under_contract"
+    if "pending" in t:
+        return "pending"
+    if "sold" in t:
+        return "sold"
+    if "available" in t or "active" in t:
+        return "available"
+    return "unknown"
+
+def compute_top_match(acres: Optional[float], price: Optional[int], status: str) -> bool:
+    if normalize_status(status) in {"under_contract", "pending", "sold"}:
+        return False
+    if acres is None or price is None:
+        return False
+    try:
+        return (MIN_ACRES <= float(acres) <= MAX_ACRES) and (int(price) <= int(MAX_PRICE))
+    except Exception:
+        return False
+
+# ---------- Page extraction helpers ----------
 def get_next_data_json(html: str) -> Optional[dict]:
     soup = BeautifulSoup(html, "html.parser")
     tag = soup.find("script", id="__NEXT_DATA__", type="application/json")
@@ -155,96 +210,15 @@ def get_json_ld(html: str) -> List[dict]:
             continue
     return out
 
-def normalize_url(base_url: str, u: str) -> str:
-    if not u:
-        return ""
-    return urljoin(base_url, u)
-
-# ---------- Title + thumbnail ----------
-BAD_TITLE_SET = {"", "land listing", "skip to navigation", "skip to content", "listing"}
-
-def is_bad_title(title: Optional[str]) -> bool:
-    t = (title or "").strip().lower()
-    return t in BAD_TITLE_SET
-
-def best_title(d: dict, source_name: str) -> str:
-    t = (d.get("title") or d.get("name") or d.get("headline") or "").strip()
-    if is_bad_title(t):
-        return f"{source_name} listing"
-    return t
-
-def try_thumbnail_from_dict(d: dict) -> Optional[str]:
-    for k in ["image", "thumbnail", "thumbnailUrl", "photo", "photoUrl", "imageUrl"]:
-        if d.get(k):
-            v = d.get(k)
-            if isinstance(v, str):
-                return v
-            if isinstance(v, list) and v and isinstance(v[0], str):
-                return v[0]
-            if isinstance(v, dict) and v.get("url"):
-                return v.get("url")
-    return None
-
-# ---------- Status detection ----------
-def detect_status(text: str) -> str:
-    """
-    Return one of:
-      available, under_contract, pending, sold, unknown
-    """
-    if not text:
-        return "unknown"
-    t = text.lower()
-
-    # order matters (sold should win)
-    if "sold" in t:
-        return "sold"
-    if "under contract" in t or "contingent" in t:
-        return "under_contract"
-    if "pending" in t:
-        return "pending"
-
-    # if none of the above, assume available (most list pages)
-    return "available"
-
-def merge_status(existing: str, new_status: str) -> str:
-    """
-    Prefer stronger signals.
-    """
-    rank = {"unknown": 0, "available": 1, "pending": 2, "under_contract": 3, "sold": 4}
-    e = existing if existing in rank else "unknown"
-    n = new_status if new_status in rank else "unknown"
-    return n if rank[n] > rank[e] else e
-
-# ---------- Criteria check for ever_top_match ----------
-def meets_acres(acres: Optional[float]) -> bool:
-    if acres is None:
-        return False
-    try:
-        return MIN_ACRES <= float(acres) <= MAX_ACRES
-    except Exception:
-        return False
-
-def meets_price(price: Optional[int]) -> bool:
-    if price is None:
-        return False
-    try:
-        return int(price) <= int(MAX_PRICE)
-    except Exception:
-        return False
-
-def is_current_top_match(price: Optional[int], acres: Optional[float], status: str) -> bool:
-    if status in {"under_contract", "pending", "sold"}:
-        return False
-    return meets_acres(acres) and meets_price(price)
-
-# ---------- Enrichment ----------
 def should_enrich(it: Dict[str, Any]) -> bool:
-    return is_bad_title(it.get("title")) or (not it.get("thumbnail")) or (it.get("status") in [None, "unknown"])
+    return is_bad_title(it.get("title")) or (not it.get("thumbnail")) or (it.get("status") in {None, "", "unknown"})
 
 def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
     """
-    Fetch a listing page and extract title + thumbnail + status.
-    Uses og:title / og:image when available.
+    Fetch a listing page and extract:
+    - title
+    - thumbnail
+    - status (from visible page text)
     """
     try:
         html = fetch_html(url)
@@ -259,8 +233,7 @@ def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
             return tag["content"].strip()
         return ""
 
-    og_title = meta("og:title", "property") or meta("twitter:title", "name")
-    title = og_title
+    title = meta("og:title", "property") or meta("twitter:title", "name")
     if not title:
         h1 = soup.find("h1")
         if h1:
@@ -270,11 +243,9 @@ def enrich_from_detail_page(url: str) -> Dict[str, Optional[str]]:
 
     thumb = meta("og:image", "property") or meta("twitter:image", "name")
 
-    # status from title + visible page text light scan
-    status = detect_status(og_title or title or "")
-    if status == "unknown":
-        page_text = soup.get_text(" ", strip=True)[:5000].lower()
-        status = detect_status(page_text)
+    # status: scan text
+    page_text = soup.get_text(" ", strip=True)
+    status = infer_status_from_text(page_text)
 
     if title:
         title = " ".join(title.split()).strip()
@@ -304,7 +275,6 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
         if not url:
             continue
 
-        # Keep only property detail pages (LandSearch)
         if "landsearch.com" in url:
             p = urlparse(url)
             if p.fragment:
@@ -334,13 +304,14 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
 
         thumb = try_thumbnail_from_dict(d)
 
-        # status hint from any text fields
-        status = "unknown"
-        for k in ["status", "availability", "headline", "title", "name"]:
-            if d.get(k):
-                status = merge_status(status, detect_status(str(d.get(k))))
-        if status == "unknown":
-            status = "available"
+        raw_status = (
+            d.get("status")
+            or d.get("listingStatus")
+            or d.get("availability")
+            or d.get("state")
+            or ""
+        )
+        status = normalize_status(str(raw_status))
 
         items.append(
             {
@@ -409,13 +380,12 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
 
             thumb = try_thumbnail_from_dict(d)
 
-            status = "unknown"
-            # JSON-LD sometimes includes availability/status in offers
-            if isinstance(d.get("offers"), dict):
-                status = merge_status(status, detect_status(str(d["offers"].get("availability", ""))))
-            status = merge_status(status, detect_status(best_title(d, source_name)))
-            if status == "unknown":
-                status = "available"
+            # Try status from JSON-LD (offers.availability sometimes shows InStock/SoldOut)
+            raw_status = d.get("listingStatus") or d.get("status") or ""
+            offers = d.get("offers")
+            if isinstance(offers, dict) and offers.get("availability"):
+                raw_status = str(offers.get("availability"))
+            status = normalize_status(str(raw_status))
 
             items.append(
                 {
@@ -472,22 +442,17 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
         acres = None
         m = re.search(r"(\d+(?:\.\d+)?)\s*acres?\b", card_text.lower())
         if m:
-            try:
-                acres = float(m.group(1))
-            except Exception:
-                acres = None
+            acres = float(m.group(1))
 
         thumb = None
         img = a.find("img")
         if img and img.get("src"):
             thumb = img.get("src")
 
-        status = detect_status(card_text)
-        if status == "unknown":
-            status = "available"
-
         raw_title = a.get_text(" ", strip=True)
         title = raw_title if not is_bad_title(raw_title) else f"{source_name} listing"
+
+        status = infer_status_from_text(card_text)
 
         items.append(
             {
@@ -512,6 +477,7 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
 
 def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
     host = urlparse(url).netloc.lower()
+
     next_data = get_next_data_json(html)
     json_ld_blocks = get_json_ld(html)
 
@@ -547,18 +513,27 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
         out.append(it)
     return out
 
-# ---------- Persist prior run fields ----------
-def load_existing_by_url() -> Dict[str, Dict[str, Any]]:
+# ---------- Persistence ----------
+def load_existing_maps() -> Dict[str, Dict[str, Any]]:
+    """
+    Preserve found_utc + ever_top_match across runs.
+    Returns: { url: {"found_utc": "...", "ever_top_match": bool} }
+    """
     try:
         if not os.path.exists(DATA_FILE):
             return {}
         with open(DATA_FILE, "r", encoding="utf-8") as f:
             old = json.load(f)
-        out = {}
+
+        out: Dict[str, Dict[str, Any]] = {}
         for it in old.get("items", []) or []:
-            u = it.get("url")
-            if u:
-                out[u] = it
+            url = it.get("url")
+            if not url:
+                continue
+            out[url] = {
+                "found_utc": it.get("found_utc"),
+                "ever_top_match": bool(it.get("ever_top_match", False)),
+            }
         return out
     except Exception:
         return {}
@@ -568,8 +543,7 @@ def main():
     os.makedirs("data", exist_ok=True)
     run_utc = datetime.now(timezone.utc).isoformat()
 
-    old_by_url = load_existing_by_url()
-
+    old_map = load_existing_maps()
     all_items: List[Dict[str, Any]] = []
 
     for url in START_URLS:
@@ -579,7 +553,8 @@ def main():
             print(f"Failed to fetch {url}: {e}")
             continue
 
-        all_items.extend(extract_listings(url, html))
+        items = extract_listings(url, html)
+        all_items.extend(items)
 
     # Dedup across sources by URL
     seen = set()
@@ -590,43 +565,24 @@ def main():
             continue
         seen.add(u)
 
-        old = old_by_url.get(u, {})
+        prev = old_map.get(u, {})
+        x["found_utc"] = prev.get("found_utc") or run_utc
 
-        # Persist first-seen timestamp
-        if old.get("found_utc"):
-            x["found_utc"] = old["found_utc"]
-        else:
-            x["found_utc"] = run_utc
-
-        # Always update last-seen
-        x["last_seen_utc"] = run_utc
-
-        # Preserve ever_top_match unless we newly qualify
-        prev_ever = bool(old.get("ever_top_match", False))
-        status = (x.get("status") or old.get("status") or "unknown").lower()
-        x["status"] = status if status else "unknown"
-
-        # If we have better title/thumb from old, keep it
-        if is_bad_title(x.get("title")) and old.get("title") and not is_bad_title(old.get("title")):
-            x["title"] = old["title"]
-        if not x.get("thumbnail") and old.get("thumbnail"):
-            x["thumbnail"] = old["thumbnail"]
-
-        # If old status was stronger (sold/under_contract), keep strongest
-        if old.get("status"):
-            x["status"] = merge_status(x["status"], str(old.get("status")).lower())
-
-        # Compute current top match and update ever_top_match
-        current_top = is_current_top_match(x.get("price"), x.get("acres"), x["status"])
-        x["ever_top_match"] = prev_ever or current_top
-
-        # Ensure title not generic
+        # normalize title
         if is_bad_title(x.get("title")):
             x["title"] = f"{x.get('source','Listing')} listing"
 
+        # normalize status (may be unknown at this point)
+        x["status"] = normalize_status(x.get("status") or "unknown")
+
+        # update ever_top_match
+        prev_ever = bool(prev.get("ever_top_match", False))
+        top_now = compute_top_match(x.get("acres"), x.get("price"), x.get("status"))
+        x["ever_top_match"] = prev_ever or top_now
+
         final.append(x)
 
-    # Optional enrichment: fix bad titles / missing thumbs / unknown status (limited)
+    # Optional enrichment (fix title/thumb/status)
     enriched = 0
     for it in final:
         if enriched >= DETAIL_ENRICH_LIMIT:
@@ -640,12 +596,12 @@ def main():
             if (not it.get("thumbnail")) and info.get("thumbnail"):
                 it["thumbnail"] = info["thumbnail"]
 
-            if info.get("status"):
-                it["status"] = merge_status(it.get("status", "unknown"), info["status"])
+            if (it.get("status") in {None, "", "unknown"}) and info.get("status"):
+                it["status"] = normalize_status(info["status"])
 
-            # recompute current top -> update ever
-            current_top = is_current_top_match(it.get("price"), it.get("acres"), it.get("status", "unknown"))
-            it["ever_top_match"] = bool(it.get("ever_top_match")) or current_top
+            # after enrichment, re-evaluate ever_top_match (in case now we have price/acres already, etc)
+            top_now = compute_top_match(it.get("acres"), it.get("price"), it.get("status"))
+            it["ever_top_match"] = bool(it.get("ever_top_match", False)) or top_now
 
             enriched += 1
 
