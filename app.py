@@ -9,6 +9,7 @@ import streamlit as st
 # ---------- Paths ----------
 DATA_PATH = Path("data/listings.json")
 LOGO_PATH = Path("assets/kblogo.png")
+PREVIEW_PATH = Path("assets/previewkb.png")  # ✅ placeholder image
 
 # ---------- Page config ----------
 st.set_page_config(
@@ -352,16 +353,21 @@ def listing_card(it: Dict[str, Any]):
         if thumb:
             st.image(thumb, use_container_width=True)
         else:
-            st.markdown(
-                """
-                <div style="width:100%; height:220px; background:#f2f2f2; border-radius:16px;
-                            display:flex; align-items:center; justify-content:center; color:#777;
-                            font-weight:600;">
-                    No preview available
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            # ✅ Use your branded placeholder if it exists
+            if PREVIEW_PATH.exists():
+                st.image(str(PREVIEW_PATH), use_container_width=True)
+            else:
+                # Fallback to the old neutral block if placeholder is missing
+                st.markdown(
+                    """
+                    <div style="width:100%; height:220px; background:#f2f2f2; border-radius:16px;
+                                display:flex; align-items:center; justify-content:center; color:#777;
+                                font-weight:600;">
+                        Preview not available
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
         st.subheader(title)
         st.caption(f"{' • '.join(badges)} • {source}")
