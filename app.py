@@ -1,92 +1,50 @@
 import base64
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 import streamlit as st
+import streamlit.components.v1 as components
 
+# ---------------- Paths ----------------
 DATA_PATH = Path("data/listings.json")
 LOGO_PATH = Path("assets/kblogo.png")
 
+# ---------------- Branding ----------------
 TITLE = "KB’s Land Tracker"
 CAPTION = "What’s meant for you is already in motion."
 
-
-# ---------------- Page config ----------------
 st.set_page_config(
     page_title=TITLE,
-    page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🗺️",
+    page_icon="assets/kblogo.png",
     layout="wide",
 )
 
-
-# ---------------- Data loading ----------------
+# ---------------- Helpers ----------------
 def load_data():
     if not DATA_PATH.exists():
         return {"items": [], "criteria": {}, "last_updated_utc": None}
     with open(DATA_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
-
-data = load_data()
-items = data.get("items", [])
-last_updated = data.get("last_updated_utc")
-criteria = data.get("criteria", {})
-
-
-# ---------------- Helpers ----------------
-def safe_title(it: dict) -> str:
-    t = (it.get("title") or "").strip()
-    if t and t.lower() != "land listing":
-        return t
-    src = (it.get("source") or "Listing").strip()
-    return f"{src} listing"
-
-
-def parse_price(it: dict):
-    p = it.get("price")
+def load_logo_base64(path: Path):
     try:
-        return int(p) if p is not None else None
+        if not path.exists():
+            return None
+        return base64.b64encode(path.read_bytes()).decode("utf-8")
     except Exception:
         return None
 
-
-def parse_acres(it: dict):
-    a = it.get("acres")
-    try:
-        return float(a) if a is not None else None
-    except Exception:
+def pretty_last_updated(last_updated):
+    if not last_updated:
         return None
-
-
-def is_top_match(it: dict, min_acres: float, max_acres: float, max_price: int) -> bool:
-    p = parse_price(it)
-    a = parse_acres(it)
-    if p is None or a is None:
-        return False
-    return (min_acres <= a <= max_acres) and (p <= max_price)
-
-
-def is_new(it: dict, hours: int = 48) -> bool:
-    """
-    NEW is best-effort:
-    - If scraper later adds found_utc/first_seen_utc, we use it.
-    - If not present, we treat everything as NEW for now (so you still get the badge).
-    """
-    ts = it.get("found_utc") or it.get("first_seen_utc")
-    if not ts:
-        return True  # no timestamp available yet -> treat as new
     try:
-        dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        age_hours = (datetime.now(timezone.utc) - dt).total_seconds() / 3600
-        return age_hours <= hours
+        dt = datetime.fromisoformat(last_updated.replace("Z", "+00:00"))
+        return dt.strftime("%b %d, %Y • %I:%M %p UTC")
     except Exception:
-        return True
+        return str(last_updated)
 
-
-def searchable_text(it: dict) -> str:
+def searchable_text(it):
     return " ".join(
         [
             str(it.get("title", "")),
@@ -95,38 +53,34 @@ def searchable_text(it: dict) -> str:
         ]
     ).lower()
 
+def parse_dt(it):
+    # Future-friendly if you add found_utc later
+    return it.get("found_utc") or ""
 
-def sort_key_newest(it: dict):
-    # If timestamps exist later, this will truly sort by newest.
-    # For now: stable ordering + keeps it from breaking.
-    return it.get("found_utc") or it.get("first_seen_utc") or ""
+# ---------------- Load ----------------
+data = load_data()
+items = data.get("items", [])
+criteria = data.get("criteria", {})
+last_updated = data.get("last_updated_utc")
+last_updated_pretty = pretty_last_updated(last_updated)
 
-
-def load_logo_base64(path: Path) -> str:
-    if not path.exists():
-        return ""
-    return base64.b64encode(path.read_bytes()).decode("utf-8")
-
-
-# ---------------- Header (HTML) ----------------
+# ---------------- Header (HTML, mobile-safe) ----------------
 logo_b64 = load_logo_base64(LOGO_PATH)
 
-# Auto-scale header: logo scales with viewport, title wraps cleanly on mobile
 header_html = f"""
 <div style="
     display:flex;
     align-items:center;
     gap:clamp(12px, 2vw, 22px);
-    margin-top: 6px;
-    margin-bottom: 8px;
+    margin: 6px 0 6px 0;
 ">
   <div style="flex:0 0 auto;">
-    {"<img src='data:image/png;base64," + logo_b64 + "' style='width:clamp(70px, 14vw, 120px); height:auto; display:block;' />" if logo_b64 else ""}
+    {"<img src='data:image/png;base64," + logo_b64 + "' style='width:clamp(95px, 17vw, 145px); height:auto; display:block;' />" if logo_b64 else ""}
   </div>
 
   <div style="flex:1 1 auto; min-width:0;">
     <div style="
-        font-size:clamp(2.0rem, 5.6vw, 3.2rem);
+        font-size:clamp(2.15rem, 6vw, 3.1rem);
         font-weight:900;
         line-height:1.05;
         color:#0f172a;
@@ -136,8 +90,8 @@ header_html = f"""
     ">{TITLE}</div>
 
     <div style="
-        font-size:clamp(1.05rem, 2.8vw, 1.35rem);
-        color:rgba(49, 51, 63, 0.75);
+        font-size:clamp(1.1rem, 3vw, 1.35rem);
+        color:rgba(49, 51, 63, 0.72);
         margin-top:10px;
         line-height:1.35;
     ">{CAPTION}</div>
@@ -145,35 +99,37 @@ header_html = f"""
 </div>
 """
 
-st.markdown(header_html, unsafe_allow_html=True)
+components.html(header_html, height=175)
 
+# ✅ Last updated OUTSIDE
+if last_updated_pretty:
+    st.caption(f"Last updated: {last_updated_pretty}")
 
-# ---------------- Last updated (OUTSIDE dropdowns) ----------------
-if last_updated:
-    try:
-        dt = datetime.fromisoformat(str(last_updated).replace("Z", "+00:00"))
-        st.caption(f"Last updated: {dt.strftime('%b %d, %Y • %I:%M %p UTC')}")
-    except Exception:
-        st.caption(f"Last updated: {last_updated}")
+st.write("")  # spacer
 
-st.write("")  # small spacer
-
-
-# ✅ Search outside filters (top of page)
+# ---------------- Search (OUTSIDE filters) ----------------
 search_query = st.text_input(
     "Search (title / location / source)",
     value="",
     placeholder="Try: king george, port royal, landsearch, 20 acres…",
 )
 
+# ---------------- Filter UI (as dropdowns) ----------------
+# Defaults (your tracker criteria)
+default_max_price = int(criteria.get("max_price", 600000))
+default_min_acres = float(criteria.get("min_acres", 11.0))
+default_max_acres = float(criteria.get("max_acres", 50.0))
 
-# ---------------- Default criteria values ----------------
-default_min_acres = float(criteria.get("min_acres", 11.0) or 11.0)
-default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
-default_max_price = int(criteria.get("max_price", 600000) or 600000)
+# We want top matches ON by default
+default_top_matches_only = True
 
+# --- Apply search first ---
+filtered = items[:]
+if search_query.strip():
+    q = search_query.strip().lower()
+    filtered = [it for it in filtered if q in searchable_text(it)]
 
-# ---------------- Filters + Details dropdowns ----------------
+# ---------------- Filter + details expanders ----------------
 with st.expander("Filters", expanded=False):
     max_price = st.number_input(
         "Max price (Top match)",
@@ -187,6 +143,7 @@ with st.expander("Filters", expanded=False):
         min_value=0.0,
         value=default_min_acres,
         step=1.0,
+        format="%.2f",
     )
 
     max_acres = st.number_input(
@@ -194,74 +151,71 @@ with st.expander("Filters", expanded=False):
         min_value=0.0,
         value=default_max_acres,
         step=1.0,
+        format="%.2f",
     )
 
-    # Defaults
-    show_top_only = st.toggle("Top matches only", value=True)
+    top_matches_only = st.toggle("Top matches only", value=default_top_matches_only)
     new_only = st.toggle("New only", value=False)
     newest_first = st.toggle("Newest first", value=True)
 
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
-# Compute metrics BEFORE Details so it always matches filters/criteria
-top_count = sum(1 for it in items if is_top_match(it, min_acres, max_acres, max_price))
-new_count = sum(1 for it in items if is_new(it, hours=48))
+# ---------------- Match logic ----------------
+def is_top_match(it):
+    price = it.get("price")
+    acres = it.get("acres")
+    if price is None or acres is None:
+        return False
+    try:
+        return (float(min_acres) <= float(acres) <= float(max_acres)) and (int(price) <= int(max_price))
+    except Exception:
+        return False
 
-with st.expander("Details", expanded=False):
-    st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
+# New logic (simple version for now)
+# If you later add found_utc, this becomes perfect. For now treat all scraped items as "new".
+def is_new(it):
+    return True
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("All found", f"{len(items)}")
-    c2.metric("Top matches", f"{top_count}")
-    c3.metric("New", f"{new_count}")
+# Apply top match / new filters
+if top_matches_only:
+    filtered = [it for it in filtered if is_top_match(it)]
 
-
-# ---------------- Apply filters ----------------
-filtered = items[:]
-
-# Search first
-if search_query.strip():
-    q = search_query.strip().lower()
-    filtered = [it for it in filtered if q in searchable_text(it)]
-
-# New only
 if new_only:
-    filtered = [it for it in filtered if is_new(it, hours=48)]
+    filtered = [it for it in filtered if is_new(it)]
 
-# Top only
-if show_top_only:
-    filtered = [it for it in filtered if is_top_match(it, min_acres, max_acres, max_price)]
-
-# Sort newest
+# Sorting
 if newest_first:
-    filtered = sorted(filtered, key=sort_key_newest, reverse=True)
+    filtered = sorted(filtered, key=parse_dt, reverse=True)
 
 # Limit
 filtered = filtered[:show_n]
 
+# ---------------- Details expander ----------------
+all_found_count = len(items)
+top_match_count = len([it for it in items if is_top_match(it)])
+new_count = len([it for it in items if is_new(it)])
+
+with st.expander("Details", expanded=False):
+    st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("All found", f"{all_found_count}")
+    col2.metric("Top matches", f"{top_match_count}")
+    col3.metric("New", f"{new_count}")
+
 st.divider()
 
-
-# ---------------- Listing cards ----------------
-def listing_card(it: dict):
-    title = safe_title(it)
+# ---------------- Listing Cards ----------------
+def listing_card(it):
+    title = it.get("title") or f"{it.get('source','Listing')} listing"
     url = it.get("url") or ""
     source = it.get("source") or ""
-    price = parse_price(it)
-    acres = parse_acres(it)
+    price = it.get("price")
+    acres = it.get("acres")
     thumb = it.get("thumbnail")
 
-    top = is_top_match(it, min_acres, max_acres, max_price)
-    new_flag = is_new(it, hours=48)
-
-    # Badge line
-    badges = []
-    if top:
-        badges.append("⭐ Top match")
-    if new_flag:
-        badges.append("🆕 NEW")
-    if not top:
-        badges.append("FOUND")
+    top_match = is_top_match(it)
+    new_badge = is_new(it)
 
     with st.container(border=True):
         if thumb:
@@ -279,23 +233,31 @@ def listing_card(it: dict):
             )
 
         st.subheader(title)
-        st.caption(" • ".join([b for b in badges if b]) + (f" • {source}" if source else ""))
+
+        # Badges line
+        badges = []
+        if top_match:
+            badges.append("⭐ Top match")
+        if new_badge:
+            badges.append("🆕 NEW")
+        badge_text = " • ".join(badges) if badges else "FOUND"
+
+        st.caption(f"{badge_text} • {source}")
 
         if price is None:
             st.write("**Price:** —")
         else:
-            st.write(f"**Price:** ${price:,}")
+            st.write(f"**Price:** ${int(price):,}")
 
         if acres is None:
             st.write("**Acres:** —")
         else:
-            st.write(f"**Acres:** {acres:g}")
+            st.write(f"**Acres:** {float(acres):g}")
 
         if url:
             st.link_button("Open listing ↗", url, use_container_width=True)
 
-
-# 2-column grid (works fine on mobile too)
+# Grid
 cols = st.columns(2)
 for idx, it in enumerate(filtered):
     with cols[idx % 2]:
