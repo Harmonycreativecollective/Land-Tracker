@@ -11,11 +11,14 @@ LOGO_PATH = Path("assets/kblogo.png")
 TITLE = "KB’s Land Tracker"
 CAPTION = "What’s meant for you is already in motion."
 
+
+# ---------- Page config ----------
 st.set_page_config(
     page_title=TITLE,
     page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🗺️",
     layout="wide",
 )
+
 
 # ---------- Load data ----------
 def load_data():
@@ -24,8 +27,9 @@ def load_data():
     with open(DATA_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
 data = load_data()
-items = data.get("items", [])
+items = data.get("items", []) or []
 criteria = data.get("criteria", {}) or {}
 last_updated = data.get("last_updated_utc")
 
@@ -48,7 +52,7 @@ def format_last_updated(ts: str) -> str:
 
 
 def parse_dt(it):
-    # Found date from scraper (ISO string)
+    # works once scraper writes found_utc
     return it.get("found_utc") or ""
 
 
@@ -63,7 +67,6 @@ def searchable_text(it):
     ).lower()
 
 
-# Top match logic (uses current filter values; criteria are just for display)
 def is_top_match(it, min_acres, max_acres, max_price):
     price = it.get("price")
     acres = it.get("acres")
@@ -76,7 +79,6 @@ def is_top_match(it, min_acres, max_acres, max_price):
 
 
 def is_new(it, new_days=7):
-    """NEW = first seen within last N days based on found_utc."""
     ts = it.get("found_utc")
     if not ts:
         return False
@@ -88,16 +90,14 @@ def is_new(it, new_days=7):
         return False
 
 
-# ---------- Header (FIXED: wrap + autoscale, no clipping) ----------
+# ---------- Header (rendered properly) ----------
 logo_b64 = b64_image(LOGO_PATH)
 
+# small global css for spacing + prevent weird clipping
 st.markdown(
     """
     <style>
-      /* Give the main container a tiny bit more breathing room on mobile */
-      @media (max-width: 600px) {
-        .block-container { padding-top: 1.2rem; }
-      }
+      .block-container { padding-top: 1.2rem; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -107,40 +107,39 @@ header_html = f"""
 <div style="
   display:flex;
   align-items:center;
-  gap:18px;
-  margin-top:6px;
-  margin-bottom:6px;
+  gap:16px;
+  margin: 0.25rem 0 0.25rem 0;
 ">
   <div style="
     flex: 0 0 auto;
-    width: clamp(88px, 18vw, 130px);
+    width: clamp(96px, 22vw, 140px);
   ">
     {"<img src='data:image/png;base64," + logo_b64 + "' style='width:100%; height:auto; display:block;' />" if logo_b64 else ""}
   </div>
 
   <div style="
     flex: 1 1 auto;
-    min-width: 0;            /* IMPORTANT: allows text to wrap instead of overflow */
+    min-width: 0;
   ">
     <div style="
-      font-size: clamp(2.0rem, 6.5vw, 3.2rem);
       font-weight: 900;
       line-height: 1.05;
-      margin: 0;
       color: #0f172a;
-      white-space: normal;   /* allow wrap */
+      font-size: clamp(2.1rem, 8vw, 3.2rem);
+      white-space: normal;
       overflow-wrap: anywhere;
       word-break: break-word;
+      margin: 0;
     ">
       {TITLE}
     </div>
 
     <div style="
-      font-size: clamp(1.05rem, 3.8vw, 1.35rem);
-      color: rgba(51, 51, 51, 0.72);
       margin-top: 10px;
       line-height: 1.35;
-      white-space: normal;   /* allow wrap */
+      color: rgba(51, 51, 51, 0.72);
+      font-size: clamp(1.05rem, 4.5vw, 1.35rem);
+      white-space: normal;
       overflow-wrap: anywhere;
       word-break: break-word;
     ">
@@ -149,16 +148,18 @@ header_html = f"""
   </div>
 </div>
 """
+
+# ✅ THIS is the render line (DO NOT change to st.write)
 st.markdown(header_html, unsafe_allow_html=True)
 
-# Last updated OUTSIDE details (as requested)
+# ✅ Last updated OUTSIDE Filters/Details
 if last_updated:
     st.caption(f"Last updated: {format_last_updated(last_updated)}")
 
-st.write("")  # a little spacing
+st.write("")
 
 
-# ✅ Search (top-of-page)
+# ---------- Search (top of page) ----------
 search_query = st.text_input(
     "Search (title / location / source)",
     value="",
@@ -166,12 +167,13 @@ search_query = st.text_input(
 )
 
 
-# ---------- Filters + Details as dropdowns ----------
-# Defaults (prefer JSON criteria when present)
+# ---------- Defaults (prefer JSON criteria if present) ----------
 default_min = float(criteria.get("min_acres", 11.0) or 11.0)
 default_max = float(criteria.get("max_acres", 50.0) or 50.0)
 default_price = int(criteria.get("max_price", 600000) or 600000)
 
+
+# ---------- Filters + Details dropdowns ----------
 with st.expander("Filters", expanded=False):
     max_price = st.number_input("Max price (Top match)", min_value=0, value=default_price, step=10000)
     min_acres = st.number_input("Min acres", min_value=0.0, value=default_min, step=1.0)
@@ -180,54 +182,55 @@ with st.expander("Filters", expanded=False):
     show_top_matches_only = st.toggle("Top matches only", value=True)  # ON by default
     show_new_only = st.toggle("New only", value=False)
     sort_newest = st.toggle("Newest first", value=True)
-
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
+
+
+# counts (computed once, used in Details + pills)
+all_found = len(items)
+top_match_count = sum(1 for it in items if is_top_match(it, min_acres, max_acres, max_price))
+new_count = sum(1 for it in items if is_new(it, new_days=7))
 
 with st.expander("Details", expanded=False):
     st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
+
+    # ✅ Metrics INSIDE details dropdown
+    st.markdown("**All found**")
+    st.markdown(f"<div style='font-size:3rem; font-weight:800; margin-top:-6px;'>{all_found}</div>", unsafe_allow_html=True)
+
+    st.markdown("**Top matches**")
+    st.markdown(f"<div style='font-size:3rem; font-weight:800; margin-top:-6px;'>{top_match_count}</div>", unsafe_allow_html=True)
+
+    st.markdown("**New**")
+    st.markdown(f"<div style='font-size:3rem; font-weight:800; margin-top:-6px;'>{new_count}</div>", unsafe_allow_html=True)
+
+
+st.divider()
 
 
 # ---------- Apply filters ----------
 filtered = items[:]
 
-# Search
 if search_query.strip():
     q = search_query.strip().lower()
     filtered = [it for it in filtered if q in searchable_text(it)]
 
-# Top match / New toggles
 if show_top_matches_only:
     filtered = [it for it in filtered if is_top_match(it, min_acres, max_acres, max_price)]
 
 if show_new_only:
     filtered = [it for it in filtered if is_new(it, new_days=7)]
 
-# Sort newest (by found_utc, which scraper should write)
 if sort_newest:
     filtered = sorted(filtered, key=parse_dt, reverse=True)
 
-# Limit
 filtered = filtered[:show_n]
-
-
-# ---------- Metrics ----------
-all_found = len(items)
-top_match_count = sum(1 for it in items if is_top_match(it, min_acres, max_acres, max_price))
-new_count = sum(1 for it in items if is_new(it, new_days=7))
-
-col1, col2, col3 = st.columns(3)
-col1.metric("All found", f"{all_found}")
-col2.metric("Top matches", f"{top_match_count}")
-col3.metric("New", f"{new_count}")
-
-st.divider()
 
 
 # ---------- Listing cards ----------
 def listing_card(it):
-    title = it.get("title") or f"{it.get('source','Listing')} listing"
+    source = it.get("source") or "Listing"
+    title = it.get("title") or f"{source} listing"
     url = it.get("url") or ""
-    source = it.get("source") or ""
     price = it.get("price")
     acres = it.get("acres")
     thumb = it.get("thumbnail")
