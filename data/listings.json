@@ -1,7 +1,7 @@
 {
-  "last_updated_utc": "2026-01-31T23:08:49.257286+00:00",
+  "last_updated_utc": "2026-01-31T23:53:50.442673+00:00",
   "criteria": {
-    "min_acres": 10.0,
+    "min_acres": 11.0,
     "max_acres": 50.0,
     "max_price": 600000
   },
@@ -13,6 +13,7 @@
       "price": null,
       "acres": 10.8,
       "thumbnail": "https://cdn.landsearch.com/listings/4Pr7Q/small/king-george-va-153864222.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -22,6 +23,7 @@
       "price": null,
       "acres": 29.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QJmw/small/king-george-va-159480515.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -31,6 +33,7 @@
       "price": null,
       "acres": 10.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4PkC7/small/king-george-va-157081388.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -40,6 +43,7 @@
       "price": null,
       "acres": 228.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4Kq3v/small/king-george-va-152026131.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -49,6 +53,7 @@
       "price": null,
       "acres": 10.9,
       "thumbnail": "https://cdn.landsearch.com/listings/4QspB/small/king-george-va-158609119.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -58,6 +63,7 @@
       "price": null,
       "acres": 10.3,
       "thumbnail": "https://cdn.landsearch.com/listings/4NyRv/large/king-george-va-157142524.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -67,6 +73,7 @@
       "price": null,
       "acres": 10.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QBgJ/large/king-george-va-159069617.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -76,6 +83,7 @@
       "price": null,
       "acres": 10.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QBgm/large/king-george-va-159069097.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -85,6 +93,7 @@
       "price": null,
       "acres": 14.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QBgH/large/king-george-va-159069601.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -94,6 +103,7 @@
       "price": null,
       "acres": 14.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QBgG/large/king-george-va-159069587.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -103,6 +113,7 @@
       "price": null,
       "acres": 10.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QzH7/large/king-george-va-159033896.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -112,6 +123,7 @@
       "price": null,
       "acres": 52.2,
       "thumbnail": "https://cdn.landsearch.com/listings/4DHq5/large/king-george-va-152064090.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -121,6 +133,7 @@
       "price": null,
       "acres": 18.5,
       "thumbnail": "https://cdn.landsearch.com/listings/4QBgn/large/king-george-va-159069112.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -130,6 +143,7 @@
       "price": null,
       "acres": 10.9,
       "thumbnail": "https://cdn.landsearch.com/listings/4jwbj/large/king-george-va-152070533.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -139,6 +153,7 @@
       "price": null,
       "acres": 19.4,
       "thumbnail": "https://cdn.landsearch.com/listings/4QMKd/large/king-george-va-159614756.jpg",
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -148,6 +163,7 @@
       "price": 700000,
       "acres": 162.0,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -157,6 +173,7 @@
       "price": 66000,
       "acres": 70.0,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -166,6 +183,7 @@
       "price": 709900,
       "acres": 10.0,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -175,6 +193,7 @@
       "price": 330000,
       "acres": 20.0,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -184,6 +203,7 @@
       "price": 174900,
       "acres": 10.0,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -193,6 +213,7 @@
       "price": 129900,
       "acres": 10.0,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -202,6 +223,7 @@
       "price": 129900,
       "acres": 10.0,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -211,6 +233,7 @@
       "price": 465000,
       "acres": 37.3,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -220,6 +243,7 @@
       "price": null,
       "acres": 30.0,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -229,6 +253,7 @@
       "price": null,
       "acres": 352.0,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -238,6 +263,7 @@
       "price": null,
       "acres": 35.0,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -247,6 +273,7 @@
       "price": 15100,
       "acres": 26.2,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     },
     {
@@ -256,6 +283,7 @@
       "price": null,
       "acres": 19.3,
       "thumbnail": null,
+      "status": "under_contract",
       "found_utc": "2026-01-30T23:30:50.823059+00:00"
     }
   ]
