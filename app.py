@@ -9,7 +9,7 @@ import streamlit as st
 # ---------- Paths ----------
 DATA_PATH = Path("data/listings.json")
 LOGO_PATH = Path("assets/kblogo.png")
-PREVIEW_PATH = Path("assets/previewkb.png")  # placeholder image
+PREVIEW_PATH = Path("assets/previewkb.png")  # your branded placeholder
 
 # ---------- Page config ----------
 st.set_page_config(
@@ -39,7 +39,7 @@ def format_last_updated_et(ts: str) -> str:
         return ""
     try:
         dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-        from zoneinfo import ZoneInfo  # py3.9+
+        from zoneinfo import ZoneInfo
         dt_et = dt.astimezone(ZoneInfo("America/New_York"))
         return dt_et.strftime("%b %d, %Y • %I:%M %p ET")
     except Exception:
@@ -49,7 +49,7 @@ def format_last_updated_et(ts: str) -> str:
         except Exception:
             return ts
 
-# ---------- Header ----------
+# ---------- Header (logo left, text right) ----------
 def render_header():
     logo_b64 = ""
     if LOGO_PATH.exists():
@@ -94,41 +94,47 @@ def render_header():
             word-break: break-word;
           }}
 
-          /* Placeholder frame */
-          .kb-imgwrap {{
-            position: relative;
-            width: 100%;
-            height: 260px;
-            border-radius: 16px;
-            overflow: hidden;
-            background: #f2f2f2;
+          /* Placeholder block */
+          .kb-ph {{
+            width:100%;
+            height:220px;
+            border-radius:16px;
+            overflow:hidden;
+            position:relative;
+            display:flex;
+            align-items:center;
+            justify-content:center;
           }}
-          .kb-imgwrap img {{
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+          .kb-ph img {{
+            width:100%;
+            height:100%;
+            object-fit:cover;
             display:block;
+            filter: saturate(1.0);
           }}
-          .kb-gradient {{
+          .kb-ph::after {{
+            content:"";
             position:absolute;
-            left:0; right:0; bottom:0;
-            height: 46%;
-            background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.10), rgba(0,0,0,0.18));
+            inset:0;
+            background: linear-gradient(
+              to bottom,
+              rgba(255,255,255,0.0) 0%,
+              rgba(255,255,255,0.30) 45%,
+              rgba(255,255,255,0.70) 100%
+            );
           }}
-          .kb-overlay-text {{
+          .kb-ph-label {{
             position:absolute;
-            left:0; right:0;
-            bottom: 14px;
+            z-index:2;
             text-align:center;
-            font-weight: 600;
-            color: rgba(20,20,20,0.55);
-            text-shadow: 0 1px 0 rgba(255,255,255,0.5);
-          }}
-
-          /* Section headings */
-          .kb-section {{
-            margin-top: 0.4rem;
-            margin-bottom: 0.4rem;
+            font-weight:800;
+            letter-spacing:0.2px;
+            color: rgba(15, 23, 42, 0.78);
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(15,23,42,0.08);
           }}
         </style>
 
@@ -145,18 +151,20 @@ def render_header():
 
 render_header()
 
+# last updated OUTSIDE filters/details
 if last_updated:
     st.caption(f"Last updated: {format_last_updated_et(last_updated)}")
 
 st.write("")
 
+# ✅ Search stays top-of-page (outside dropdowns)
 search_query = st.text_input(
     "Search (title / location / source)",
     value="",
     placeholder="Try: king george, port royal, landsearch, 20 acres…",
 )
 
-# ---------- Defaults ----------
+# ---------- Defaults (pull from json criteria if present) ----------
 default_max_price = int(criteria.get("max_price", 600000) or 600000)
 default_min_acres = float(criteria.get("min_acres", 11.0) or 11.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
@@ -234,7 +242,7 @@ def is_new(it: Dict[str, Any]) -> bool:
     except Exception:
         return False
 
-# ---------- Filters ----------
+# ---------- Dropdowns ----------
 with st.expander("Filters", expanded=False):
     max_price = st.number_input("Max price (Top match)", min_value=0, value=default_max_price, step=10000)
     min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
@@ -246,10 +254,9 @@ with st.expander("Filters", expanded=False):
 
     show_new_only = st.toggle("🆕 New only", value=False)
     sort_newest = st.toggle("Newest first", value=True)
-
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
-# ---------- Counts ----------
+# counts for details
 top_matches_all = [it for it in items if is_top_match(it, min_acres, max_acres, max_price)]
 possible_all = [it for it in items if is_possible_match(it, min_acres, max_acres)]
 former_all = [it for it in items if is_former_top_match(it)]
@@ -257,75 +264,68 @@ new_all = [it for it in items if is_new(it)]
 
 with st.expander("Details", expanded=False):
     st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
+
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("All found", f"{len(items)}")
     c2.metric("Top matches", f"{len(top_matches_all)}")
     c3.metric("Possible matches", f"{len(possible_all)}")
     c4.metric("New", f"{len(new_all)}")
+
     if len(former_all) > 0:
         st.caption(f"Former top matches available: {len(former_all)} (toggle in Filters)")
 
 st.divider()
 
-# ---------- Apply search + new filter ----------
-pool = items[:]
+# ---------- Apply filters ----------
+filtered = items[:]
 
 if search_query.strip():
     q = search_query.strip().lower()
-    pool = [it for it in pool if q in searchable_text(it)]
+    filtered = [it for it in filtered if q in searchable_text(it)]
 
 if show_new_only:
-    pool = [it for it in pool if is_new(it)]
+    filtered = [it for it in filtered if is_new(it)]
 
-# ---------- Build sections ----------
-top_section = [it for it in pool if is_top_match(it, min_acres, max_acres, max_price)]
-possible_section = [it for it in pool if is_possible_match(it, min_acres, max_acres)]
-former_section = [it for it in pool if is_former_top_match(it)]
-other_section = [
-    it for it in pool
-    if (it not in top_section) and (it not in possible_section) and (it not in former_section)
-]
-
-# Sorting inside each section
-def sort_by_newest(arr: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    if not sort_newest:
-        return arr
-    return sorted(arr, key=parse_dt, reverse=True)
-
-top_section = sort_by_newest(top_section)
-possible_section = sort_by_newest(possible_section)
-former_section = sort_by_newest(former_section)
-other_section = sort_by_newest(other_section)
-
-# Apply toggles/modes
-sections: List[Dict[str, Any]] = []
 if show_top_matches_only:
-    sections = top_section[:]
-    if show_possible_matches:
-        sections += possible_section
-    # never include former/other in top-only mode
+    allowed = []
+    for it in filtered:
+        if is_top_match(it, min_acres, max_acres, max_price):
+            allowed.append(it)
+        elif show_possible_matches and is_possible_match(it, min_acres, max_acres):
+            allowed.append(it)
+    filtered = allowed
+    filtered = [it for it in filtered if not is_former_top_match(it)]
 else:
-    sections = other_section[:]
-    if show_possible_matches:
-        sections = top_section + possible_section + sections  # top up top
+    if not show_former_top_matches:
+        filtered = [it for it in filtered if not is_former_top_match(it)]
+    if not show_possible_matches:
+        filtered = [it for it in filtered if not is_possible_match(it, min_acres, max_acres)]
+
+def sort_key(it: Dict[str, Any]):
+    if is_top_match(it, min_acres, max_acres, max_price):
+        tier = 4
+    elif is_possible_match(it, min_acres, max_acres):
+        tier = 3
+    elif is_former_top_match(it):
+        tier = 2
     else:
-        sections = top_section + sections  # still show top first
-    if show_former_top_matches:
-        sections += former_section
+        tier = 1
+    return (tier, parse_dt(it))
 
-# Limit overall
-sections = sections[:show_n]
+if sort_newest:
+    filtered = sorted(filtered, key=sort_key, reverse=True)
 
-# ---------- Card renderer ----------
-def render_placeholder(source: str):
-    # fixed-height frame with soft gradient + centered text near image
+filtered = filtered[:show_n]
+
+# ---------- Placeholder renderer ----------
+def render_placeholder():
     if PREVIEW_PATH.exists():
+        ph_b64 = base64.b64encode(PREVIEW_PATH.read_bytes()).decode("utf-8")
         st.markdown(
             f"""
-            <div class="kb-imgwrap">
-              <img src="{PREVIEW_PATH.as_posix()}" />
-              <div class="kb-gradient"></div>
-              <div class="kb-overlay-text">Preview not available</div>
+            <div class="kb-ph">
+              <img src="data:image/png;base64,{ph_b64}" />
+              <div class="kb-ph-label">Preview not available</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -333,14 +333,16 @@ def render_placeholder(source: str):
     else:
         st.markdown(
             """
-            <div class="kb-imgwrap">
-              <div class="kb-gradient"></div>
-              <div class="kb-overlay-text">Preview not available</div>
+            <div style="width:100%; height:220px; background:#f2f2f2; border-radius:16px;
+                        display:flex; align-items:center; justify-content:center; color:#777;
+                        font-weight:700;">
+                Preview not available
             </div>
             """,
             unsafe_allow_html=True,
         )
 
+# ---------- Listing cards ----------
 def listing_card(it: Dict[str, Any]):
     title = it.get("title") or f"{it.get('source', 'Land')} listing"
     url = it.get("url") or ""
@@ -374,10 +376,9 @@ def listing_card(it: Dict[str, Any]):
 
     with st.container(border=True):
         if thumb:
-            # keep thumbs from exploding on mobile
             st.image(thumb, use_container_width=True)
         else:
-            render_placeholder(source)
+            render_placeholder()
 
         st.subheader(title)
         st.caption(f"{' • '.join(badges)} • {source}")
@@ -395,11 +396,11 @@ def listing_card(it: Dict[str, Any]):
         if url:
             st.link_button("Open listing ↗", url, use_container_width=True)
 
-# ---------- Render ----------
+# Grid (2 columns)
 cols = st.columns(2)
-for idx, it in enumerate(sections):
+for idx, it in enumerate(filtered):
     with cols[idx % 2]:
         listing_card(it)
 
-if not sections:
+if not filtered:
     st.info("No listings matched your current search/filters.")
