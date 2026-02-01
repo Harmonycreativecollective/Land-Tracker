@@ -10,11 +10,25 @@ from bs4 import BeautifulSoup
 
 # ====== YOUR SETTINGS ======
 START_URLS = [
-    "https://www.landsearch.com/properties/king-george-va/filter/format=sales,size[min]=10",
-    "https://www.landwatch.com/virginia-land-for-sale/king-george/acres-11-50/available",
+    # ---- LandSearch (county pages, NO filters) ----
+    "https://www.landsearch.com/properties/king-george-va",
+    "https://www.landsearch.com/properties/westmoreland-county-va",
+    "https://www.landsearch.com/properties/stafford-county-va",
+    "https://www.landsearch.com/properties/caroline-county-va",
+    "https://www.landsearch.com/properties/frederick-county-md",
+    "https://www.landsearch.com/properties/anne-arundel-county-md",
+
+    # ---- LandWatch is currently 403 blocked in your logs ----
+    # Leave these commented out until you make a dedicated LandWatch scraper
+    # "https://www.landwatch.com/virginia-land-for-sale/king-george",
+    # "https://www.landwatch.com/virginia-land-for-sale/westmoreland-county",
+    # "https://www.landwatch.com/virginia-land-for-sale/stafford-county",
+    # "https://www.landwatch.com/maryland-land-for-sale/caroline-county",
+    # "https://www.landwatch.com/maryland-land-for-sale/frederick-county",
+    # "https://www.landwatch.com/maryland-land-for-sale/anne-arundel-county",
 ]
 
-MIN_ACRES = 11.0
+MIN_ACRES = 10.0
 MAX_ACRES = 50.0
 MAX_PRICE = 600_000
 
@@ -34,12 +48,15 @@ DATA_FILE = "data/listings.json"
 session = requests.Session()
 session.headers.update(HEADERS)
 
+# NOTE: expanded with explicit generic titles you generate
 BAD_TITLE_SET = {
     "",
     "land listing",
     "skip to navigation",
     "skip to content",
     "listing",
+    "landsearch listing",
+    "landwatch listing",
 }
 
 STATUS_VALUES = {"available", "under_contract", "pending", "sold", "unknown"}
@@ -68,11 +85,6 @@ def walk(obj: Any):
 
 # ------------------- Parsers -------------------
 def parse_money(value: Any) -> Optional[int]:
-    """
-    Safer money parsing.
-    - Ignores small numbers (like "15.1k drop")
-    - Prefers larger values when multiple exist (detail pages can contain drops/estimates)
-    """
     if value is None:
         return None
 
@@ -89,7 +101,6 @@ def parse_money(value: Any) -> Optional[int]:
 
     s = s.replace(",", "")
 
-    # collect ALL possible numbers, then pick the most plausible "price"
     candidates: List[int] = []
     for m in re.finditer(r"(\d+(?:\.\d+)?)\s*([km])?\b", s):
         num = float(m.group(1))
@@ -99,20 +110,14 @@ def parse_money(value: Any) -> Optional[int]:
         elif suffix == "m":
             num *= 1_000_000
         v = int(num)
-
-        # ignore tiny values (drops, monthly estimates, etc.)
         if v < 1000:
             continue
-
         candidates.append(v)
 
     if not candidates:
         return None
 
-    # Heuristic: choose the MAX number that looks like a listing price
-    # (protects against "15.1k drop" etc.)
-    best = max(candidates)
-    return best if best >= 1000 else None
+    return max(candidates)
 
 
 def parse_acres(value: Any) -> Optional[float]:
@@ -168,26 +173,14 @@ def parse_acres(value: Any) -> Optional[float]:
 
 # ------------------- Status detection (STRICT) -------------------
 def detect_status(text: str) -> str:
-    """
-    IMPORTANT: strict phrase matching to avoid false positives:
-    - does NOT match "contractor" etc.
-    - does NOT default to under_contract
-    """
     t = (text or "").lower()
 
-    # SOLD (strongest)
     if re.search(r"\bsold\b", t):
         return "sold"
-
-    # UNDER CONTRACT (must be phrase)
     if re.search(r"\bunder\s+contract\b", t):
         return "under_contract"
-
-    # PENDING (explicit)
     if re.search(r"\bpending\b", t):
         return "pending"
-
-    # AVAILABLE / ACTIVE / FOR SALE
     if re.search(r"\bavailable\b", t) or re.search(r"\bfor\s+sale\b", t) or re.search(r"\bactive\b", t):
         return "available"
 
@@ -227,7 +220,12 @@ def normalize_url(base_url: str, u: str) -> str:
 
 def is_bad_title(title: Optional[str]) -> bool:
     t = (title or "").strip().lower()
-    return t in BAD_TITLE_SET
+    if t in BAD_TITLE_SET:
+        return True
+    # Treat anything like "<source> listing" as bad too
+    if t.endswith(" listing"):
+        return True
+    return False
 
 
 def best_title(d: dict, source_name: str) -> str:
@@ -251,12 +249,12 @@ def try_thumbnail_from_dict(d: dict) -> Optional[str]:
 
 
 def should_enrich(it: Dict[str, Any]) -> bool:
-    # enrich if title is generic OR missing thumb OR status unknown OR price missing
     return (
         is_bad_title(it.get("title"))
         or (not it.get("thumbnail"))
         or (it.get("status") in (None, "", "unknown"))
         or (it.get("price") is None)
+        or (it.get("acres") is None)
     )
 
 
@@ -277,14 +275,6 @@ def is_top_match_now(it: Dict[str, Any], min_a: float, max_a: float, max_p: int)
 
 # ------------------- Detail enrichment -------------------
 def enrich_from_detail_page(url: str) -> Dict[str, Any]:
-    """
-    Fetch a listing page and extract:
-    - title (og:title / h1)
-    - thumbnail (og:image)
-    - status (STRICT detect_status on meta + body)
-    - price (prefer ld+json offers)
-    - acres (try ld+json)
-    """
     try:
         html = fetch_html(url)
     except Exception:
@@ -308,7 +298,6 @@ def enrich_from_detail_page(url: str) -> Dict[str, Any]:
 
     thumb = meta("og:image", "property") or meta("twitter:image", "name")
 
-    # Status text pool: meta descriptions + body (trim)
     status_text = " ".join(
         [
             meta("og:description", "property"),
@@ -318,7 +307,6 @@ def enrich_from_detail_page(url: str) -> Dict[str, Any]:
     )
     status = detect_status(status_text)
 
-    # Price/acres from JSON-LD (best signal)
     price = None
     acres = None
     for block in get_json_ld(html):
@@ -326,7 +314,6 @@ def enrich_from_detail_page(url: str) -> Dict[str, Any]:
             if not isinstance(d, dict):
                 continue
 
-            # price
             offers = d.get("offers")
             if isinstance(offers, dict):
                 p = parse_money(offers.get("price"))
@@ -337,12 +324,16 @@ def enrich_from_detail_page(url: str) -> Dict[str, Any]:
             if p2 is not None:
                 price = price or p2
 
-            # acres
-            a2 = parse_acres(d.get("acres") or d.get("lotSizeAcres") or d.get("lotSize") or d.get("size") or d.get("area"))
+            a2 = parse_acres(
+                d.get("acres")
+                or d.get("lotSizeAcres")
+                or d.get("lotSize")
+                or d.get("size")
+                or d.get("area")
+            )
             if a2 is not None:
                 acres = acres or a2
 
-    # Clean title
     if title:
         title = " ".join(title.split()).strip()
     if is_bad_title(title):
@@ -409,7 +400,6 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
                 "price": price,
                 "acres": acres,
                 "thumbnail": thumb,
-                # IMPORTANT: do NOT guess status here; reset later + enrich
                 "status": "unknown",
             }
         )
@@ -441,17 +431,12 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
             if not url:
                 continue
 
-            # Keep only detail pages
             if "landsearch.com" in host:
                 p = urlparse(url)
                 if p.fragment:
                     continue
                 parts = p.path.strip("/").split("/")
                 if len(parts) < 3 or parts[0] != "properties" or not parts[-1].isdigit():
-                    continue
-
-            if "landwatch.com" in host:
-                if "/property/" not in urlparse(url).path:
                     continue
 
             price = parse_money(
@@ -511,10 +496,6 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
             if len(parts) < 3 or parts[0] != "properties" or not parts[-1].isdigit():
                 continue
 
-        if "landwatch.com" in host:
-            if "/property/" not in urlparse(full).path:
-                continue
-
         card_text = a.get_text(" ", strip=True)
         parent = a.parent
         for _ in range(4):
@@ -571,22 +552,10 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
         items.extend(extract_from_landsearch_next(url, next_data))
 
     if json_ld_blocks:
-        items.extend(
-            extract_from_jsonld(
-                url,
-                json_ld_blocks,
-                "LandSearch" if "landsearch.com" in host else "LandWatch",
-            )
-        )
+        items.extend(extract_from_jsonld(url, json_ld_blocks, "LandSearch"))
 
     if not items:
-        items.extend(
-            extract_from_html_fallback(
-                url,
-                html,
-                "LandSearch" if "landsearch.com" in host else "LandWatch",
-            )
-        )
+        items.extend(extract_from_html_fallback(url, html, "LandSearch"))
 
     seen = set()
     out = []
@@ -599,11 +568,6 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
 
 
 def load_existing_maps() -> Dict[str, Dict[str, Any]]:
-    """
-    Load old items by URL so we can persist:
-    - found_utc
-    - ever_top_match
-    """
     out: Dict[str, Dict[str, Any]] = {}
     try:
         if not os.path.exists(DATA_FILE):
@@ -638,7 +602,6 @@ def main():
             continue
         all_items.extend(extract_listings(url, html))
 
-    # Dedup across sources by URL
     seen = set()
     final: List[Dict[str, Any]] = []
     for x in all_items:
@@ -647,26 +610,16 @@ def main():
             continue
         seen.add(u)
 
-        # Persist found_utc
         prev = old_map.get(u, {})
-        if prev.get("found_utc"):
-            x["found_utc"] = prev["found_utc"]
-        else:
-            x["found_utc"] = run_utc
-
-        # Persist ever_top_match (start with old value)
+        x["found_utc"] = prev.get("found_utc") or run_utc
         x["ever_top_match"] = bool(prev.get("ever_top_match", False))
 
-        # Never allow bad title into file
         if is_bad_title(x.get("title")):
             x["title"] = f"{x.get('source','Listing')} listing"
 
-        # CRITICAL: reset status every run (prevents “poisoned” saved statuses)
         x["status"] = "unknown"
-
         final.append(x)
 
-    # Enrich (limited)
     enriched = 0
     for it in final:
         if enriched >= DETAIL_ENRICH_LIMIT:
@@ -674,17 +627,16 @@ def main():
         if should_enrich(it):
             info = enrich_from_detail_page(it["url"])
 
+            # Replace title if current is generic/bad
             if info.get("title") and is_bad_title(it.get("title")):
                 it["title"] = info["title"]
 
             if (not it.get("thumbnail")) and info.get("thumbnail"):
                 it["thumbnail"] = info["thumbnail"]
 
-            # Update status if detected
             s = (info.get("status") or "unknown").lower()
             it["status"] = s if s in STATUS_VALUES else "unknown"
 
-            # Fill price/acres if missing or if enrichment provides better signal
             if it.get("price") is None and info.get("price") is not None:
                 it["price"] = info["price"]
             if it.get("acres") is None and info.get("acres") is not None:
@@ -692,13 +644,11 @@ def main():
 
             enriched += 1
 
-    # Clamp status values
     for it in final:
         s = (it.get("status") or "unknown").lower()
         if s not in STATUS_VALUES:
             it["status"] = "unknown"
 
-    # Update ever_top_match ONLY when it qualifies as a top match at least once
     for it in final:
         if not it.get("ever_top_match"):
             if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE):
@@ -706,11 +656,7 @@ def main():
 
     out = {
         "last_updated_utc": run_utc,
-        "criteria": {
-            "min_acres": MIN_ACRES,
-            "max_acres": MAX_ACRES,
-            "max_price": MAX_PRICE,
-        },
+        "criteria": {"min_acres": MIN_ACRES, "max_acres": MAX_ACRES, "max_price": MAX_PRICE},
         "items": final,
     }
 
