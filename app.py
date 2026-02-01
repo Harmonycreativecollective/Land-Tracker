@@ -280,9 +280,9 @@ with st.expander("Filters", expanded=False):
     selected_states = st.multiselect("State", options=states, default=states)
     selected_counties = st.multiselect("County", options=counties, default=counties)
 
-    show_top_matches_only = st.toggle("✨ Top matches only", value=True)
-    show_possible_matches = st.toggle("🧩 Include possible matches", value=False)
-    show_former_top_matches = st.toggle("⭐ Former top matches", value=False)
+    show_top_matches_only = st.toggle("✨ Top matches", value=True)
+    show_possible_matches = st.toggle("🧩 Possible matches", value=False)
+  
 
     show_new_only = st.toggle("🆕 New only", value=False)
     sort_newest = st.toggle("Newest first", value=True)
@@ -410,8 +410,7 @@ def listing_card(it: Dict[str, Any]):
         badges.append("✨️ Top match")
     elif possible:
         badges.append("🧩 Possible match")
-    elif former:
-        badges.append("⭐ Former top match")
+   
     else:
         badges.append("🔎 Found")
 
