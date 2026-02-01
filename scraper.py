@@ -10,21 +10,55 @@ from bs4 import BeautifulSoup
 
 # ====== YOUR SETTINGS ======
 START_URLS = [
-    # ---- LandSearch (county pages, NO filters) ----
-    "https://www.landsearch.com/properties/king-george-va",
+    # ======================
+    # LANDSEARCH
+    # ======================
+
+    # Virginia
+    "https://www.landsearch.com/properties/king-george-county-va",
     "https://www.landsearch.com/properties/westmoreland-county-va",
-    "https://www.landsearch.com/properties/stafford-county-va",
     "https://www.landsearch.com/properties/caroline-county-va",
+    "https://www.landsearch.com/properties/stafford-county-va",
+
+    # Maryland
+    "https://www.landsearch.com/properties/caroline-county-md",
     "https://www.landsearch.com/properties/frederick-county-md",
     "https://www.landsearch.com/properties/anne-arundel-county-md",
+    "https://www.landsearch.com/properties/montgomery-county-md",
 
-    # ---- LandWatch (county pages, NO filters) ----
+
+    # ======================
+    # LANDWATCH
+    # ======================
+
+    # Virginia
     "https://www.landwatch.com/virginia-land-for-sale/king-george",
     "https://www.landwatch.com/virginia-land-for-sale/westmoreland-county",
+    "https://www.landwatch.com/virginia-land-for-sale/caroline-county",
     "https://www.landwatch.com/virginia-land-for-sale/stafford-county",
+
+    # Maryland
     "https://www.landwatch.com/maryland-land-for-sale/caroline-county",
     "https://www.landwatch.com/maryland-land-for-sale/frederick-county",
     "https://www.landwatch.com/maryland-land-for-sale/anne-arundel-county",
+    "https://www.landwatch.com/maryland-land-for-sale/montgomery-county",
+
+
+    # ======================
+    # LAND & FARM
+    # ======================
+
+    # Virginia
+    "https://www.landandfarm.com/search/virginia/king-george-county-land-for-sale/",
+    "https://www.landandfarm.com/search/virginia/westmoreland-county-land-for-sale/",
+    "https://www.landandfarm.com/search/virginia/caroline-county-land-for-sale/",
+    "https://www.landandfarm.com/search/virginia/stafford-county-land-for-sale/",
+
+    # Maryland
+    "https://www.landandfarm.com/search/maryland/caroline-county-land-for-sale/",
+    "https://www.landandfarm.com/search/maryland/frederick-county-land-for-sale/",
+    "https://www.landandfarm.com/search/maryland/anne-arundel-county-land-for-sale/",
+    "https://www.landandfarm.com/search/maryland/montgomery-county-land-for-sale/",
 ]
 
 MIN_ACRES = 11.0
