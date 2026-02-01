@@ -26,7 +26,6 @@ START_URLS = [
     "https://www.landwatch.com/maryland-land-for-sale/frederick-county",
     "https://www.landwatch.com/maryland-land-for-sale/anne-arundel-county",
 ]
-]
 
 MIN_ACRES = 11.0
 MAX_ACRES = 50.0
