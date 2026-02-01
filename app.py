@@ -315,8 +315,7 @@ with st.expander("Details", expanded=False):
     c3.metric("Possible matches", f"{len(possible_all)}")
     c4.metric("New", f"{len(new_all)}")
 
-    if len(former_all) > 0:
-        st.caption(f"Former top matches available: {len(former_all)} (toggle in Filters)")
+
 
 st.divider()
 
