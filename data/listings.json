@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-01T05:17:51.610482+00:00",
+  "last_updated_utc": "2026-02-01T07:50:51.850812+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -1186,6 +1186,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/916-decatur-rd-stafford-va-22554/5020743",
+      "price": 765000,
+      "acres": 5.22,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T07:50:51.850812+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/201-doe-way-fredericksburg-va-22406/4984477",
       "price": 249990,
       "acres": 5.0,
@@ -1629,17 +1640,6 @@
       "url": "https://www.landsearch.com/properties/jumping-branch-rd-stafford-va-22554/4972047",
       "price": 169750,
       "acres": 0.33,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/mountain-view-rd-stafford-va-22556/4245209",
-      "price": 1099645,
-      "acres": 4.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2495,6 +2495,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/ijamsville-md-21754/4663750",
+      "price": 925000,
+      "acres": 8.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T07:50:51.850812+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/michaels-mill-rd-buckeystown-md-21717/4840327",
       "price": 300000,
       "acres": 2.32,
@@ -2729,17 +2740,6 @@
       "url": "https://www.landsearch.com/properties/2240-monument-rd-myersville-md-21773/4936554",
       "price": 700000,
       "acres": 14.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/23823-peaceful-ridge-rd-smithsburg-md-21783/4860214",
-      "price": 519900,
-      "acres": 7.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
