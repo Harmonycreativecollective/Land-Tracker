@@ -59,6 +59,22 @@ START_URLS = [
     "https://www.landandfarm.com/search/maryland/frederick-county-land-for-sale/",
     "https://www.landandfarm.com/search/maryland/anne-arundel-county-land-for-sale/",
     "https://www.landandfarm.com/search/maryland/montgomery-county-land-for-sale/",
+
+# =========================
+# LAND.COM
+# =========================
+
+# Virginia
+"https://www.land.com/King-George-County-VA/all-land/",
+"https://www.land.com/Westmoreland-County-VA/all-land/",
+"https://www.land.com/Caroline-County-VA/all-land/",
+"https://www.land.com/Stafford-County-VA/all-land/",
+
+# Maryland
+"https://www.land.com/Caroline-County-MD/all-land/",
+"https://www.land.com/Frederick-County-MD/all-land/",
+"https://www.land.com/Anne-Arundel-County-MD/all-land/",
+"https://www.land.com/Montgomery-County-MD/all-land/",   
 ]
 
 MIN_ACRES = 11.0
