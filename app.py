@@ -9,7 +9,7 @@ import streamlit as st
 # ---------- Paths ----------
 DATA_PATH = Path("data/listings.json")
 LOGO_PATH = Path("assets/kblogo.png")
-PREVIEW_PATH = Path("assets/previewkb.png")
+PREVIEW_PATH = Path("assets/previewkb.png")  # placeholder image
 
 # ---------- Page config ----------
 st.set_page_config(
@@ -21,7 +21,6 @@ st.set_page_config(
 TITLE = "KB’s Land Tracker"
 CAPTION = "What’s meant for you is already in motion."
 
-
 # ---------- Load data ----------
 def load_data() -> Dict[str, Any]:
     if not DATA_PATH.exists():
@@ -29,15 +28,13 @@ def load_data() -> Dict[str, Any]:
     with open(DATA_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
-
 data = load_data()
 items: List[Dict[str, Any]] = data.get("items", []) or []
 criteria = data.get("criteria", {}) or {}
 last_updated = data.get("last_updated_utc")
 
-
 # ---------- Time formatting (Eastern) ----------
-def format_ts_et(ts: str) -> str:
+def format_last_updated_et(ts: str) -> str:
     if not ts:
         return ""
     try:
@@ -52,8 +49,7 @@ def format_ts_et(ts: str) -> str:
         except Exception:
             return ts
 
-
-# ---------- Header (logo left, text right) ----------
+# ---------- Header ----------
 def render_header():
     logo_b64 = ""
     if LOGO_PATH.exists():
@@ -98,45 +94,41 @@ def render_header():
             word-break: break-word;
           }}
 
-          /* Placeholder card media */
-          .kb-media {{
+          /* Placeholder frame */
+          .kb-imgwrap {{
             position: relative;
             width: 100%;
+            height: 260px;
             border-radius: 16px;
             overflow: hidden;
-            background: #f3f4f6;
-            border: 1px solid rgba(15, 23, 42, 0.06);
+            background: #f2f2f2;
           }}
-          .kb-media img {{
-            display:block;
+          .kb-imgwrap img {{
             width: 100%;
-            max-height: 260px;          /* ✅ prevents giant placeholder */
-            height: auto;
-            object-fit: contain;         /* keep your design intact */
+            height: 100%;
+            object-fit: cover;
+            display:block;
           }}
-          .kb-media::after {{
-            content: "";
+          .kb-gradient {{
             position:absolute;
             left:0; right:0; bottom:0;
-            height: 60px;
-            background: linear-gradient(to bottom,
-              rgba(243,244,246,0.0),
-              rgba(243,244,246,0.85),
-              rgba(243,244,246,1.0)
-            );
+            height: 46%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.10), rgba(0,0,0,0.18));
           }}
-          .kb-media-label {{
+          .kb-overlay-text {{
+            position:absolute;
+            left:0; right:0;
+            bottom: 14px;
             text-align:center;
-            margin-top: -44px;          /* ✅ pulls label closer */
-            padding-bottom: 8px;
-            color: rgba(49, 51, 63, 0.62);
-            font-weight: 500;
+            font-weight: 600;
+            color: rgba(20,20,20,0.55);
+            text-shadow: 0 1px 0 rgba(255,255,255,0.5);
           }}
 
-          /* Section headings spacing */
+          /* Section headings */
           .kb-section {{
-            margin-top: 0.35rem;
-            margin-bottom: 0.15rem;
+            margin-top: 0.4rem;
+            margin-bottom: 0.4rem;
           }}
         </style>
 
@@ -151,27 +143,25 @@ def render_header():
         unsafe_allow_html=True,
     )
 
-
 render_header()
 
 if last_updated:
-    st.caption(f"Last updated: {format_ts_et(last_updated)}")
+    st.caption(f"Last updated: {format_last_updated_et(last_updated)}")
 
 st.write("")
 
-# Search stays top-of-page
 search_query = st.text_input(
     "Search (title / location / source)",
     value="",
     placeholder="Try: king george, port royal, landsearch, 20 acres…",
 )
 
-# Defaults from criteria
+# ---------- Defaults ----------
 default_max_price = int(criteria.get("max_price", 600000) or 600000)
 default_min_acres = float(criteria.get("min_acres", 11.0) or 11.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
 
-# Status helpers
+# ---------- Status helpers ----------
 STATUS_EMOJI = {
     "available": "🟢 Available",
     "under_contract": "🟡 Under contract",
@@ -180,17 +170,14 @@ STATUS_EMOJI = {
     "unknown": "⚪ Status unknown",
 }
 
-
 def get_status(it: Dict[str, Any]) -> str:
     s = (it.get("status") or "unknown").strip().lower()
     return s if s in STATUS_EMOJI else "unknown"
 
-
 def is_unavailable(status: str) -> bool:
     return status in {"under_contract", "pending", "sold"}
 
-
-# Match logic
+# ---------- Match logic ----------
 def meets_acres(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
     acres = it.get("acres")
     if acres is None:
@@ -199,7 +186,6 @@ def meets_acres(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
         return min_a <= float(acres) <= max_a
     except Exception:
         return False
-
 
 def meets_price(it: Dict[str, Any], max_p: int) -> bool:
     price = it.get("price")
@@ -210,13 +196,11 @@ def meets_price(it: Dict[str, Any], max_p: int) -> bool:
     except Exception:
         return False
 
-
 def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
     status = get_status(it)
     if is_unavailable(status):
         return False
     return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
-
 
 def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
     status = get_status(it)
@@ -226,13 +210,11 @@ def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
         return False
     return it.get("price") is None
 
-
 def is_former_top_match(it: Dict[str, Any]) -> bool:
     status = get_status(it)
     if not is_unavailable(status):
         return False
     return bool(it.get("ever_top_match", False))
-
 
 def searchable_text(it: Dict[str, Any]) -> str:
     return " ".join(
@@ -243,17 +225,14 @@ def searchable_text(it: Dict[str, Any]) -> str:
         ]
     ).lower()
 
-
 def parse_dt(it: Dict[str, Any]) -> str:
     return it.get("found_utc") or ""
-
 
 def is_new(it: Dict[str, Any]) -> bool:
     try:
         return bool(it.get("found_utc")) and bool(last_updated) and it.get("found_utc") == last_updated
     except Exception:
         return False
-
 
 # ---------- Filters ----------
 with st.expander("Filters", expanded=False):
@@ -267,10 +246,28 @@ with st.expander("Filters", expanded=False):
 
     show_new_only = st.toggle("🆕 New only", value=False)
     sort_newest = st.toggle("Newest first", value=True)
+
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
+# ---------- Counts ----------
+top_matches_all = [it for it in items if is_top_match(it, min_acres, max_acres, max_price)]
+possible_all = [it for it in items if is_possible_match(it, min_acres, max_acres)]
+former_all = [it for it in items if is_former_top_match(it)]
+new_all = [it for it in items if is_new(it)]
 
-# ---------- Apply search + new filter first ----------
+with st.expander("Details", expanded=False):
+    st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("All found", f"{len(items)}")
+    c2.metric("Top matches", f"{len(top_matches_all)}")
+    c3.metric("Possible matches", f"{len(possible_all)}")
+    c4.metric("New", f"{len(new_all)}")
+    if len(former_all) > 0:
+        st.caption(f"Former top matches available: {len(former_all)} (toggle in Filters)")
+
+st.divider()
+
+# ---------- Apply search + new filter ----------
 pool = items[:]
 
 if search_query.strip():
@@ -280,99 +277,69 @@ if search_query.strip():
 if show_new_only:
     pool = [it for it in pool if is_new(it)]
 
-# ---------- Build buckets (sections) ----------
-top_bucket = [it for it in pool if is_top_match(it, min_acres, max_acres, max_price)]
-possible_bucket = [it for it in pool if is_possible_match(it, min_acres, max_acres)]
-former_bucket = [it for it in pool if is_former_top_match(it)]
+# ---------- Build sections ----------
+top_section = [it for it in pool if is_top_match(it, min_acres, max_acres, max_price)]
+possible_section = [it for it in pool if is_possible_match(it, min_acres, max_acres)]
+former_section = [it for it in pool if is_former_top_match(it)]
+other_section = [
+    it for it in pool
+    if (it not in top_section) and (it not in possible_section) and (it not in former_section)
+]
 
-# "Other" excludes anything that is already in the special buckets
-special_urls = {it.get("url") for it in (top_bucket + possible_bucket + former_bucket) if it.get("url")}
-other_bucket = [it for it in pool if it.get("url") not in special_urls]
-
-# Sorting inside each bucket
-def sort_list(lst: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+# Sorting inside each section
+def sort_by_newest(arr: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     if not sort_newest:
-        return lst
-    return sorted(lst, key=parse_dt, reverse=True)
+        return arr
+    return sorted(arr, key=parse_dt, reverse=True)
 
-top_bucket = sort_list(top_bucket)
-possible_bucket = sort_list(possible_bucket)
-former_bucket = sort_list(former_bucket)
-other_bucket = sort_list(other_bucket)
+top_section = sort_by_newest(top_section)
+possible_section = sort_by_newest(possible_section)
+former_section = sort_by_newest(former_section)
+other_section = sort_by_newest(other_section)
 
-# Apply filter modes
-sections: List[tuple[str, List[Dict[str, Any]]]] = []
-
+# Apply toggles/modes
+sections: List[Dict[str, Any]] = []
 if show_top_matches_only:
-    sections.append(("✨ Top matches", top_bucket))
+    sections = top_section[:]
     if show_possible_matches:
-        sections.append(("🧩 Possible matches", possible_bucket))
-    # never show former/other in top-only mode
+        sections += possible_section
+    # never include former/other in top-only mode
 else:
-    # normal mode: show top always first (nice UX)
-    sections.append(("✨ Top matches", top_bucket))
+    sections = other_section[:]
     if show_possible_matches:
-        sections.append(("🧩 Possible matches", possible_bucket))
+        sections = top_section + possible_section + sections  # top up top
+    else:
+        sections = top_section + sections  # still show top first
     if show_former_top_matches:
-        sections.append(("⭐ Former top matches", former_bucket))
-    sections.append(("🔎 Other listings", other_bucket))
+        sections += former_section
 
-# Combine to compute counts + enforce show_n
-flat = []
-for _, lst in sections:
-    flat.extend(lst)
-flat = flat[:show_n]
+# Limit overall
+sections = sections[:show_n]
 
-# Re-slice sections based on show_n limit
-remaining = show_n
-trimmed_sections: List[tuple[str, List[Dict[str, Any]]]] = []
-for title, lst in sections:
-    if remaining <= 0:
-        break
-    chunk = lst[:remaining]
-    if chunk:
-        trimmed_sections.append((title, chunk))
-        remaining -= len(chunk)
-
-# ---------- Details ----------
-with st.expander("Details", expanded=False):
-    st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
-
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("All found", f"{len(items)}")
-    c2.metric("Top matches", f"{len(top_bucket)}")
-    c3.metric("Possible matches", f"{len(possible_bucket)}")
-    c4.metric("New", f"{len([it for it in items if is_new(it)])}")
-
-    st.caption(f"Former top matches detected: {len(former_bucket)} (toggle in Filters)")
-
-st.divider()
-
-# ---------- Card rendering ----------
-def placeholder_block():
+# ---------- Card renderer ----------
+def render_placeholder(source: str):
+    # fixed-height frame with soft gradient + centered text near image
     if PREVIEW_PATH.exists():
-        b64 = base64.b64encode(PREVIEW_PATH.read_bytes()).decode("utf-8")
         st.markdown(
             f"""
-            <div class="kb-media">
-              <img src="data:image/png;base64,{b64}" alt="Preview not available" />
+            <div class="kb-imgwrap">
+              <img src="{PREVIEW_PATH.as_posix()}" />
+              <div class="kb-gradient"></div>
+              <div class="kb-overlay-text">Preview not available</div>
             </div>
-            <div class="kb-media-label">Preview not available</div>
             """,
             unsafe_allow_html=True,
         )
     else:
         st.markdown(
             """
-            <div style="width:100%; height:220px; background:#f2f2f2; border-radius:16px;
-                        display:flex; align-items:center; justify-content:center; color:#777;
-                        font-weight:600;">
-                Preview not available
+            <div class="kb-imgwrap">
+              <div class="kb-gradient"></div>
+              <div class="kb-overlay-text">Preview not available</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
-
 
 def listing_card(it: Dict[str, Any]):
     title = it.get("title") or f"{it.get('source', 'Land')} listing"
@@ -407,17 +374,13 @@ def listing_card(it: Dict[str, Any]):
 
     with st.container(border=True):
         if thumb:
+            # keep thumbs from exploding on mobile
             st.image(thumb, use_container_width=True)
         else:
-            placeholder_block()
+            render_placeholder(source)
 
         st.subheader(title)
         st.caption(f"{' • '.join(badges)} • {source}")
-
-        # show found timestamp (helps a LOT when you add more URLs)
-        found_label = format_ts_et(it.get("found_utc") or "")
-        if found_label:
-            st.caption(f"Found: {found_label}")
 
         if price is None:
             st.write("**Price:** —")
@@ -432,19 +395,11 @@ def listing_card(it: Dict[str, Any]):
         if url:
             st.link_button("Open listing ↗", url, use_container_width=True)
 
+# ---------- Render ----------
+cols = st.columns(2)
+for idx, it in enumerate(sections):
+    with cols[idx % 2]:
+        listing_card(it)
 
-# ---------- Render sections (2-col grid per section) ----------
-rendered_any = False
-for section_title, lst in trimmed_sections:
-    st.markdown(f"<div class='kb-section'></div>", unsafe_allow_html=True)
-    st.subheader(f"{section_title} ({len(lst)})")
-
-    cols = st.columns(2)
-    for idx, it in enumerate(lst):
-        with cols[idx % 2]:
-            listing_card(it)
-
-    rendered_any = rendered_any or bool(lst)
-
-if not rendered_any:
+if not sections:
     st.info("No listings matched your current search/filters.")
