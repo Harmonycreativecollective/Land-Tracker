@@ -227,21 +227,13 @@ def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> 
     return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
 
 def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
-    """
-    Possible match = acres fits, BUT price missing.
-    """
+    # Possible match = acres fits, but price missing
     status = get_status(it)
     if is_unavailable(status):
         return False
     if not meets_acres(it, min_a, max_a):
         return False
     return is_missing_price(it)
-
-def is_former_top_match(it: Dict[str, Any]) -> bool:
-    status = get_status(it)
-    if not is_unavailable(status):
-        return False
-    return bool(it.get("ever_top_match", False))
 
 def searchable_text(it: Dict[str, Any]) -> str:
     return " ".join(
@@ -263,7 +255,7 @@ def is_new(it: Dict[str, Any]) -> bool:
     except Exception:
         return False
 
-# ---------- State/County options (from scraper fields) ----------
+# ---------- State/County options ----------
 def norm_opt(x: Optional[str]) -> str:
     return (x or "").strip()
 
@@ -276,46 +268,51 @@ with st.expander("Filters", expanded=False):
     min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
     max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
 
-    # Location filters
+    # Location filters (if scraper doesn't provide these yet, the lists are empty)
     selected_states = st.multiselect("State", options=states, default=states)
     selected_counties = st.multiselect("County", options=counties, default=counties)
 
-    show_top_matches_only = st.toggle("✨ Top matches", value=True)
-    show_possible_matches = st.toggle("🧩 Possible matches", value=False)
-  
+    # Matching toggles
+    show_top_only = st.toggle("✨ Top matches", value=True)
+    show_possible = st.toggle("🧩 Possible matches", value=False)
 
     show_new_only = st.toggle("🆕 New only", value=False)
     sort_newest = st.toggle("Newest first", value=True)
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
-# ---------- Details counts (based on current inputs) ----------
+# ---------- Location filter ----------
 def passes_location(it: Dict[str, Any]) -> bool:
     st_ = norm_opt(it.get("state"))
     co_ = norm_opt(it.get("county"))
+
+    # If no options exist yet, don't filter at all
+    if not states and not counties:
+        return True
+
+    # If user cleared selections, treat that as "no filter"
     if selected_states and st_ and st_ not in selected_states:
         return False
     if selected_counties and co_ and co_ not in selected_counties:
         return False
-    # If an item is missing state/county, we still allow it (so you can see “unknown” items)
+
+    # If missing state/county, keep it visible
     return True
 
 loc_items = [it for it in items if passes_location(it)]
 
+# ---------- Details counts ----------
 top_matches_all = [it for it in loc_items if is_top_match(it, min_acres, max_acres, max_price)]
 possible_all = [it for it in loc_items if is_possible_match(it, min_acres, max_acres)]
-former_all = [it for it in loc_items if is_former_top_match(it)]
 new_all = [it for it in loc_items if is_new(it)]
 
 with st.expander("Details", expanded=False):
     st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("All valid listings", f"{len(loc_items)}")
+    c1.metric("All listings", f"{len(loc_items)}")
     c2.metric("Top matches", f"{len(top_matches_all)}")
     c3.metric("Possible matches", f"{len(possible_all)}")
     c4.metric("New", f"{len(new_all)}")
-
-
 
 st.divider()
 
@@ -329,27 +326,25 @@ if search_query.strip():
 if show_new_only:
     filtered = [it for it in filtered if is_new(it)]
 
-if show_top_matches_only:
+# Matching rules
+if show_top_only:
     allowed = []
     for it in filtered:
         if is_top_match(it, min_acres, max_acres, max_price):
             allowed.append(it)
-        elif show_possible_matches and is_possible_match(it, min_acres, max_acres):
+        elif show_possible and is_possible_match(it, min_acres, max_acres):
             allowed.append(it)
     filtered = allowed
-    filtered = [it for it in filtered if not is_former_top_match(it)]
 else:
-    if not show_former_top_matches:
-        filtered = [it for it in filtered if not is_former_top_match(it)]
-    if not show_possible_matches:
+    # If not "top only", optionally hide possibles
+    if not show_possible:
         filtered = [it for it in filtered if not is_possible_match(it, min_acres, max_acres)]
 
+# Sorting
 def sort_key(it: Dict[str, Any]):
     if is_top_match(it, min_acres, max_acres, max_price):
-        tier = 4
-    elif is_possible_match(it, min_acres, max_acres):
         tier = 3
-    elif is_former_top_match(it):
+    elif is_possible_match(it, min_acres, max_acres):
         tier = 2
     else:
         tier = 1
@@ -401,7 +396,6 @@ def listing_card(it: Dict[str, Any]):
 
     top = is_top_match(it, min_acres, max_acres, max_price)
     possible = is_possible_match(it, min_acres, max_acres)
-    former = is_former_top_match(it)
     new_flag = is_new(it)
 
     badges = []
@@ -409,7 +403,6 @@ def listing_card(it: Dict[str, Any]):
         badges.append("✨️ Top match")
     elif possible:
         badges.append("🧩 Possible match")
-   
     else:
         badges.append("🔎 Found")
 
@@ -436,12 +429,18 @@ def listing_card(it: Dict[str, Any]):
         if price is None:
             st.write("**Price:** —")
         else:
-            st.write(f"**Price:** ${int(price):,}")
+            try:
+                st.write(f"**Price:** ${int(price):,}")
+            except Exception:
+                st.write(f"**Price:** {price}")
 
         if acres is None:
             st.write("**Acres:** —")
         else:
-            st.write(f"**Acres:** {float(acres):g}")
+            try:
+                st.write(f"**Acres:** {float(acres):g}")
+            except Exception:
+                st.write(f"**Acres:** {acres}")
 
         if url:
             st.link_button("Open listing ↗", url, use_container_width=True)
