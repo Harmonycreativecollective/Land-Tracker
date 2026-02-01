@@ -1,8 +1,10 @@
 import base64
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
+from urllib.parse import urlparse
 
 import streamlit as st
 
@@ -29,7 +31,7 @@ def load_data() -> Dict[str, Any]:
         return json.load(f)
 
 data = load_data()
-items: List[Dict[str, Any]] = data.get("items", []) or []
+raw_items: List[Dict[str, Any]] = data.get("items", []) or []
 criteria = data.get("criteria", {}) or {}
 last_updated = data.get("last_updated_utc")
 
@@ -169,6 +171,34 @@ default_max_price = int(criteria.get("max_price", 600000) or 600000)
 default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
 
+# ---------- URL validation (filters out nav / junk pages) ----------
+def is_valid_listing_url(it: Dict[str, Any]) -> bool:
+    u = (it.get("url") or "").strip()
+    if not u:
+        return False
+
+    p = urlparse(u)
+    host = (p.netloc or "").lower()
+    path = (p.path or "").strip("/")
+
+    # LandSearch: require /properties/.../<id>
+    if "landsearch.com" in host:
+        parts = path.split("/")
+        # e.g. properties/some-slug/4901267
+        if len(parts) >= 3 and parts[0] == "properties" and parts[-1].isdigit():
+            return True
+        return False
+
+    # LandWatch: require /property/
+    if "landwatch.com" in host:
+        return "/property/" in ("/" + path + "/")
+
+    # If you add other sources later, default to keeping them
+    return True
+
+# ✅ only show real listing URLs in the app
+items: List[Dict[str, Any]] = [it for it in raw_items if is_valid_listing_url(it)]
+
 # ---------- Status helpers ----------
 STATUS_EMOJI = {
     "available": "🟢 Available",
@@ -204,21 +234,6 @@ def meets_price(it: Dict[str, Any], max_p: int) -> bool:
     except Exception:
         return False
 
-def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
-    status = get_status(it)
-    if is_unavailable(status):
-        return False
-    return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
-
-
-def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
-    status = get_status(it)
-    if is_unavailable(status):
-        return False
-    if not meets_acres(it, min_a, max_a):
-        return False
-    return is_missing_price(it)
-
 def is_missing_price(it: Dict[str, Any]) -> bool:
     p = it.get("price")
 
@@ -230,7 +245,7 @@ def is_missing_price(it: Dict[str, Any]) -> bool:
     if isinstance(p, str) and p.strip() == "":
         return True
 
-    # Some scrapers store missing as 0 (optional — keep if you want)
+    # Optional: treat 0 as missing
     if p == 0:
         return True
 
@@ -242,7 +257,19 @@ def is_missing_price(it: Dict[str, Any]) -> bool:
 
     return False
 
+def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
+    status = get_status(it)
+    if is_unavailable(status):
+        return False
+    return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
 
+def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
+    status = get_status(it)
+    if is_unavailable(status):
+        return False
+    if not meets_acres(it, min_a, max_a):
+        return False
+    return is_missing_price(it)
 
 def is_former_top_match(it: Dict[str, Any]) -> bool:
     status = get_status(it)
@@ -288,17 +315,38 @@ possible_all = [it for it in items if is_possible_match(it, min_acres, max_acres
 former_all = [it for it in items if is_former_top_match(it)]
 new_all = [it for it in items if is_new(it)]
 
+# helpful extra: missing price but acres NOT known (explains "why possible is zero")
+missing_price_all = [it for it in items if not is_unavailable(get_status(it)) and is_missing_price(it)]
+missing_price_no_acres_all = [it for it in missing_price_all if it.get("acres") is None]
+
 with st.expander("Details", expanded=False):
     st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("All found", f"{len(items)}")
+    c1.metric("All valid listings", f"{len(items)}")
     c2.metric("Top matches", f"{len(top_matches_all)}")
     c3.metric("Possible matches", f"{len(possible_all)}")
     c4.metric("New", f"{len(new_all)}")
 
+    # this is the key “why is possible not showing” explanation in numbers
+    if len(missing_price_no_acres_all) > 0:
+        st.caption(
+            f"FYI: {len(missing_price_no_acres_all)} listings have missing price but NO acres captured yet "
+            f"(they cannot qualify as Possible until acres is known)."
+        )
+
     if len(former_all) > 0:
         st.caption(f"Former top matches available: {len(former_all)} (toggle in Filters)")
+    else:
+        st.caption("Former top matches requires status = pending/under contract/sold AND ever_top_match=true.")
+
+    # optional peek (doesn't break anything)
+    with st.expander("Debug: show 5 missing-price listings (to confirm scraper)", expanded=False):
+        sample = missing_price_all[:5]
+        if not sample:
+            st.write("None found.")
+        for it in sample:
+            st.write(f"- {it.get('title')} • acres={it.get('acres')} • status={get_status(it)}")
 
 st.divider()
 
@@ -409,7 +457,7 @@ def listing_card(it: Dict[str, Any]):
         st.subheader(title)
         st.caption(f"{' • '.join(badges)} • {source}")
 
-        if price is None:
+        if is_missing_price(it):
             st.write("**Price:** —")
         else:
             st.write(f"**Price:** ${int(price):,}")
