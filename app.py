@@ -1,17 +1,15 @@
 import base64
 import json
-import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
-from urllib.parse import urlparse
+from typing import Any, Dict, List, Optional
 
 import streamlit as st
 
 # ---------- Paths ----------
 DATA_PATH = Path("data/listings.json")
 LOGO_PATH = Path("assets/kblogo.png")
-PREVIEW_PATH = Path("assets/previewkb.png")  # your branded placeholder
+PREVIEW_PATH = Path("assets/previewkb.png")  # branded placeholder
 
 # ---------- Page config ----------
 st.set_page_config(
@@ -31,7 +29,7 @@ def load_data() -> Dict[str, Any]:
         return json.load(f)
 
 data = load_data()
-raw_items: List[Dict[str, Any]] = data.get("items", []) or []
+items: List[Dict[str, Any]] = data.get("items", []) or []
 criteria = data.get("criteria", {}) or {}
 last_updated = data.get("last_updated_utc")
 
@@ -51,7 +49,7 @@ def format_last_updated_et(ts: str) -> str:
         except Exception:
             return ts
 
-# ---------- Header (logo left, text right) ----------
+# ---------- Header ----------
 def render_header():
     logo_b64 = ""
     if LOGO_PATH.exists():
@@ -96,7 +94,6 @@ def render_header():
             word-break: break-word;
           }}
 
-          /* Placeholder block */
           .kb-ph {{
             width:100%;
             height:220px;
@@ -112,7 +109,6 @@ def render_header():
             height:100%;
             object-fit:cover;
             display:block;
-            filter: saturate(1.0);
           }}
           .kb-ph::after {{
             content:"";
@@ -153,51 +149,22 @@ def render_header():
 
 render_header()
 
-# last updated OUTSIDE filters/details
 if last_updated:
     st.caption(f"Last updated: {format_last_updated_et(last_updated)}")
 
 st.write("")
 
-# ✅ Search stays top-of-page (outside dropdowns)
+# ✅ Search stays top-of-page
 search_query = st.text_input(
     "Search (title / location / source)",
     value="",
-    placeholder="Try: king george, port royal, landsearch, 20 acres…",
+    placeholder="Try: king george, port royal, landwatch, 20 acres…",
 )
 
-# ---------- Defaults (pull from json criteria if present) ----------
+# ---------- Defaults ----------
 default_max_price = int(criteria.get("max_price", 600000) or 600000)
 default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
-
-# ---------- URL validation (filters out nav / junk pages) ----------
-def is_valid_listing_url(it: Dict[str, Any]) -> bool:
-    u = (it.get("url") or "").strip()
-    if not u:
-        return False
-
-    p = urlparse(u)
-    host = (p.netloc or "").lower()
-    path = (p.path or "").strip("/")
-
-    # LandSearch: require /properties/.../<id>
-    if "landsearch.com" in host:
-        parts = path.split("/")
-        # e.g. properties/some-slug/4901267
-        if len(parts) >= 3 and parts[0] == "properties" and parts[-1].isdigit():
-            return True
-        return False
-
-    # LandWatch: require /property/
-    if "landwatch.com" in host:
-        return "/property/" in ("/" + path + "/")
-
-    # If you add other sources later, default to keeping them
-    return True
-
-# ✅ only show real listing URLs in the app
-items: List[Dict[str, Any]] = [it for it in raw_items if is_valid_listing_url(it)]
 
 # ---------- Status helpers ----------
 STATUS_EMOJI = {
@@ -237,19 +204,15 @@ def meets_price(it: Dict[str, Any], max_p: int) -> bool:
 def is_missing_price(it: Dict[str, Any]) -> bool:
     p = it.get("price")
 
-    # Truly missing
     if p is None:
         return True
 
-    # Some scrapers store missing as empty string
     if isinstance(p, str) and p.strip() == "":
         return True
 
-    # Optional: treat 0 as missing
     if p == 0:
         return True
 
-    # Text placeholders some sites use
     if isinstance(p, str):
         s = p.strip().lower()
         if s in {"n/a", "na", "none", "unknown", "call", "call for price", "contact"}:
@@ -264,6 +227,9 @@ def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> 
     return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
 
 def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
+    """
+    Possible match = acres fits, BUT price missing.
+    """
     status = get_status(it)
     if is_unavailable(status):
         return False
@@ -281,6 +247,8 @@ def searchable_text(it: Dict[str, Any]) -> str:
     return " ".join(
         [
             str(it.get("title", "")),
+            str(it.get("county", "")),
+            str(it.get("state", "")),
             str(it.get("source", "")),
             str(it.get("url", "")),
         ]
@@ -295,11 +263,22 @@ def is_new(it: Dict[str, Any]) -> bool:
     except Exception:
         return False
 
-# ---------- Dropdowns ----------
+# ---------- State/County options (from scraper fields) ----------
+def norm_opt(x: Optional[str]) -> str:
+    return (x or "").strip()
+
+states = sorted({norm_opt(it.get("state")) for it in items if norm_opt(it.get("state"))})
+counties = sorted({norm_opt(it.get("county")) for it in items if norm_opt(it.get("county"))})
+
+# ---------- Filters ----------
 with st.expander("Filters", expanded=False):
     max_price = st.number_input("Max price (Top match)", min_value=0, value=default_max_price, step=10000)
     min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
     max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
+
+    # Location filters
+    selected_states = st.multiselect("State", options=states, default=states)
+    selected_counties = st.multiselect("County", options=counties, default=counties)
 
     show_top_matches_only = st.toggle("✨ Top matches only", value=True)
     show_possible_matches = st.toggle("🧩 Include possible matches", value=False)
@@ -309,49 +288,40 @@ with st.expander("Filters", expanded=False):
     sort_newest = st.toggle("Newest first", value=True)
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
-# counts for details
-top_matches_all = [it for it in items if is_top_match(it, min_acres, max_acres, max_price)]
-possible_all = [it for it in items if is_possible_match(it, min_acres, max_acres)]
-former_all = [it for it in items if is_former_top_match(it)]
-new_all = [it for it in items if is_new(it)]
+# ---------- Details counts (based on current inputs) ----------
+def passes_location(it: Dict[str, Any]) -> bool:
+    st_ = norm_opt(it.get("state"))
+    co_ = norm_opt(it.get("county"))
+    if selected_states and st_ and st_ not in selected_states:
+        return False
+    if selected_counties and co_ and co_ not in selected_counties:
+        return False
+    # If an item is missing state/county, we still allow it (so you can see “unknown” items)
+    return True
 
-# helpful extra: missing price but acres NOT known (explains "why possible is zero")
-missing_price_all = [it for it in items if not is_unavailable(get_status(it)) and is_missing_price(it)]
-missing_price_no_acres_all = [it for it in missing_price_all if it.get("acres") is None]
+loc_items = [it for it in items if passes_location(it)]
+
+top_matches_all = [it for it in loc_items if is_top_match(it, min_acres, max_acres, max_price)]
+possible_all = [it for it in loc_items if is_possible_match(it, min_acres, max_acres)]
+former_all = [it for it in loc_items if is_former_top_match(it)]
+new_all = [it for it in loc_items if is_new(it)]
 
 with st.expander("Details", expanded=False):
     st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("All valid listings", f"{len(items)}")
+    c1.metric("All valid listings", f"{len(loc_items)}")
     c2.metric("Top matches", f"{len(top_matches_all)}")
     c3.metric("Possible matches", f"{len(possible_all)}")
     c4.metric("New", f"{len(new_all)}")
 
-    # this is the key “why is possible not showing” explanation in numbers
-    if len(missing_price_no_acres_all) > 0:
-        st.caption(
-            f"FYI: {len(missing_price_no_acres_all)} listings have missing price but NO acres captured yet "
-            f"(they cannot qualify as Possible until acres is known)."
-        )
-
     if len(former_all) > 0:
         st.caption(f"Former top matches available: {len(former_all)} (toggle in Filters)")
-    else:
-        st.caption("Former top matches requires status = pending/under contract/sold AND ever_top_match=true.")
-
-    # optional peek (doesn't break anything)
-    with st.expander("Debug: show 5 missing-price listings (to confirm scraper)", expanded=False):
-        sample = missing_price_all[:5]
-        if not sample:
-            st.write("None found.")
-        for it in sample:
-            st.write(f"- {it.get('title')} • acres={it.get('acres')} • status={get_status(it)}")
 
 st.divider()
 
 # ---------- Apply filters ----------
-filtered = items[:]
+filtered = loc_items[:]
 
 if search_query.strip():
     q = search_query.strip().lower()
@@ -424,6 +394,8 @@ def listing_card(it: Dict[str, Any]):
     price = it.get("price")
     acres = it.get("acres")
     thumb = it.get("thumbnail")
+    st_ = it.get("state") or ""
+    co_ = it.get("county") or ""
 
     status = get_status(it)
     status_badge = STATUS_EMOJI.get(status, STATUS_EMOJI["unknown"])
@@ -448,6 +420,8 @@ def listing_card(it: Dict[str, Any]):
 
     badges.append(status_badge)
 
+    loc_line = " • ".join([x for x in [co_, st_] if x])
+
     with st.container(border=True):
         if thumb:
             st.image(thumb, use_container_width=True)
@@ -455,9 +429,13 @@ def listing_card(it: Dict[str, Any]):
             render_placeholder()
 
         st.subheader(title)
-        st.caption(f"{' • '.join(badges)} • {source}")
 
-        if is_missing_price(it):
+        meta_bits = [" • ".join(badges), source]
+        if loc_line:
+            meta_bits.insert(1, loc_line)
+        st.caption(" • ".join(meta_bits))
+
+        if price is None:
             st.write("**Price:** —")
         else:
             st.write(f"**Price:** ${int(price):,}")
