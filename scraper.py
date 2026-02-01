@@ -10,8 +10,22 @@ from bs4 import BeautifulSoup
 
 # ====== YOUR SETTINGS ======
 START_URLS = [
-    "https://www.landsearch.com/properties/king-george-va/filter/format=sales,size[min]=10",
-    "https://www.landwatch.com/virginia-land-for-sale/king-george/acres-11-50/available",
+    # ---- LandSearch (county pages, NO filters) ----
+    "https://www.landsearch.com/properties/king-george-va",
+    "https://www.landsearch.com/properties/westmoreland-county-va",
+    "https://www.landsearch.com/properties/stafford-county-va",
+    "https://www.landsearch.com/properties/caroline-county-va",
+    "https://www.landsearch.com/properties/frederick-county-md",
+    "https://www.landsearch.com/properties/anne-arundel-county-md",
+
+    # ---- LandWatch (county pages, NO filters) ----
+    "https://www.landwatch.com/virginia-land-for-sale/king-george",
+    "https://www.landwatch.com/virginia-land-for-sale/westmoreland-county",
+    "https://www.landwatch.com/virginia-land-for-sale/stafford-county",
+    "https://www.landwatch.com/maryland-land-for-sale/caroline-county",
+    "https://www.landwatch.com/maryland-land-for-sale/frederick-county",
+    "https://www.landwatch.com/maryland-land-for-sale/anne-arundel-county",
+]
 ]
 
 MIN_ACRES = 11.0
