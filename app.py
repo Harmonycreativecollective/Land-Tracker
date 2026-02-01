@@ -203,21 +203,16 @@ def meets_price(it: Dict[str, Any], max_p: int) -> bool:
 
 def is_missing_price(it: Dict[str, Any]) -> bool:
     p = it.get("price")
-
     if p is None:
         return True
-
     if isinstance(p, str) and p.strip() == "":
         return True
-
     if p == 0:
         return True
-
     if isinstance(p, str):
         s = p.strip().lower()
         if s in {"n/a", "na", "none", "unknown", "call", "call for price", "contact"}:
             return True
-
     return False
 
 def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
@@ -255,9 +250,31 @@ def is_new(it: Dict[str, Any]) -> bool:
     except Exception:
         return False
 
-# ---------- State/County options ----------
+# ---------- Location options ----------
 def norm_opt(x: Optional[str]) -> str:
     return (x or "").strip()
+
+# ---------- Keep only real property pages ----------
+def is_property_listing(it: Dict[str, Any]) -> bool:
+    url = (it.get("url") or "").strip().lower()
+    if not url:
+        return False
+
+    # LandSearch: property pages look like:
+    # https://www.landsearch.com/properties/<slug...>/<numeric_id>
+    if "landsearch.com" in url:
+        parts = url.rstrip("/").split("/")
+        return ("/properties/" in url) and parts[-1].isdigit()
+
+    # LandWatch: property pages typically contain /property/
+    if "landwatch.com" in url:
+        return "/property/" in url
+
+    # Unknown source: keep it (for future sites), but you can change to False if you want strict
+    return True
+
+# APPLY the property filter so junk nav pages disappear
+items = [it for it in items if is_property_listing(it)]
 
 states = sorted({norm_opt(it.get("state")) for it in items if norm_opt(it.get("state"))})
 counties = sorted({norm_opt(it.get("county")) for it in items if norm_opt(it.get("county"))})
@@ -268,12 +285,12 @@ with st.expander("Filters", expanded=False):
     min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
     max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
 
-    # Location filters (if scraper doesn't provide these yet, the lists are empty)
+    # Location filters (won't break if empty)
     selected_states = st.multiselect("State", options=states, default=states)
     selected_counties = st.multiselect("County", options=counties, default=counties)
 
     # Matching toggles
-    show_top_only = st.toggle("✨ Top matches", value=True)
+    show_top_only = st.toggle("✨ Top matches", value=True)   # default ON
     show_possible = st.toggle("🧩 Possible matches", value=False)
 
     show_new_only = st.toggle("🆕 New only", value=False)
@@ -285,17 +302,19 @@ def passes_location(it: Dict[str, Any]) -> bool:
     st_ = norm_opt(it.get("state"))
     co_ = norm_opt(it.get("county"))
 
-    # If no options exist yet, don't filter at all
+    # If scraper doesn't provide location fields yet, don't filter
     if not states and not counties:
         return True
 
-    # If user cleared selections, treat that as "no filter"
+    # If user selected some states and item has state, enforce it
     if selected_states and st_ and st_ not in selected_states:
         return False
+
+    # If user selected some counties and item has county, enforce it
     if selected_counties and co_ and co_ not in selected_counties:
         return False
 
-    # If missing state/county, keep it visible
+    # Missing state/county stays visible
     return True
 
 loc_items = [it for it in items if passes_location(it)]
@@ -313,6 +332,10 @@ with st.expander("Details", expanded=False):
     c2.metric("Top matches", f"{len(top_matches_all)}")
     c3.metric("Possible matches", f"{len(possible_all)}")
     c4.metric("New", f"{len(new_all)}")
+
+    # Helpful debug to see what scraper is actually returning
+    with st.expander("Debug (first 5 items)", expanded=False):
+        st.json(loc_items[:5])
 
 st.divider()
 
