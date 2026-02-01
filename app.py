@@ -166,7 +166,7 @@ search_query = st.text_input(
 
 # ---------- Defaults (pull from json criteria if present) ----------
 default_max_price = int(criteria.get("max_price", 600000) or 600000)
-default_min_acres = float(criteria.get("min_acres", 11.0) or 11.0)
+default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
 
 # ---------- Status helpers ----------
