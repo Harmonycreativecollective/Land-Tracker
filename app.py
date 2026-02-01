@@ -15,7 +15,7 @@ PREVIEW_PATH = Path("assets/previewkb.png")  # your branded placeholder
 st.set_page_config(
     page_title="KB’s Land Tracker",
     page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🗺️",
-    layout="wide",
+    layout="centered",
 )
 
 TITLE = "KB’s Land Tracker"
