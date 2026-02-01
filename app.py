@@ -9,7 +9,7 @@ import streamlit as st
 # ---------- Paths ----------
 DATA_PATH = Path("data/listings.json")
 LOGO_PATH = Path("assets/kblogo.png")
-PREVIEW_PATH = Path("assets/previewkb.png")  # your branded placeholder
+PLACEHOLDER_PATH = Path("assets/previewkb.png")
 
 # ---------- Page config ----------
 st.set_page_config(
@@ -21,6 +21,57 @@ st.set_page_config(
 TITLE = "KB’s Land Tracker"
 CAPTION = "What’s meant for you is already in motion."
 
+# ---------- CSS ----------
+st.markdown("""
+<style>
+/* Card image wrapper */
+.listing-image {
+  position: relative;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f6f7f9, #eef0f3);
+}
+
+/* Image itself */
+.listing-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Desktop size cap */
+@media (min-width: 900px) {
+  .listing-image {
+    max-height: 260px;
+  }
+}
+
+/* Mobile size */
+@media (max-width: 899px) {
+  .listing-image {
+    max-height: 200px;
+  }
+}
+
+/* Preview overlay */
+.preview-overlay {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  transform: translate(-50%, -50%);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #444;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ---------- Load data ----------
 def load_data() -> Dict[str, Any]:
     if not DATA_PATH.exists():
@@ -29,148 +80,22 @@ def load_data() -> Dict[str, Any]:
         return json.load(f)
 
 data = load_data()
-items: List[Dict[str, Any]] = data.get("items", []) or []
-criteria = data.get("criteria", {}) or {}
+items = data.get("items", [])
+criteria = data.get("criteria", {})
 last_updated = data.get("last_updated_utc")
 
-# ---------- Time formatting (Eastern) ----------
-def format_last_updated_et(ts: str) -> str:
+# ---------- Time ----------
+def format_time(ts: str) -> str:
     if not ts:
         return ""
     try:
         dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-        from zoneinfo import ZoneInfo
-        dt_et = dt.astimezone(ZoneInfo("America/New_York"))
-        return dt_et.strftime("%b %d, %Y • %I:%M %p ET")
+        return dt.strftime("%b %d, %Y • %I:%M %p")
     except Exception:
-        try:
-            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-            return dt.strftime("%b %d, %Y • %I:%M %p")
-        except Exception:
-            return ts
+        return ts
 
-# ---------- Header (logo left, text right) ----------
-def render_header():
-    logo_b64 = ""
-    if LOGO_PATH.exists():
-        logo_b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("utf-8")
-
-    st.markdown(
-        f"""
-        <style>
-          .kb-header {{
-            display:flex;
-            align-items:center;
-            gap:16px;
-            margin-top: 0.25rem;
-            margin-bottom: 0.35rem;
-          }}
-          .kb-logo {{
-            width:140px;
-            height:140px;
-            flex: 0 0 140px;
-            border-radius: 16px;
-            object-fit: contain;
-          }}
-          .kb-text {{
-            flex: 1 1 auto;
-            min-width: 0;
-          }}
-          .kb-title {{
-            font-size: clamp(1.55rem, 3.3vw, 2.05rem);
-            font-weight: 900;
-            line-height: 1.05;
-            margin: 0;
-            color: #0f172a;
-            overflow-wrap: anywhere;
-            word-break: break-word;
-          }}
-          .kb-caption {{
-            font-size: clamp(1.05rem, 2.5vw, 1.22rem);
-            color: rgba(49, 51, 63, 0.75);
-            margin-top: 8px;
-            line-height: 1.35;
-            overflow-wrap: anywhere;
-            word-break: break-word;
-          }}
-
-          /* Placeholder block */
-          .kb-ph {{
-            width:100%;
-            height:220px;
-            border-radius:16px;
-            overflow:hidden;
-            position:relative;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-          }}
-          .kb-ph img {{
-            width:100%;
-            height:100%;
-            object-fit:cover;
-            display:block;
-            filter: saturate(1.0);
-          }}
-          .kb-ph::after {{
-            content:"";
-            position:absolute;
-            inset:0;
-            background: linear-gradient(
-              to bottom,
-              rgba(255,255,255,0.0) 0%,
-              rgba(255,255,255,0.30) 45%,
-              rgba(255,255,255,0.70) 100%
-            );
-          }}
-          .kb-ph-label {{
-            position:absolute;
-            z-index:2;
-            text-align:center;
-            font-weight:800;
-            letter-spacing:0.2px;
-            color: rgba(15, 23, 42, 0.78);
-            padding: 10px 14px;
-            border-radius: 999px;
-            background: rgba(255,255,255,0.65);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(15,23,42,0.08);
-          }}
-        </style>
-
-        <div class="kb-header">
-          {"<img class='kb-logo' src='data:image/png;base64," + logo_b64 + "' />" if logo_b64 else ""}
-          <div class="kb-text">
-            <div class="kb-title">{TITLE}</div>
-            <div class="kb-caption">{CAPTION}</div>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-render_header()
-
-# last updated OUTSIDE filters/details
-if last_updated:
-    st.caption(f"Last updated: {format_last_updated_et(last_updated)}")
-
-st.write("")
-
-# ✅ Search stays top-of-page (outside dropdowns)
-search_query = st.text_input(
-    "Search (title / location / source)",
-    value="",
-    placeholder="Try: king george, port royal, landsearch, 20 acres…",
-)
-
-# ---------- Defaults (pull from json criteria if present) ----------
-default_max_price = int(criteria.get("max_price", 600000) or 600000)
-default_min_acres = float(criteria.get("min_acres", 11.0) or 11.0)
-default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
-
-# ---------- Status helpers ----------
-STATUS_EMOJI = {
+# ---------- Status ----------
+STATUS_LABELS = {
     "available": "🟢 Available",
     "under_contract": "🟡 Under contract",
     "pending": "⏳ Pending",
@@ -178,229 +103,94 @@ STATUS_EMOJI = {
     "unknown": "⚪ Status unknown",
 }
 
-def get_status(it: Dict[str, Any]) -> str:
-    s = (it.get("status") or "unknown").strip().lower()
-    return s if s in STATUS_EMOJI else "unknown"
+def get_status(it):
+    s = (it.get("status") or "unknown").lower()
+    return s if s in STATUS_LABELS else "unknown"
 
-def is_unavailable(status: str) -> bool:
-    return status in {"under_contract", "pending", "sold"}
+def unavailable(s):
+    return s in {"under_contract", "pending", "sold"}
 
 # ---------- Match logic ----------
-def meets_acres(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
-    acres = it.get("acres")
-    if acres is None:
-        return False
-    try:
-        return min_a <= float(acres) <= max_a
-    except Exception:
-        return False
+def is_top(it):
+    return (
+        not unavailable(get_status(it))
+        and it.get("price") is not None
+        and it.get("acres") is not None
+        and it["price"] <= criteria.get("max_price", 600000)
+    )
 
-def meets_price(it: Dict[str, Any], max_p: int) -> bool:
-    price = it.get("price")
-    if price is None:
-        return False
-    try:
-        return int(price) <= int(max_p)
-    except Exception:
-        return False
+def is_possible(it):
+    return (
+        not unavailable(get_status(it))
+        and it.get("acres") is not None
+        and it.get("price") is None
+    )
 
-def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
-    status = get_status(it)
-    if is_unavailable(status):
-        return False
-    return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
+def is_former(it):
+    return unavailable(get_status(it)) and it.get("ever_top_match", False)
 
-def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
-    status = get_status(it)
-    if is_unavailable(status):
-        return False
-    if not meets_acres(it, min_a, max_a):
-        return False
-    return it.get("price") is None
+# ---------- Header ----------
+st.title(TITLE)
+st.caption(CAPTION)
 
-def is_former_top_match(it: Dict[str, Any]) -> bool:
-    status = get_status(it)
-    if not is_unavailable(status):
-        return False
-    return bool(it.get("ever_top_match", False))
-
-def searchable_text(it: Dict[str, Any]) -> str:
-    return " ".join(
-        [
-            str(it.get("title", "")),
-            str(it.get("source", "")),
-            str(it.get("url", "")),
-        ]
-    ).lower()
-
-def parse_dt(it: Dict[str, Any]) -> str:
-    return it.get("found_utc") or ""
-
-def is_new(it: Dict[str, Any]) -> bool:
-    try:
-        return bool(it.get("found_utc")) and bool(last_updated) and it.get("found_utc") == last_updated
-    except Exception:
-        return False
-
-# ---------- Dropdowns ----------
-with st.expander("Filters", expanded=False):
-    max_price = st.number_input("Max price (Top match)", min_value=0, value=default_max_price, step=10000)
-    min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
-    max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
-
-    show_top_matches_only = st.toggle("✨ Top matches only", value=True)
-    show_possible_matches = st.toggle("🧩 Include possible matches", value=False)
-    show_former_top_matches = st.toggle("⭐ Former top matches", value=False)
-
-    show_new_only = st.toggle("🆕 New only", value=False)
-    sort_newest = st.toggle("Newest first", value=True)
-    show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
-
-# counts for details
-top_matches_all = [it for it in items if is_top_match(it, min_acres, max_acres, max_price)]
-possible_all = [it for it in items if is_possible_match(it, min_acres, max_acres)]
-former_all = [it for it in items if is_former_top_match(it)]
-new_all = [it for it in items if is_new(it)]
-
-with st.expander("Details", expanded=False):
-    st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
-
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("All found", f"{len(items)}")
-    c2.metric("Top matches", f"{len(top_matches_all)}")
-    c3.metric("Possible matches", f"{len(possible_all)}")
-    c4.metric("New", f"{len(new_all)}")
-
-    if len(former_all) > 0:
-        st.caption(f"Former top matches available: {len(former_all)} (toggle in Filters)")
+if last_updated:
+    st.caption(f"Last updated: {format_time(last_updated)}")
 
 st.divider()
 
-# ---------- Apply filters ----------
-filtered = items[:]
-
-if search_query.strip():
-    q = search_query.strip().lower()
-    filtered = [it for it in filtered if q in searchable_text(it)]
-
-if show_new_only:
-    filtered = [it for it in filtered if is_new(it)]
-
-if show_top_matches_only:
-    allowed = []
-    for it in filtered:
-        if is_top_match(it, min_acres, max_acres, max_price):
-            allowed.append(it)
-        elif show_possible_matches and is_possible_match(it, min_acres, max_acres):
-            allowed.append(it)
-    filtered = allowed
-    filtered = [it for it in filtered if not is_former_top_match(it)]
-else:
-    if not show_former_top_matches:
-        filtered = [it for it in filtered if not is_former_top_match(it)]
-    if not show_possible_matches:
-        filtered = [it for it in filtered if not is_possible_match(it, min_acres, max_acres)]
-
-def sort_key(it: Dict[str, Any]):
-    if is_top_match(it, min_acres, max_acres, max_price):
-        tier = 4
-    elif is_possible_match(it, min_acres, max_acres):
-        tier = 3
-    elif is_former_top_match(it):
-        tier = 2
-    else:
-        tier = 1
-    return (tier, parse_dt(it))
-
-if sort_newest:
-    filtered = sorted(filtered, key=sort_key, reverse=True)
-
-filtered = filtered[:show_n]
-
-# ---------- Placeholder renderer ----------
-def render_placeholder():
-    if PREVIEW_PATH.exists():
-        ph_b64 = base64.b64encode(PREVIEW_PATH.read_bytes()).decode("utf-8")
-        st.markdown(
-            f"""
-            <div class="kb-ph">
-              <img src="data:image/png;base64,{ph_b64}" />
-              <div class="kb-ph-label">Preview not available</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            """
-            <div style="width:100%; height:220px; background:#f2f2f2; border-radius:16px;
-                        display:flex; align-items:center; justify-content:center; color:#777;
-                        font-weight:700;">
-                Preview not available
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-# ---------- Listing cards ----------
+# ---------- Listing card ----------
 def listing_card(it: Dict[str, Any]):
-    title = it.get("title") or f"{it.get('source', 'Land')} listing"
-    url = it.get("url") or ""
-    source = it.get("source") or ""
+    title = it.get("title", "Land listing")
+    source = it.get("source", "")
+    url = it.get("url")
     price = it.get("price")
     acres = it.get("acres")
     thumb = it.get("thumbnail")
 
-    status = get_status(it)
-    status_badge = STATUS_EMOJI.get(status, STATUS_EMOJI["unknown"])
-
-    top = is_top_match(it, min_acres, max_acres, max_price)
-    possible = is_possible_match(it, min_acres, max_acres)
-    former = is_former_top_match(it)
-    new_flag = is_new(it)
-
     badges = []
-    if top:
-        badges.append("✨️ Top match")
-    elif possible:
+    if is_top(it):
+        badges.append("✨ Top match")
+    elif is_possible(it):
         badges.append("🧩 Possible match")
-    elif former:
+    elif is_former(it):
         badges.append("⭐ Former top match")
     else:
         badges.append("🔎 Found")
 
-    if new_flag:
-        badges.append("🆕 NEW")
+    badges.append(STATUS_LABELS[get_status(it)])
+    badges.append(source)
 
-    badges.append(status_badge)
+    # ---------- Image logic ----------
+    has_real_image = bool(thumb)
+
+    if has_real_image:
+        image_html = f"""
+        <div class="listing-image">
+            <img src="{thumb}">
+        </div>
+        """
+    else:
+        image_html = f"""
+        <div class="listing-image">
+            <img src="{PLACEHOLDER_PATH}">
+            <div class="preview-overlay">Preview not available</div>
+        </div>
+        """
 
     with st.container(border=True):
-        if thumb:
-            st.image(thumb, use_container_width=True)
-        else:
-            render_placeholder()
+        st.markdown(image_html, unsafe_allow_html=True)
 
         st.subheader(title)
-        st.caption(f"{' • '.join(badges)} • {source}")
+        st.caption(" • ".join(badges))
 
-        if price is None:
-            st.write("**Price:** —")
-        else:
-            st.write(f"**Price:** ${int(price):,}")
-
-        if acres is None:
-            st.write("**Acres:** —")
-        else:
-            st.write(f"**Acres:** {float(acres):g}")
+        st.write(f"**Price:** ${price:,.0f}" if price else "**Price:** —")
+        st.write(f"**Acres:** {acres:g}" if acres else "**Acres:** —")
 
         if url:
             st.link_button("Open listing ↗", url, use_container_width=True)
 
-# Grid (2 columns)
+# ---------- Render ----------
 cols = st.columns(2)
-for idx, it in enumerate(filtered):
-    with cols[idx % 2]:
+for i, it in enumerate(items):
+    with cols[i % 2]:
         listing_card(it)
-
-if not filtered:
-    st.info("No listings matched your current search/filters.")
