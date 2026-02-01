@@ -210,13 +210,39 @@ def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> 
         return False
     return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
 
+
 def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
     status = get_status(it)
     if is_unavailable(status):
         return False
     if not meets_acres(it, min_a, max_a):
         return False
-    return it.get("price") is None
+    return is_missing_price(it)
+
+def is_missing_price(it: Dict[str, Any]) -> bool:
+    p = it.get("price")
+
+    # Truly missing
+    if p is None:
+        return True
+
+    # Some scrapers store missing as empty string
+    if isinstance(p, str) and p.strip() == "":
+        return True
+
+    # Some scrapers store missing as 0 (optional — keep if you want)
+    if p == 0:
+        return True
+
+    # Text placeholders some sites use
+    if isinstance(p, str):
+        s = p.strip().lower()
+        if s in {"n/a", "na", "none", "unknown", "call", "call for price", "contact"}:
+            return True
+
+    return False
+
+
 
 def is_former_top_match(it: Dict[str, Any]) -> bool:
     status = get_status(it)
