@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-01T19:05:11.263630+00:00",
+  "last_updated_utc": "2026-02-02T05:17:14.446298+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -262,28 +262,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995041",
-      "price": 199000,
-      "acres": 14.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995040",
-      "price": 249000,
-      "acres": 14.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/king-george-va-22485/4995024",
       "price": 249000,
       "acres": 10.0,
@@ -306,9 +284,20 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995025",
-      "price": 299000,
-      "acres": 18.5,
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995041",
+      "price": 199000,
+      "acres": 14.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995040",
+      "price": 249000,
+      "acres": 14.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
@@ -331,6 +320,17 @@
       "url": "https://www.landsearch.com/properties/compass-court-lot-24-king-george-va-22485/2220814",
       "price": 124900,
       "acres": 10.9,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995025",
+      "price": 299000,
+      "acres": 18.5,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
@@ -526,6 +526,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/5021087",
+      "price": 200000,
+      "acres": 6.75,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-02T05:17:14.446298+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/2202-belvedere-dr-king-george-va-22485/4996354",
       "price": 330000,
       "acres": 20.0,
@@ -544,17 +555,6 @@
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/salem-church-road-lot-17-king-george-va-22485/4565976",
-      "price": 174900,
-      "acres": 10.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -607,17 +607,6 @@
       "price": 825000,
       "acres": 18.2,
       "thumbnail": "https://cdn.landsearch.com/listings/4PBhb/small/montross-va-154549600.jpg",
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/687-prospect-hill-rd-montross-va-22520/4805895",
-      "price": 515000,
-      "acres": 2.86,
-      "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
@@ -801,6 +790,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/bay-pointe-dr-montross-va-22520/4333574",
+      "price": 35000,
+      "acres": 0.48,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/colonial-beach-va-22443/5016209",
       "price": 22443,
       "acres": 0.06,
@@ -834,17 +834,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/bay-pointe-dr-montross-va-22520/4333574",
-      "price": 35000,
-      "acres": 0.48,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/wilton-woods-dr-hague-va-22469/2664273",
       "price": 69900,
       "acres": 1.1,
@@ -867,12 +856,12 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/n-independence-dr-montross-va-22520/4865394",
-      "price": 125000,
-      "acres": 0.67,
+      "url": "https://www.landsearch.com/properties/196-matthews-cove-dr-montross-va-22520/4929617",
+      "price": 625000,
+      "acres": 2.34,
       "thumbnail": null,
       "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "found_utc": "2026-02-02T05:17:14.446298+00:00",
       "ever_top_match": false
     },
     {
@@ -900,6 +889,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/n-independence-dr-montross-va-22520/4865394",
+      "price": 125000,
+      "acres": 0.67,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/252-lighthouse-ln-montross-va-22520/4856279",
       "price": 52500,
       "acres": 1.0,
@@ -918,6 +918,17 @@
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/4516-oldhams-rd-hague-va-22469/4810472",
+      "price": 559000,
+      "acres": 38.7,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -951,17 +962,6 @@
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/4516-oldhams-rd-hague-va-22469/4810472",
-      "price": 559000,
-      "acres": 38.7,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -1021,9 +1021,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/pratts-pl-montross-va-22520/4947932",
-      "price": 22520,
-      "acres": 1.5,
+      "url": "https://www.landsearch.com/properties/256-pierce-creek-lndg-montross-va-22520/4264904",
+      "price": 327000,
+      "acres": 2.69,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -1032,9 +1032,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/256-pierce-creek-lndg-montross-va-22520/4264904",
-      "price": 327000,
-      "acres": 2.69,
+      "url": "https://www.landsearch.com/properties/pratts-pl-montross-va-22520/4947932",
+      "price": 22520,
+      "acres": 1.5,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -1208,17 +1208,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/8-hope-valley-ln-stafford-va-22554/4960901",
-      "price": 990000,
-      "acres": 5.47,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T05:17:51.610482+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/916-decatur-rd-stafford-va-22554/5020743",
       "price": 765000,
       "acres": 5.22,
@@ -1230,12 +1219,12 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/116-hidden-ln-stafford-va-22556/5015622",
-      "price": 925000,
-      "acres": 5.0,
+      "url": "https://www.landsearch.com/properties/8-hope-valley-ln-stafford-va-22554/4960901",
+      "price": 990000,
+      "acres": 5.47,
       "thumbnail": null,
       "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "found_utc": "2026-02-01T05:17:51.610482+00:00",
       "ever_top_match": false
     },
     {
@@ -1244,6 +1233,17 @@
       "url": "https://www.landsearch.com/properties/569-tacketts-mill-rd-stafford-va-22556/4918835",
       "price": 958000,
       "acres": 4.43,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/116-hidden-ln-stafford-va-22556/5015622",
+      "price": 925000,
+      "acres": 5.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -1296,17 +1296,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/53-brooke-crest-ln-stafford-va-22554/4992396",
-      "price": 730000,
-      "acres": 3.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/182-wood-landing-rd-fredericksburg-va-22405/4978573",
       "price": 795000,
       "acres": 3.0,
@@ -1329,9 +1318,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/1573-garrisonville-rd-stafford-va-22556/4941179",
-      "price": 22556,
-      "acres": 6.66,
+      "url": "https://www.landsearch.com/properties/53-brooke-crest-ln-stafford-va-22554/4992396",
+      "price": 730000,
+      "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -1343,6 +1332,28 @@
       "url": "https://www.landsearch.com/properties/51-maidenhair-way-stafford-va-22556/4829431",
       "price": 1224900,
       "acres": 3.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/1573-garrisonville-rd-stafford-va-22556/4941179",
+      "price": 22556,
+      "acres": 6.66,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/21-reids-rd-stafford-va-22554/4924886",
+      "price": 520000,
+      "acres": 4.5,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -1365,6 +1376,17 @@
       "url": "https://www.landsearch.com/properties/8-hope-valley-ln-stafford-va-22554/4962161",
       "price": 22554,
       "acres": 5.47,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/45-crestwood-ln-stafford-va-22554/5019352",
+      "price": 699000,
+      "acres": 2.52,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -1450,17 +1472,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/21-reids-rd-stafford-va-22554/4924886",
-      "price": 520000,
-      "acres": 4.5,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/ramoth-church-rd-stafford-va-22554/4475818",
       "price": 1700000,
       "acres": 19.1,
@@ -1516,17 +1527,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/23-old-banks-fredericksburg-va-22406/4568720",
-      "price": 996530,
-      "acres": 10.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/315-sandy-ridge-rd-fredericksburg-va-22405/4904394",
       "price": 555000,
       "acres": 3.16,
@@ -1538,9 +1538,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/45-crestwood-ln-stafford-va-22554/5019352",
-      "price": 699000,
-      "acres": 2.52,
+      "url": "https://www.landsearch.com/properties/23-old-banks-fredericksburg-va-22406/4568720",
+      "price": 996530,
+      "acres": 10.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -1560,17 +1560,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/202-sail-cv-stafford-va-22554/4724414",
-      "price": 44900,
-      "acres": 0.58,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/18-winslow-rd-fredericksburg-va-22406/4864421",
       "price": 500000,
       "acres": 3.0,
@@ -1582,9 +1571,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/8-winter-wheat-ln-fredericksburg-va-22406/4770723",
-      "price": 549900,
-      "acres": 7.52,
+      "url": "https://www.landsearch.com/properties/202-sail-cv-stafford-va-22554/4724414",
+      "price": 44900,
+      "acres": 0.58,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -1643,6 +1632,17 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/mountain-view-rd-stafford-va-22556/4245209",
+      "price": 1099645,
+      "acres": 4.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-02T05:17:14.446298+00:00",
       "ever_top_match": false
     },
     {
@@ -1879,9 +1879,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/6-stafford-cv-ruther-glen-va-22546/4775512",
-      "price": 49900,
-      "acres": 0.38,
+      "url": "https://www.landsearch.com/properties/commerce-way-ruther-glen-va-22546/2817590",
+      "price": 545000,
+      "acres": 1.5,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -1890,9 +1890,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/commerce-way-ruther-glen-va-22546/2817590",
-      "price": 545000,
-      "acres": 1.5,
+      "url": "https://www.landsearch.com/properties/6-stafford-cv-ruther-glen-va-22546/4775512",
+      "price": 49900,
+      "acres": 0.38,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2022,9 +2022,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/13499-wingfield-ln-ruther-glen-va-22546/4980725",
-      "price": 220000,
-      "acres": 15.5,
+      "url": "https://www.landsearch.com/properties/25692-a-p-hill-blvd-port-royal-va-22535/4820031",
+      "price": 22535,
+      "acres": 19.3,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2033,9 +2033,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/25692-a-p-hill-blvd-port-royal-va-22535/4820031",
-      "price": 22535,
-      "acres": 19.3,
+      "url": "https://www.landsearch.com/properties/13499-wingfield-ln-ruther-glen-va-22546/4980725",
+      "price": 220000,
+      "acres": 15.5,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2231,10 +2231,10 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/12804-spruce-run-rd-myersville-md-21773/4988186",
-      "price": 865000,
-      "acres": 7.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QxhT/small/myersville-md-158869398.jpg",
+      "url": "https://www.landsearch.com/properties/2710-a-monument-rd-myersville-md-21773/4784878",
+      "price": 698500,
+      "acres": 5.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4NH4j/small/myersville-md-152104841.jpg",
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
@@ -2242,10 +2242,10 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/2710-a-monument-rd-myersville-md-21773/4784878",
-      "price": 698500,
-      "acres": 5.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4NH4j/small/myersville-md-152104841.jpg",
+      "url": "https://www.landsearch.com/properties/12804-spruce-run-rd-myersville-md-21773/4988186",
+      "price": 865000,
+      "acres": 7.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QxhT/small/myersville-md-158869398.jpg",
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
@@ -2319,6 +2319,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/edgemont-rd-frederick-md-21702/4518425",
+      "price": 200000,
+      "acres": 5.8,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/2730-marker-rd-middletown-md-21769/4969305",
       "price": 1500000,
       "acres": 37.2,
@@ -2341,9 +2352,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/5222-mussetter-rd-ijamsville-md-21754/4849989",
-      "price": 759999,
-      "acres": 3.0,
+      "url": "https://www.landsearch.com/properties/17026-eylers-valley-rd-emmitsburg-md-21727/4950280",
+      "price": 444999,
+      "acres": 5.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2352,9 +2363,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/edgemont-rd-frederick-md-21702/4518425",
-      "price": 200000,
-      "acres": 5.8,
+      "url": "https://www.landsearch.com/properties/5222-mussetter-rd-ijamsville-md-21754/4849989",
+      "price": 759999,
+      "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2374,9 +2385,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/6710-ford-rd-frederick-md-21702/4965117",
-      "price": 499900,
-      "acres": 2.7,
+      "url": "https://www.landsearch.com/properties/5948-white-flint-dr-frederick-md-21702/4932053",
+      "price": 1599999,
+      "acres": 2.46,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2385,9 +2396,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/5948-white-flint-dr-frederick-md-21702/4932053",
-      "price": 1599999,
-      "acres": 2.46,
+      "url": "https://www.landsearch.com/properties/6710-ford-rd-frederick-md-21702/4965117",
+      "price": 499900,
+      "acres": 2.7,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2440,9 +2451,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/4026-cherry-ln-jefferson-md-21755/5012762",
-      "price": 700000,
-      "acres": 1.52,
+      "url": "https://www.landsearch.com/properties/6527-morningside-ct-middletown-md-21769/4911650",
+      "price": 574900,
+      "acres": 1.72,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2451,9 +2462,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/6527-morningside-ct-middletown-md-21769/4911650",
-      "price": 574900,
-      "acres": 1.72,
+      "url": "https://www.landsearch.com/properties/4026-cherry-ln-jefferson-md-21755/5012762",
+      "price": 700000,
+      "acres": 1.52,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2594,17 +2605,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/se-thompson-drive-lot-2-thompson-dr-ijamsville-md-21754/1736396",
-      "price": 700000,
-      "acres": 5.25,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/elmer-derr-rd-frederick-md-21703/5016072",
       "price": 310000,
       "acres": 18.5,
@@ -2619,6 +2619,17 @@
       "url": "https://www.landsearch.com/properties/142-water-st-thurmont-md-21788/4989013",
       "price": 1200000,
       "acres": 3.87,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/se-thompson-drive-lot-2-thompson-dr-ijamsville-md-21754/1736396",
+      "price": 700000,
+      "acres": 5.25,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2726,17 +2737,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/17026-eylers-valley-rd-emmitsburg-md-21727/4950280",
-      "price": 434999,
-      "acres": 5.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/2240-monument-rd-myersville-md-21773/4936554",
       "price": 700000,
       "acres": 14.0,
@@ -2770,6 +2770,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/873-benjamin-br-davidsonville-md-21035/4669309",
+      "price": 2150000,
+      "acres": 8.1,
+      "thumbnail": "https://cdn.landsearch.com/listings/4MDTC/small/davidsonville-md-151921664.jpg",
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/301-sturtons-ln-pasadena-md-21122/4383618",
       "price": 1300000,
       "acres": 6.66,
@@ -2792,17 +2803,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/668-n-bestgate-rd-annapolis-md-21401/4870330",
-      "price": 325000,
-      "acres": 0.65,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Pt8y/small/annapolis-md-154070745.jpg",
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/13-jessie-rd-harwood-md-20776/3660158",
       "price": 1300000,
       "acres": 4.89,
@@ -2814,20 +2814,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/10-annapolis-st-annapolis-md-21401/4806409",
-      "price": 975000,
-      "acres": 0.34,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/873-benjamin-br-davidsonville-md-21035/4669309",
-      "price": 2150000,
-      "acres": 8.1,
+      "url": "https://www.landsearch.com/properties/668-n-bestgate-rd-annapolis-md-21401/4870330",
+      "price": 325000,
+      "acres": 0.65,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2839,6 +2828,17 @@
       "url": "https://www.landsearch.com/properties/1458-wilderness-ridge-trl-crownsville-md-21032/4600746",
       "price": 1200000,
       "acres": 10.4,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/10-annapolis-st-annapolis-md-21401/4806409",
+      "price": 975000,
+      "acres": 0.34,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -2902,17 +2902,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/726-sunpoint-rd-davidsonville-md-21035/4998542",
-      "price": 1550000,
-      "acres": 5.29,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/5169-mountain-rd-pasadena-md-21122/4830491",
       "price": 1200000,
       "acres": 0.61,
@@ -2968,17 +2957,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/7343-2-green-acres-dr-glen-burnie-md-21060/4727892",
-      "price": 150000,
-      "acres": 0.69,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/1883-cedar-dr-severn-md-21144/4731308",
       "price": 237250,
       "acres": 3.27,
@@ -2990,9 +2968,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/49-old-solomons-island-rd-lothian-md-20711/4010269",
-      "price": 199000,
-      "acres": 2.0,
+      "url": "https://www.landsearch.com/properties/7343-2-green-acres-dr-glen-burnie-md-21060/4727892",
+      "price": 150000,
+      "acres": 0.69,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -3001,9 +2979,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/1133-steamboat-rd-shady-side-md-20764/3778890",
-      "price": 997000,
-      "acres": 1.6,
+      "url": "https://www.landsearch.com/properties/49-old-solomons-island-rd-lothian-md-20711/4010269",
+      "price": 199000,
+      "acres": 2.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -3056,17 +3034,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/17-vinter-ln-pasadena-md-21122/4922919",
-      "price": 1390000,
-      "acres": 2.88,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/1650-cedar-ln-shady-side-md-20764/4846874",
       "price": 729900,
       "acres": 3.0,
@@ -3103,6 +3070,17 @@
       "url": "https://www.landsearch.com/properties/1019-landon-ln-arnold-md-21012/4948580",
       "price": 75000,
       "acres": 0.48,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/17-vinter-ln-pasadena-md-21122/4922919",
+      "price": 1390000,
+      "acres": 2.88,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -3155,28 +3133,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/benning-rd-galesville-md-20765/4805453",
-      "price": 399000,
-      "acres": 0.39,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/1635-wall-dr-pasadena-md-21122/4789222",
-      "price": 25000,
-      "acres": 0.34,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/176-southdown-rd-edgewater-md-21037/4341118",
       "price": 109900,
       "acres": 0.12,
@@ -3191,6 +3147,28 @@
       "url": "https://www.landsearch.com/properties/701-church-st-baltimore-md-21225/4992299",
       "price": 94900,
       "acres": 0.04,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/benning-rd-galesville-md-20765/4805453",
+      "price": 399000,
+      "acres": 0.39,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/1635-wall-dr-pasadena-md-21122/4789222",
+      "price": 25000,
+      "acres": 0.34,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -3232,9 +3210,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/1814-and-1836-pleasant-plains-and-cherry-rd-annapolis-md-21409/4785924",
-      "price": 1300000,
-      "acres": 4.0,
+      "url": "https://www.landsearch.com/properties/509-overhill-dr-edgewater-md-21037/4585917",
+      "price": 299999,
+      "acres": 0.48,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -3243,9 +3221,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/509-overhill-dr-edgewater-md-21037/4585917",
-      "price": 299999,
-      "acres": 0.48,
+      "url": "https://www.landsearch.com/properties/1814-and-1836-pleasant-plains-and-cherry-rd-annapolis-md-21409/4785924",
+      "price": 1300000,
+      "acres": 4.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -3293,6 +3271,28 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/cornfield-rd-pasadena-md-21122/4856402",
+      "price": 500000,
+      "acres": 0.52,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-02T05:17:14.446298+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/3520-castle-way-davidsonville-md-21035/4945935",
+      "price": 1749900,
+      "acres": 2.33,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-02T05:17:14.446298+00:00",
       "ever_top_match": false
     }
   ]
