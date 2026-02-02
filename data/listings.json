@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-02T05:17:14.446298+00:00",
+  "last_updated_utc": "2026-02-02T08:00:42.005516+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -85,17 +85,6 @@
     },
     {
       "source": "LandSearch",
-      "title": "2.49 Acres of Residential Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/john-minor-dr-king-george-va-22485/4709415",
-      "price": 65000,
-      "acres": 2.49,
-      "thumbnail": "https://cdn.landsearch.com/listings/4N2j9/large/king-george-va-147881138.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
       "title": "228 Acres of Recreational Land with Home for Sale in King George, Virginia",
       "url": "https://www.landsearch.com/properties/18134-green-blvd-king-george-va-22485/4531399",
       "price": 2200000,
@@ -140,12 +129,12 @@
     },
     {
       "source": "LandSearch",
-      "title": "LandSearch listing",
+      "title": "10.9 Acres of Land with Home for Sale in King George, Virginia",
       "url": "https://www.landsearch.com/properties/8528-worman-dr-king-george-va-22485/4979196",
       "price": 1010000,
       "acres": 10.9,
-      "thumbnail": null,
-      "status": "unknown",
+      "thumbnail": "https://cdn.landsearch.com/listings/4QspB/large/king-george-va-158609119.jpg",
+      "status": "available",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -555,6 +544,17 @@
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/salem-church-road-lot-17-king-george-va-22485/4565976",
+      "price": 174900,
+      "acres": 10.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-02T08:00:42.005516+00:00",
+      "ever_top_match": true
     },
     {
       "source": "LandSearch",
