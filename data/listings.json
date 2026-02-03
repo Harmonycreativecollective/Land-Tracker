@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-03T07:58:14.829333+00:00",
+  "last_updated_utc": "2026-02-03T14:32:09.797662+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -1912,17 +1912,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/16141-catalpa-dr-hanover-va-23069/4979197",
-      "price": 515000,
-      "acres": 2.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/31207-portobago-trl-port-royal-va-22535/4734576",
       "price": 531560,
       "acres": 3.18,
@@ -2193,6 +2182,17 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/224-woodside-ln-ruther-glen-va-22546/4264552",
+      "price": 40000,
+      "acres": 0.45,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-03T14:32:09.797662+00:00",
       "ever_top_match": false
     },
     {
