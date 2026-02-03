@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-03T14:32:09.797662+00:00",
+  "last_updated_utc": "2026-02-03T19:55:44.596617+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -603,24 +603,24 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/730-n-independence-dr-montross-va-22520/4884472",
-      "price": 825000,
-      "acres": 18.2,
-      "thumbnail": "https://cdn.landsearch.com/listings/4PBhb/small/montross-va-154549600.jpg",
+      "url": "https://www.landsearch.com/properties/skipjack-rd-kinsale-va-22488/4214778",
+      "price": 350000,
+      "acres": 45.6,
+      "thumbnail": "https://cdn.landsearch.com/listings/4GxCd/small/kinsale-va-160020145.jpg",
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
+      "ever_top_match": true
     },
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/skipjack-rd-kinsale-va-22488/4214778",
-      "price": 350000,
-      "acres": 45.6,
+      "url": "https://www.landsearch.com/properties/730-n-independence-dr-montross-va-22520/4884472",
+      "price": 825000,
+      "acres": 18.2,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
+      "ever_top_match": false
     },
     {
       "source": "LandSearch",
@@ -1913,7 +1913,7 @@
       "source": "LandSearch",
       "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/31207-portobago-trl-port-royal-va-22535/4734576",
-      "price": 531560,
+      "price": 525000,
       "acres": 3.18,
       "thumbnail": null,
       "status": "unknown",
