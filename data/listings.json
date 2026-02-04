@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-04T14:29:48.556968+00:00",
+  "last_updated_utc": "2026-02-04T19:53:33.685388+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -581,6 +581,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/skipjack-rd-kinsale-va-22488/5026166",
+      "price": 335000,
+      "acres": 45.6,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QSN8/small/kinsale-va-160087382.jpg",
+      "status": "unknown",
+      "found_utc": "2026-02-04T19:53:33.685388+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/commons-ct-montross-va-22520/4589300",
       "price": 22520,
       "acres": 0.37,
@@ -606,7 +617,7 @@
       "url": "https://www.landsearch.com/properties/skipjack-rd-kinsale-va-22488/4214778",
       "price": 350000,
       "acres": 45.6,
-      "thumbnail": "https://cdn.landsearch.com/listings/4GxCd/small/kinsale-va-160020145.jpg",
+      "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
@@ -1082,17 +1093,6 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/245-nomini-bay-dr-montross-va-22520/4682579",
-      "price": 399999,
-      "acres": 2.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-03T05:07:05.234377+00:00",
       "ever_top_match": false
     },
     {
@@ -3210,6 +3210,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/1439-dicus-mill-rd-severn-md-21144/5026106",
+      "price": 899900,
+      "acres": 2.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-04T19:53:33.685388+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/116-w-virginia-ave-severn-md-21144/4901265",
       "price": 485000,
       "acres": 0.12,
@@ -3282,17 +3293,6 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/cornfield-rd-pasadena-md-21122/4856402",
-      "price": 500000,
-      "acres": 0.52,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-02T05:17:14.446298+00:00",
       "ever_top_match": false
     }
   ]
