@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-05T08:01:42.903566+00:00",
+  "last_updated_utc": "2026-02-05T14:33:57.569975+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -1978,6 +1978,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/17717-pepmeier-hill-rd-woodford-va-22580/5028058",
+      "price": 850000,
+      "acres": 8.55,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-05T14:33:57.569975+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/21320-bagby-rd-bowling-green-va-22427/4955408",
       "price": 85000,
       "acres": 1.84,
@@ -2187,17 +2198,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/224-woodside-ln-ruther-glen-va-22546/4264552",
-      "price": 40000,
-      "acres": 0.45,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-03T14:32:09.797662+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/4740-ford-fields-rd-myersville-md-21773/4528652",
       "price": 1250000,
       "acres": 27.3,
@@ -2259,6 +2259,17 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/7823-timmons-rd-union-bridge-md-21791/5028049",
+      "price": 525000,
+      "acres": 4.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-05T14:33:57.569975+00:00",
       "ever_top_match": false
     },
     {
@@ -2402,6 +2413,17 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/4502-green-valley-rd-monrovia-md-21770/5028050",
+      "price": 545000,
+      "acres": 2.58,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-05T14:33:57.569975+00:00",
       "ever_top_match": false
     },
     {
@@ -2718,28 +2740,6 @@
       "url": "https://www.landsearch.com/properties/816-w-main-st-emmitsburg-md-21727/2852932",
       "price": 99990,
       "acres": 0.4,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/17449-irishtown-rd-emmitsburg-md-21727/4362066",
-      "price": 675000,
-      "acres": 15.5,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/2240-monument-rd-myersville-md-21773/4936554",
-      "price": 700000,
-      "acres": 14.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
