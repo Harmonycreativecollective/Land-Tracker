@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-05T14:33:57.569975+00:00",
+  "last_updated_utc": "2026-02-05T19:51:57.085202+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -493,17 +493,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/8278-passapatanzy-dr-king-george-va-22485/4953714",
-      "price": 385000,
-      "acres": 2.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/8550-windsor-dr-king-george-va-22485/4911681",
       "price": 499900,
       "acres": 3.0,
@@ -554,6 +543,17 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-05T05:09:12.359806+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/salem-church-road-lot-3-king-george-va-22485/4565763",
+      "price": 129900,
+      "acres": 10.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-05T19:51:57.085202+00:00",
       "ever_top_match": true
     },
     {
