@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-06T07:59:53.516851+00:00",
+  "last_updated_utc": "2026-02-06T14:27:16.720641+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -559,6 +559,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/montross-va-22520/5030338",
+      "price": 1300000,
+      "acres": 7.7,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QVB4/small/montross-va-160196316.jpg",
+      "status": "unknown",
+      "found_utc": "2026-02-06T14:27:16.720641+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/paynes-point-drive-lot-3-colonial-beach-va-22443/4836787",
       "price": 450000,
       "acres": 6.0,
@@ -606,7 +617,7 @@
       "url": "https://www.landsearch.com/properties/skipjack-rd-kinsale-va-22488/5026166",
       "price": 335000,
       "acres": 45.6,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QSN8/small/kinsale-va-160087382.jpg",
+      "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-04T19:53:33.685388+00:00",
       "ever_top_match": true
@@ -1087,17 +1098,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/66-weatherall-dr-montross-va-22520/4856280",
-      "price": 52500,
-      "acres": 0.28,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/93-dent-rd-stafford-va-22554/5015902",
       "price": 325000,
       "acres": 3.43,
@@ -1187,7 +1187,7 @@
       "source": "LandSearch",
       "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/201-doe-way-fredericksburg-va-22406/4984477",
-      "price": 249990,
+      "price": 239990,
       "acres": 5.0,
       "thumbnail": null,
       "status": "unknown",
@@ -2957,6 +2957,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/304-gatsby-pl-edgewater-md-21037/5030474",
+      "price": 1650000,
+      "acres": 2.16,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-06T14:27:16.720641+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/7343-2-green-acres-dr-glen-burnie-md-21060/4727892",
       "price": 150000,
       "acres": 0.69,
@@ -3166,6 +3177,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/982-wayson-way-davidsonville-md-21035/5030475",
+      "price": 1400000,
+      "acres": 2.22,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-06T14:27:16.720641+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/701-church-st-baltimore-md-21225/4992299",
       "price": 94900,
       "acres": 0.04,
@@ -3268,28 +3290,6 @@
       "url": "https://www.landsearch.com/properties/4414-purple-martins-rd-pasadena-md-21122/4479753",
       "price": 275000,
       "acres": 1.7,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/redwood-trail-lot-27-and-28-crownsville-md-21032/4730374",
-      "price": 22500,
-      "acres": 0.11,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/redwood-trail-lot-23-and-24-crownsville-md-21032/4730372",
-      "price": 22500,
-      "acres": 0.11,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
