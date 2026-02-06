@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-06T14:27:16.720641+00:00",
+  "last_updated_utc": "2026-02-06T19:50:42.588168+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -1164,6 +1164,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/201-doe-way-fredericksburg-va-22406/4984477",
+      "price": 239990,
+      "acres": 5.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/shady-cove-lane-lot-6-stafford-va-22554/4094721",
       "price": 415000,
       "acres": 2.4,
@@ -1178,17 +1189,6 @@
       "url": "https://www.landsearch.com/properties/1573-garrisonville-rd-stafford-va-22556/4940598",
       "price": 925000,
       "acres": 6.66,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/201-doe-way-fredericksburg-va-22406/4984477",
-      "price": 239990,
-      "acres": 5.0,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
@@ -1670,6 +1670,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/17717-pepmeier-hill-rd-woodford-va-22580/5028058",
+      "price": 850000,
+      "acres": 8.55,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QTBy/small/woodford-va-160208240.jpg",
+      "status": "unknown",
+      "found_utc": "2026-02-05T14:33:57.569975+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/23348-tidewater-trl-rappahannock-academy-va-22535/4715129",
       "price": 9000000,
       "acres": 352.0,
@@ -1695,7 +1706,7 @@
       "url": "https://www.landsearch.com/properties/marye-rd-woodford-va-22580/3834123",
       "price": 115000,
       "acres": 2.17,
-      "thumbnail": "https://cdn.landsearch.com/listings/4C6pV/small/woodford-va-154058235.jpg",
+      "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
@@ -1978,17 +1989,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/17717-pepmeier-hill-rd-woodford-va-22580/5028058",
-      "price": 850000,
-      "acres": 8.55,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-05T14:33:57.569975+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/21320-bagby-rd-bowling-green-va-22427/4955408",
       "price": 85000,
       "acres": 1.84,
@@ -2253,6 +2253,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/2240-monument-rd-myersville-md-21773/4936554",
+      "price": 700000,
+      "acres": 14.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-06T19:50:42.588168+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/7230-edgemont-rd-frederick-md-21702/4632728",
       "price": 720000,
       "acres": 9.44,
@@ -2375,7 +2386,7 @@
       "source": "LandSearch",
       "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/6710-ford-rd-frederick-md-21702/4965117",
-      "price": 499900,
+      "price": 480000,
       "acres": 2.7,
       "thumbnail": null,
       "status": "unknown",
@@ -2729,17 +2740,6 @@
       "url": "https://www.landsearch.com/properties/winchester-blvd-frederick-md-21703/4669967",
       "price": 630000,
       "acres": 4.75,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/8511-rosebud-ct-middletown-md-21769/4313482",
-      "price": 325000,
-      "acres": 8.2,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
