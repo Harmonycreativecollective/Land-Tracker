@@ -32,6 +32,23 @@ MIN_ACRES = 10.0
 MAX_ACRES = 50.0
 MAX_PRICE = 600_000
 
+LEASE_KEYWORDS = {
+    "lease",
+    "for lease",
+    "leasing",
+    "rent",
+    "rental",
+    "ground lease",
+    "land lease",
+    "annual lease",
+}
+
+def is_lease_listing(it: Dict[str, Any]) -> bool:
+    t = (it.get("title") or "").lower()
+    u = (it.get("url") or "").lower()
+
+    return any(kw in t or kw in u for kw in LEASE_KEYWORDS)
+
 # Enrich missing titles/thumbs/status/price by visiting a few detail pages
 DETAIL_ENRICH_LIMIT = 80
 # ===========================
