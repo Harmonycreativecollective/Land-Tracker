@@ -33,7 +33,7 @@ MAX_ACRES = 50.0
 MAX_PRICE = 600_000
 
 # Enrich missing titles/thumbs/status/price by visiting a few detail pages
-DETAIL_ENRICH_LIMIT = 12
+DETAIL_ENRICH_LIMIT = 80
 # ===========================
 
 HEADERS = {
@@ -61,6 +61,27 @@ BAD_TITLE_SET = {
 
 STATUS_VALUES = {"available", "under_contract", "pending", "sold", "unknown"}
 
+LEASE_KEYWORDS = {
+    "lease",
+    "for lease",
+    "leasing",
+    "rent",
+    "rental",
+    "ground lease",
+    "land lease",
+    "annual lease",
+}
+
+def is_lease_listing(it: Dict[str, Any]) -> bool:
+    t = (it.get("title") or "").lower()
+    u = (it.get("url") or "").lower()
+
+    # quick keyword check
+    for kw in LEASE_KEYWORDS:
+        if kw in t or kw in u:
+            return True
+
+    return False
 
 # ------------------- Fetch -------------------
 def fetch_html(url: str) -> str:
@@ -620,12 +641,36 @@ def main():
         x["status"] = "unknown"
         final.append(x)
 
-    enriched = 0
-    for it in final:
-        if enriched >= DETAIL_ENRICH_LIMIT:
-            break
-        if should_enrich(it):
-            info = enrich_from_detail_page(it["url"])
+ # ------------------- Enrich (limited) -------------------
+enriched = 0
+for it in final:
+    if enriched >= DETAIL_ENRICH_LIMIT:
+        break
+
+    if should_enrich(it):
+        info = enrich_from_detail_page(it["url"])
+
+        # Title
+        if info.get("title") and is_bad_title(it.get("title")):
+            it["title"] = info["title"]
+
+        # Thumbnail
+        if (not it.get("thumbnail")) and info.get("thumbnail"):
+            it["thumbnail"] = info["thumbnail"]
+
+        # Status
+        s = (info.get("status") or "unknown").lower()
+        it["status"] = s if s in STATUS_VALUES else "unknown"
+
+        # Price + acres (fill only if missing)
+        if it.get("price") is None and info.get("price") is not None:
+            it["price"] = info["price"]
+
+        if it.get("acres") is None and info.get("acres") is not None:
+            it["acres"] = info["acres"]
+
+        enriched += 1
+# --------------------------------------------------------
 
             # Replace title if current is generic/bad
             if info.get("title") and is_bad_title(it.get("title")):
