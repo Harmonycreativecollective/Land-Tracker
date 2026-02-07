@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-07T07:44:50.850312+00:00",
+  "last_updated_utc": "2026-02-07T13:55:13.953092+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -2363,6 +2363,17 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/4302-fishers-hollow-rd-myersville-md-21773/5016557",
+      "price": 999900,
+      "acres": 12.4,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/5948-white-flint-dr-frederick-md-21702/4932053",
       "price": 1599999,
       "acres": 2.46,
@@ -2457,17 +2468,6 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-06T05:06:56.133658+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/4302-fishers-hollow-rd-myersville-md-21773/5016557",
-      "price": 999900,
-      "acres": 12.4,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
