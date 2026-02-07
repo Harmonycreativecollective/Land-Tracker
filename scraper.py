@@ -651,6 +651,11 @@ def main():
         final.append(x)
 
     # ------------------- Enrich (limited) -------------------
+    final.sort(key=lambda it: (
+    0 if should_enrich(it) else 1,
+    0 if it.get("ever_top_match") else 1,
+    it.get("found_utc") or ""
+))
     enriched = 0
     for it in final:
         if enriched >= DETAIL_ENRICH_LIMIT:
