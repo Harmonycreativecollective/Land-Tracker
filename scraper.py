@@ -664,7 +664,9 @@ def main():
         # drop leases early
         if is_lease_listing(x):
             continue
-
+# drop leases (before enrichment)
+        if is_lease_listing(x):
+            continue
         final.append(x)
 
     # ------------------- Enrich (limited) -------------------
