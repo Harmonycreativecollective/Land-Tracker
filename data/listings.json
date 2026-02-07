@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": "2026-02-07T18:31:15.959925+00:00",
+  "last_updated_utc": "2026-02-07T18:38:52.573053+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -8,14 +8,14 @@
   "items": [
     {
       "source": "LandSearch",
-      "title": "10.8 Acres of Land with Home for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/13467-ellis-way-king-george-va-22485/4865687",
-      "price": 885000,
-      "acres": 10.8,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Pr7Q/small/king-george-va-153864222.jpg",
+      "title": "10 Acres of Residential Land for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995042",
+      "price": 179000,
+      "acres": 10.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QBgJ/large/king-george-va-159069617.jpg",
       "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": false
+      "found_utc": "2026-02-01T03:07:14.432999+00:00",
+      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -30,12 +30,463 @@
     },
     {
       "source": "LandSearch",
+      "title": "10 Acres of Residential Land for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995024",
+      "price": 249000,
+      "acres": 10.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QBgm/large/king-george-va-159069097.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "14 Acres of Land for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995041",
+      "price": 199000,
+      "acres": 14.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QBgH/large/king-george-va-159069601.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "14 Acres of Land for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995040",
+      "price": 249000,
+      "acres": 14.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QBgG/large/king-george-va-159069587.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "18.5 Acres of Land for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995025",
+      "price": 299000,
+      "acres": 18.5,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QBgn/large/king-george-va-159069112.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "10.9 Acres of Land for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/compass-court-lot-24-king-george-va-22485/2220814",
+      "price": 124900,
+      "acres": 10.9,
+      "thumbnail": "https://cdn.landsearch.com/listings/4jwbj/large/king-george-va-152070533.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "20 Acres of Recreational Land with Home for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/2202-belvedere-dr-king-george-va-22485/4996354",
+      "price": 330000,
+      "acres": 20.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QBR4/large/king-george-va-159108568.jpg",
+      "status": "sold",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "30 Acres of Land for Sale in Rappahannock Academy, Virginia",
+      "url": "https://www.landsearch.com/properties/tidewater-trl-rappahannock-academy-va-22538/4418916",
+      "price": 549000,
+      "acres": 30.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4Jpd6/small/rappahannock-academy-va-138822836.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "13.1 Acres of Land for Sale in Montross, Virginia",
+      "url": "https://www.landsearch.com/properties/zacata-rd-montross-va-22520/4071917",
+      "price": 95000,
+      "acres": 13.1,
+      "thumbnail": "https://cdn.landsearch.com/listings/4FfBX/large/montross-va-151978903.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "18.3 Acres of Recreational Land for Sale in Montross, Virginia",
+      "url": "https://www.landsearch.com/properties/s-tidwells-rd-montross-va-22520/5007557",
+      "price": 99900,
+      "acres": 18.3,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QHHs/large/montross-va-159436878.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "38.7 Acres of Agricultural Land with Home for Sale in Hague, Virginia",
+      "url": "https://www.landsearch.com/properties/4516-oldhams-rd-hague-va-22469/4810472",
+      "price": 559000,
+      "acres": 38.7,
+      "thumbnail": "https://cdn.landsearch.com/listings/4NW9w/large/hague-va-151583119.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "41 Acres of Recreational Land for Sale in Montross, Virginia",
+      "url": "https://www.landsearch.com/properties/20399-kings-hwy-montross-va-22520/4601859",
+      "price": 279000,
+      "acres": 41.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4M3Cq/large/montross-va-158054696.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "10.4 Acres of Recreational Land for Sale in Montross, Virginia",
+      "url": "https://www.landsearch.com/properties/prospect-hill-rd-montross-va-22520/3565203",
+      "price": 107000,
+      "acres": 10.4,
+      "thumbnail": "https://cdn.landsearch.com/listings/4yFGq/large/montross-va-152064626.jpg",
+      "status": "sold",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "17.8 Acres of Land with Home for Sale in Milford, Virginia",
+      "url": "https://www.landsearch.com/properties/20105-sparta-rd-milford-va-22514/4965807",
+      "price": 399000,
+      "acres": 17.8,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QkzF/small/milford-va-158123478.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "25.5 Acres of Land for Sale in Bowling Green, Virginia",
+      "url": "https://www.landsearch.com/properties/locust-hill-rd-bowling-green-va-22427/4993500",
+      "price": 215000,
+      "acres": 25.5,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QzBB/large/bowling-green-va-159028924.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "16.1 Acres of Land for Sale in Woodford, Virginia",
+      "url": "https://www.landsearch.com/properties/b-mckenney-dr-woodford-va-22580/4869923",
+      "price": 165000,
+      "acres": 16.1,
+      "thumbnail": "https://cdn.landsearch.com/listings/4PsY5/large/woodford-va-159502895.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "34.3 Acres of Recreational Land for Sale in Milford, Virginia",
+      "url": "https://www.landsearch.com/properties/sparta-rd-milford-va-22514/4808005",
+      "price": 255000,
+      "acres": 34.3,
+      "thumbnail": "https://cdn.landsearch.com/listings/4NV67/large/milford-va-152139105.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "14.2 Acres of Land for Sale in Ruther Glen, Virginia",
+      "url": "https://www.landsearch.com/properties/16042-countyline-church-rd-ruther-glen-va-22546/4976422",
+      "price": 164300,
+      "acres": 14.2,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QrbP/large/ruther-glen-va-158430716.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "15.5 Acres of Land with Home for Sale in Ruther Glen, Virginia",
+      "url": "https://www.landsearch.com/properties/13499-wingfield-ln-ruther-glen-va-22546/4980725",
+      "price": 210000,
+      "acres": 15.5,
+      "thumbnail": "https://cdn.landsearch.com/listings/4Qt4s/large/ruther-glen-va-158646958.jpg",
+      "status": "sold",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "11.7 Acres of Land for Sale in Ruther Glen, Virginia",
+      "url": "https://www.landsearch.com/properties/jericho-rd-ruther-glen-va-22546/3646378",
+      "price": 114900,
+      "acres": 11.7,
+      "thumbnail": "https://cdn.landsearch.com/listings/4zpVy/large/ruther-glen-va-152067007.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "11.5 Acres of Land with Home for Sale in Woodford, Virginia",
+      "url": "https://www.landsearch.com/properties/6088-fredericksburg-tpke-woodford-va-22580/4990698",
+      "price": 325000,
+      "acres": 11.5,
+      "thumbnail": "https://cdn.landsearch.com/listings/4Qypd/large/woodford-va-158934814.jpg",
+      "status": "under_contract",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "11.5 Acres of Land for Sale in Bowling Green, Virginia",
+      "url": "https://www.landsearch.com/properties/s-main-st-bowling-green-va-22427/4768243",
+      "price": 340000,
+      "acres": 11.5,
+      "thumbnail": "https://cdn.landsearch.com/listings/4NxQK/large/bowling-green-va-149829573.jpg",
+      "status": "under_contract",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "32.7 Acres of Land for Sale in Taneytown, Maryland",
+      "url": "https://www.landsearch.com/properties/11763-harney-rd-taneytown-md-21787/4531560",
+      "price": 445000,
+      "acres": 32.7,
+      "thumbnail": "https://cdn.landsearch.com/listings/4Kq6R/large/taneytown-md-159349092.jpg",
+      "status": "under_contract",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "18.5 Acres of Land for Sale in Frederick, Maryland",
+      "url": "https://www.landsearch.com/properties/elmer-derr-rd-frederick-md-21703/5016072",
+      "price": 310000,
+      "acres": 18.5,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QNpR/large/frederick-md-159653828.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "10.2 Acres of Land for Sale in Middletown, Maryland",
+      "url": "https://www.landsearch.com/properties/9702-mount-tabor-rd-middletown-md-21769/4980375",
+      "price": 450000,
+      "acres": 10.2,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QsV9/large/middletown-md-158640510.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "10.3 Acres of Land for Sale in Middletown, Maryland",
+      "url": "https://www.landsearch.com/properties/9702-mount-tabor-rd-middletown-md-21769/4980374",
+      "price": 450000,
+      "acres": 10.3,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QsV8/large/middletown-md-158640507.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "45.6 Acres of Land for Sale in Kinsale, Virginia",
+      "url": "https://www.landsearch.com/properties/skipjack-rd-kinsale-va-22488/5026166",
+      "price": 335000,
+      "acres": 45.6,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QSN8/large/kinsale-va-160087382.jpg",
+      "status": "available",
+      "found_utc": "2026-02-04T19:53:33.685388+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "10 Acres of Residential Land for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/salem-church-road-lot-17-king-george-va-22485/4565976",
+      "price": 174900,
+      "acres": 10.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4KJ3R/large/king-george-va-152093250.jpg",
+      "status": "under_contract",
+      "found_utc": "2026-02-05T05:09:12.359806+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "10 Acres of Residential Land for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/salem-church-road-lot-3-king-george-va-22485/4565763",
+      "price": 129900,
+      "acres": 10.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4KHXq/large/king-george-va-152042415.jpg",
+      "status": "under_contract",
+      "found_utc": "2026-02-05T19:51:57.085202+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "10.4 Acres of Land for Sale in Stafford, Virginia",
+      "url": "https://www.landsearch.com/properties/stafford-va-22554/5017316",
+      "price": 199000,
+      "acres": 10.4,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QNWM/large/stafford-va-160186782.jpg",
+      "status": "available",
+      "found_utc": "2026-02-06T05:06:56.133658+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "10.8 Acres of Land with Home for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/13467-ellis-way-king-george-va-22485/4865687",
+      "price": 885000,
+      "acres": 10.8,
+      "thumbnail": "https://cdn.landsearch.com/listings/4Pr7Q/small/king-george-va-153864222.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
       "title": "10 Acres of Land with Home for Sale in King George, Virginia",
       "url": "https://www.landsearch.com/properties/16725-bald-eagle-dr-king-george-va-22485/4855285",
       "price": 849900,
       "acres": 10.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4PkC7/small/king-george-va-157081388.jpg",
       "status": "under_contract",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "228 Acres of Recreational Land with Home for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/18134-green-blvd-king-george-va-22485/4531399",
+      "price": 2200000,
+      "acres": 228.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4Kq3v/large/king-george-va-152026131.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "10.3 Acres of Land with Home for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/14851-azurite-dr-king-george-va-22485/4770583",
+      "price": 649900,
+      "acres": 10.3,
+      "thumbnail": "https://cdn.landsearch.com/listings/4NyRv/large/king-george-va-157142524.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "52.2 Acres of Recreational Land for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/round-hill-road-and-ridge-rd-king-george-va-22485/4011539",
+      "price": 525000,
+      "acres": 52.2,
+      "thumbnail": "https://cdn.landsearch.com/listings/4DHq5/large/king-george-va-152064090.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "19.4 Acres of Commercial Land for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/6269-caledon-rd-king-george-va-22485/5014554",
+      "price": 3300000,
+      "acres": 19.4,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QMKd/large/king-george-va-159614756.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "162 Acres of Recreational Land for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/mathias-point-rd-king-george-va-22485/4818738",
+      "price": 900000,
+      "acres": 162.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4NZKJ/large/king-george-va-152238080.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "70 Acres of Recreational Land & Farm for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/ridge-rd-king-george-va-22485/4400303",
+      "price": 599000,
+      "acres": 70.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4Jd8k/large/king-george-va-152692909.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "10 Acres of Land with Home for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/16526-bald-eagle-dr-king-george-va-22485/4974293",
+      "price": 709900,
+      "acres": 10.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4Qqgs/large/king-george-va-158372036.jpg",
+      "status": "under_contract",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "10 Acres of Residential Land with Home for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/8991-fletchers-chapel-rd-king-george-va-22485/4993717",
+      "price": 625000,
+      "acres": 10.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QzH7/large/king-george-va-159033896.jpg",
+      "status": "under_contract",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "35 Acres of Recreational Land with Home for Sale in Fredericksburg, Virginia",
+      "url": "https://www.landsearch.com/properties/41-wood-landing-rd-fredericksburg-va-22405/4450546",
+      "price": 2100000,
+      "acres": 35.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4JFX4/large/fredericksburg-va-152001571.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "352 Acres of Recreational Land with Home for Sale in Rappahannock Academy, Virginia",
+      "url": "https://www.landsearch.com/properties/23348-tidewater-trl-rappahannock-academy-va-22535/4715129",
+      "price": 9000000,
+      "acres": 352.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4N4Nc/small/rappahannock-academy-va-152009314.jpg",
+      "status": "available",
+      "found_utc": "2026-02-01T03:12:53.367171+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "19.3 Acres of Mixed-Use Land for Sale in Port Royal, Virginia",
+      "url": "https://www.landsearch.com/properties/25692-a-p-hill-blvd-port-royal-va-22535/4820007",
+      "price": 1200000,
+      "acres": 19.3,
+      "thumbnail": "https://cdn.landsearch.com/listings/4P2j9/large/port-royal-va-152311862.jpg",
+      "status": "available",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -70,17 +521,6 @@
       "thumbnail": "https://cdn.landsearch.com/listings/4Qdjb/large/king-george-va-157733357.jpg",
       "status": "available",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "228 Acres of Recreational Land with Home for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/18134-green-blvd-king-george-va-22485/4531399",
-      "price": 2200000,
-      "acres": 228.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Kq3v/large/king-george-va-152026131.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
     {
@@ -195,17 +635,6 @@
     },
     {
       "source": "LandSearch",
-      "title": "10.3 Acres of Land with Home for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/14851-azurite-dr-king-george-va-22485/4770583",
-      "price": 649900,
-      "acres": 10.3,
-      "thumbnail": "https://cdn.landsearch.com/listings/4NyRv/large/king-george-va-157142524.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
       "title": "9.56 Acres of Land for Sale in King George, Virginia",
       "url": "https://www.landsearch.com/properties/round-hill-road-and-ridge-rd-king-george-va-22485/4011540",
       "price": 525000,
@@ -214,17 +643,6 @@
       "status": "available",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "10 Acres of Residential Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995042",
-      "price": 179000,
-      "acres": 10.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QBgJ/large/king-george-va-159069617.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:07:14.432999+00:00",
-      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -239,17 +657,6 @@
     },
     {
       "source": "LandSearch",
-      "title": "10 Acres of Residential Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995024",
-      "price": 249000,
-      "acres": 10.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QBgm/large/king-george-va-159069097.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
       "title": "2.6 Acres of Residential Land with Home for Sale in King George, Virginia",
       "url": "https://www.landsearch.com/properties/10287-dahlgren-rd-king-george-va-22485/4985873",
       "price": 410000,
@@ -261,50 +668,6 @@
     },
     {
       "source": "LandSearch",
-      "title": "14 Acres of Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995041",
-      "price": 199000,
-      "acres": 14.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QBgH/large/king-george-va-159069601.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "14 Acres of Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995040",
-      "price": 249000,
-      "acres": 14.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QBgG/large/king-george-va-159069587.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "52.2 Acres of Recreational Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/round-hill-road-and-ridge-rd-king-george-va-22485/4011539",
-      "price": 525000,
-      "acres": 52.2,
-      "thumbnail": "https://cdn.landsearch.com/listings/4DHq5/large/king-george-va-152064090.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "18.5 Acres of Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/4995025",
-      "price": 299000,
-      "acres": 18.5,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QBgn/large/king-george-va-159069112.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
       "title": "2.64 Acres of Residential Land with Home for Sale in King George, Virginia",
       "url": "https://www.landsearch.com/properties/windsor-dr-lot-4-king-george-va-22485/3641495",
       "price": 629900,
@@ -313,17 +676,6 @@
       "status": "available",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "10.9 Acres of Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/compass-court-lot-24-king-george-va-22485/2220814",
-      "price": 124900,
-      "acres": 10.9,
-      "thumbnail": "https://cdn.landsearch.com/listings/4jwbj/large/king-george-va-152070533.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -360,17 +712,6 @@
     },
     {
       "source": "LandSearch",
-      "title": "1.78 Acres of Residential Land with Home for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/11019-cozy-ct-king-george-va-22485/5021687",
-      "price": 225000,
-      "acres": 1.78,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QQQQ/large/king-george-va-159966672.jpg",
-      "status": "sold",
-      "found_utc": "2026-02-03T05:07:05.234377+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
       "title": "2.83 Acres of Residential Land for Sale in King George, Virginia",
       "url": "https://www.landsearch.com/properties/windsor-dr-king-george-va-22485/4223848",
       "price": 80000,
@@ -378,50 +719,6 @@
       "thumbnail": "https://cdn.landsearch.com/listings/4GCyb/large/king-george-va-152009895.jpg",
       "status": "available",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "19.4 Acres of Commercial Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/6269-caledon-rd-king-george-va-22485/5014554",
-      "price": 3300000,
-      "acres": 19.4,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QMKd/large/king-george-va-159614756.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "162 Acres of Recreational Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/mathias-point-rd-king-george-va-22485/4818738",
-      "price": 900000,
-      "acres": 162.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4NZKJ/large/king-george-va-152238080.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "70 Acres of Recreational Land & Farm for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/ridge-rd-king-george-va-22485/4400303",
-      "price": 599000,
-      "acres": 70.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Jd8k/large/king-george-va-152692909.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "10 Acres of Land with Home for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/16526-bald-eagle-dr-king-george-va-22485/4974293",
-      "price": 709900,
-      "acres": 10.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Qqgs/large/king-george-va-158372036.jpg",
-      "status": "under_contract",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
     {
@@ -448,17 +745,6 @@
     },
     {
       "source": "LandSearch",
-      "title": "10 Acres of Residential Land with Home for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/8991-fletchers-chapel-rd-king-george-va-22485/4993717",
-      "price": 625000,
-      "acres": 10.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QzH7/large/king-george-va-159033896.jpg",
-      "status": "under_contract",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
       "title": "3 Acres of Residential Land with Home for Sale in King George, Virginia",
       "url": "https://www.landsearch.com/properties/8550-windsor-dr-king-george-va-22485/4911681",
       "price": 499900,
@@ -470,28 +756,6 @@
     },
     {
       "source": "LandSearch",
-      "title": "6.75 Acres of Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/king-george-va-22485/5021087",
-      "price": 200000,
-      "acres": 6.75,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QQzk/large/king-george-va-159948640.jpg",
-      "status": "available",
-      "found_utc": "2026-02-02T05:17:14.446298+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "20 Acres of Recreational Land with Home for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/2202-belvedere-dr-king-george-va-22485/4996354",
-      "price": 330000,
-      "acres": 20.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QBR4/large/king-george-va-159108568.jpg",
-      "status": "sold",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
       "title": "5 Acres of Residential Land with Home for Sale in King George, Virginia",
       "url": "https://www.landsearch.com/properties/16031-arthur-rd-king-george-va-22485/4908496",
       "price": 699000,
@@ -499,39 +763,6 @@
       "thumbnail": "https://cdn.landsearch.com/listings/4PPHG/large/king-george-va-155387085.jpg",
       "status": "under_contract",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "10 Acres of Residential Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/salem-church-road-lot-17-king-george-va-22485/4565976",
-      "price": 174900,
-      "acres": 10.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4KJ3R/large/king-george-va-152093250.jpg",
-      "status": "under_contract",
-      "found_utc": "2026-02-05T05:09:12.359806+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "10 Acres of Residential Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/salem-church-road-lot-3-king-george-va-22485/4565763",
-      "price": 129900,
-      "acres": 10.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4KHXq/large/king-george-va-152042415.jpg",
-      "status": "under_contract",
-      "found_utc": "2026-02-05T19:51:57.085202+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "7.7 Acres of Residential Land with Home for Sale in Montross, Virginia",
-      "url": "https://www.landsearch.com/properties/montross-va-22520/5030338",
-      "price": 1300000,
-      "acres": 7.7,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QVB4/small/montross-va-160196316.jpg",
-      "status": "available",
-      "found_utc": "2026-02-06T14:27:16.720641+00:00",
       "ever_top_match": false
     },
     {
@@ -591,17 +822,6 @@
     },
     {
       "source": "LandSearch",
-      "title": "45.6 Acres of Land for Sale in Kinsale, Virginia",
-      "url": "https://www.landsearch.com/properties/skipjack-rd-kinsale-va-22488/5026166",
-      "price": 335000,
-      "acres": 45.6,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QSN8/large/kinsale-va-160087382.jpg",
-      "status": "available",
-      "found_utc": "2026-02-04T19:53:33.685388+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
       "title": "2.14 Acres of Residential Land for Sale in Montross, Virginia",
       "url": "https://www.landsearch.com/properties/scenic-dr-montross-va-22520/4309020",
       "price": 249900,
@@ -646,212 +866,179 @@
     },
     {
       "source": "LandSearch",
-      "title": "1.47 Acres of Residential Land for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/36-127-beales-wharf-rd-montross-va-22520/4413970",
       "price": 170000,
       "acres": 1.47,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Jm54/large/montross-va-140585794.jpg",
-      "status": "under_contract",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "13.1 Acres of Land for Sale in Montross, Virginia",
-      "url": "https://www.landsearch.com/properties/zacata-rd-montross-va-22520/4071917",
-      "price": 95000,
-      "acres": 13.1,
-      "thumbnail": "https://cdn.landsearch.com/listings/4FfBX/large/montross-va-151978903.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "135 Acres of Recreational Land with Home for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/585-white-hall-rd-montross-va-22520/4567905",
       "price": 3499999,
       "acres": 135.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4KJT3/large/montross-va-155502430.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "1.4 Acres of Residential Land for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/kings-ct-montross-va-22520/5007350",
       "price": 22520,
       "acres": 1.4,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QHC8/large/montross-va-159432168.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "4.8 Acres of Residential Land with Home for Sale in Colonial Beach, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/436-thompson-cir-colonial-beach-va-22443/4978163",
       "price": 649800,
       "acres": 4.8,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QrX5/large/colonial-beach-va-158577613.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "2 Acres of Residential Land with Home for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/103-hidden-lake-dr-montross-va-22520/4899114",
       "price": 439999,
       "acres": 2.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4PJDd/large/montross-va-155040620.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "0.29 Acres of Residential Land for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/egret-ct-montross-va-22520/4697069",
       "price": 34900,
       "acres": 0.29,
-      "thumbnail": "https://cdn.landsearch.com/listings/4MTWX/large/montross-va-147420038.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "0.94 Acres of Residential Land for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/neptune-ln-montross-va-22520/4606354",
       "price": 115000,
       "acres": 0.94,
-      "thumbnail": "https://cdn.landsearch.com/listings/4M5z4/large/montross-va-158241358.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "46.3 Acres of Land with Home for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/317-coles-point-rd-montross-va-22469/2631560",
       "price": 2120000,
       "acres": 46.3,
-      "thumbnail": "https://cdn.landsearch.com/listings/4pdsw/large/montross-va-94660816.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "0.06 Acres of Land for Sale in Colonial Beach, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/colonial-beach-va-22443/5016140",
       "price": 22443,
       "acres": 0.06,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QNrg/large/colonial-beach-va-159655219.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "0.34 Acres of Residential Land for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/n-glebe-montross-va-22520/4883520",
       "price": 52500,
       "acres": 0.34,
-      "thumbnail": "https://cdn.landsearch.com/listings/4PzSm/large/montross-va-154480799.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "0.21 Acres of Residential Land for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/weatherall-dr-montross-va-22520/4729285",
       "price": 34900,
       "acres": 0.21,
-      "thumbnail": "https://cdn.landsearch.com/listings/4NbW7/large/montross-va-148534084.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "0.48 Acres of Residential Land for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/bay-pointe-dr-montross-va-22520/4333574",
       "price": 35000,
       "acres": 0.48,
-      "thumbnail": "https://cdn.landsearch.com/listings/4HCb8/large/montross-va-152064648.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "0.06 Acres of Land for Sale in Colonial Beach, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/colonial-beach-va-22443/5016209",
       "price": 22443,
       "acres": 0.06,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QNsH/large/colonial-beach-va-159656849.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "0.06 Acres of Land for Sale in Colonial Beach, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/colonial-beach-va-22443/5016142",
       "price": 22443,
       "acres": 0.06,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QNrj/large/colonial-beach-va-159655251.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "2.34 Acres of Residential Land with Home for Sale in Montross, Virginia",
-      "url": "https://www.landsearch.com/properties/196-matthews-cove-dr-montross-va-22520/4929617",
-      "price": 625000,
-      "acres": 2.34,
-      "thumbnail": "https://cdn.landsearch.com/listings/4PZSH/large/montross-va-158009388.jpg",
-      "status": "under_contract",
-      "found_utc": "2026-02-02T05:17:14.446298+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "0.87 Acres of Residential Land for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/plantation-lot-69-montross-va-22520/2762401",
       "price": 22520,
       "acres": 0.87,
-      "thumbnail": "https://cdn.landsearch.com/listings/4qqfn/large/montross-va-152061310.jpg",
-      "status": "under_contract",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "2.3 Acres of Residential Land for Sale in Montross, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/parcelb2-apple-tree-rd-montross-va-22520/4823902",
       "price": 175000,
       "acres": 2.3,
-      "thumbnail": "https://cdn.landsearch.com/listings/4P3Zj/large/montross-va-152437590.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "18.3 Acres of Recreational Land for Sale in Montross, Virginia",
-      "url": "https://www.landsearch.com/properties/s-tidwells-rd-montross-va-22520/5007557",
-      "price": 99900,
-      "acres": 18.3,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QHHs/large/montross-va-159436878.jpg",
-      "status": "available",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -911,28 +1098,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/4516-oldhams-rd-hague-va-22469/4810472",
-      "price": 559000,
-      "acres": 38.7,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/20399-kings-hwy-montross-va-22520/4601859",
-      "price": 279000,
-      "acres": 41.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/woodberry-dr-montross-va-22520/4294790",
       "price": 22520,
       "acres": 0.9,
@@ -962,17 +1127,6 @@
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/prospect-hill-rd-montross-va-22520/3565203",
-      "price": 107000,
-      "acres": 10.4,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -1038,17 +1192,6 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/kelly-rd-kinsale-va-22488/4935733",
-      "price": 55000,
-      "acres": 9.44,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-07T07:44:50.850312+00:00",
       "ever_top_match": false
     },
     {
@@ -1307,17 +1450,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/41-wood-landing-rd-fredericksburg-va-22405/4450546",
-      "price": 2100000,
-      "acres": 35.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/45-crestwood-ln-stafford-va-22554/5019352",
       "price": 699000,
       "acres": 2.52,
@@ -1346,17 +1478,6 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/42-kinsley-ln-fredericksburg-va-22406/5026965",
-      "price": 780000,
-      "acres": 3.1,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-05T05:09:12.359806+00:00",
       "ever_top_match": false
     },
     {
@@ -1446,17 +1567,6 @@
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/stafford-va-22554/5017316",
-      "price": 199000,
-      "acres": 10.4,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-06T05:06:56.133658+00:00",
-      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -1571,94 +1681,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/mountain-view-rd-stafford-va-22556/4245209",
-      "price": 1105645,
-      "acres": 4.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-02T05:17:14.446298+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/20-mccarty-rd-fredericksburg-va-22405/3511175",
-      "price": 1275000,
-      "acres": 3.9,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-04T04:58:31.479204+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/245-saddle-ridge-ln-fredericksburg-va-22406/5021440",
-      "price": 755000,
-      "acres": 1.56,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-07T04:53:36.191554+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/104-dent-rd-stafford-va-22554/4716583",
-      "price": 799900,
-      "acres": 3.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-07T04:53:36.191554+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/tidewater-trl-rappahannock-academy-va-22538/4418916",
-      "price": 549000,
-      "acres": 30.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Jpd6/small/rappahannock-academy-va-138822836.jpg",
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/17717-pepmeier-hill-rd-woodford-va-22580/5028058",
-      "price": 850000,
-      "acres": 8.55,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QTBy/small/woodford-va-160208240.jpg",
-      "status": "unknown",
-      "found_utc": "2026-02-05T14:33:57.569975+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/20105-sparta-rd-milford-va-22514/4965807",
-      "price": 399000,
-      "acres": 17.8,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QkzF/small/milford-va-158123478.jpg",
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/23348-tidewater-trl-rappahannock-academy-va-22535/4715129",
-      "price": 9000000,
-      "acres": 352.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4N4Nc/small/rappahannock-academy-va-152009314.jpg",
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/18056-obrien-ct-milford-va-22514/4998118",
       "price": 699000,
       "acres": 11.8,
@@ -1736,28 +1758,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/locust-hill-rd-bowling-green-va-22427/4993500",
-      "price": 215000,
-      "acres": 25.5,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/b-mckenney-dr-woodford-va-22580/4869923",
-      "price": 165000,
-      "acres": 16.1,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/industrial-dr-milford-va-22514/4819939",
       "price": 169000,
       "acres": 4.34,
@@ -1787,17 +1787,6 @@
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/sparta-rd-milford-va-22514/4808005",
-      "price": 255000,
-      "acres": 34.3,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -1901,17 +1890,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/16042-countyline-church-rd-ruther-glen-va-22546/4976422",
-      "price": 164300,
-      "acres": 14.2,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/11498-dry-bridge-rd-ruther-glen-va-22546/4974991",
       "price": 229000,
       "acres": 2.29,
@@ -1956,28 +1934,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/21320-bagby-rd-bowling-green-va-22427/4955408",
-      "price": 85000,
-      "acres": 1.84,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-03T05:07:05.234377+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/25692-a-p-hill-blvd-port-royal-va-22535/4820031",
-      "price": 22535,
-      "acres": 19.3,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/golansville-rd-lot-2-ruther-glen-va-22546/4608331",
       "price": 95000,
       "acres": 6.0,
@@ -2011,28 +1967,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/25692-a-p-hill-blvd-port-royal-va-22535/4820007",
-      "price": 1200000,
-      "acres": 19.3,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:12:53.367171+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/13499-wingfield-ln-ruther-glen-va-22546/4980725",
-      "price": 210000,
-      "acres": 15.5,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/cedon-rd-woodford-va-22580/4820557",
       "price": 130000,
       "acres": 7.16,
@@ -2055,28 +1989,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/8236-camden-rd-port-royal-va-22535/4997662",
-      "price": 22535,
-      "acres": 19.3,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/jericho-rd-ruther-glen-va-22546/3646378",
-      "price": 114900,
-      "acres": 11.7,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/15390-moores-mill-rd-ruther-glen-va-22546/4971880",
       "price": 590000,
       "acres": 2.0,
@@ -2084,28 +1996,6 @@
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/6088-fredericksburg-tpke-woodford-va-22580/4990698",
-      "price": 325000,
-      "acres": 11.5,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/s-main-st-bowling-green-va-22427/4768243",
-      "price": 340000,
-      "acres": 11.5,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -2220,34 +2110,12 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/2240-monument-rd-myersville-md-21773/4936554",
-      "price": 700000,
-      "acres": 14.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-06T19:50:42.588168+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/7230-edgemont-rd-frederick-md-21702/4632728",
       "price": 720000,
       "acres": 9.44,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/7823-timmons-rd-union-bridge-md-21791/5028049",
-      "price": 525000,
-      "acres": 4.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-05T14:33:57.569975+00:00",
       "ever_top_match": false
     },
     {
@@ -2407,34 +2275,12 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/4502-green-valley-rd-monrovia-md-21770/5028050",
-      "price": 545000,
-      "acres": 2.58,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-05T14:33:57.569975+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/7192-rosalees-walk-frederick-md-21701/4818116",
       "price": 280000,
       "acres": 1.56,
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/10011-baltimore-national-pike-myersville-md-21773/4729986",
-      "price": 21773,
-      "acres": 6.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-06T05:06:56.133658+00:00",
       "ever_top_match": false
     },
     {
@@ -2479,17 +2325,6 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/ijamsville-md-21754/4663750",
-      "price": 925000,
-      "acres": 8.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T07:50:51.850812+00:00",
       "ever_top_match": false
     },
     {
@@ -2561,17 +2396,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/11763-harney-rd-taneytown-md-21787/4531560",
-      "price": 445000,
-      "acres": 32.7,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/750-carroll-pkwy-frederick-md-21701/4279870",
       "price": 2100000,
       "acres": 1.54,
@@ -2616,17 +2440,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/elmer-derr-rd-frederick-md-21703/5016072",
-      "price": 310000,
-      "acres": 18.5,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/142-water-st-thurmont-md-21788/4989013",
       "price": 1200000,
       "acres": 3.87,
@@ -2660,17 +2473,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/9702-mount-tabor-rd-middletown-md-21769/4980375",
-      "price": 450000,
-      "acres": 10.2,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/13405-john-cline-rd-frederick-md-21783/3558470",
       "price": 1399000,
       "acres": 30.0,
@@ -2678,28 +2480,6 @@
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/kemptown-church-rd-monrovia-md-21770/5027345",
-      "price": 295000,
-      "acres": 0.87,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-05T05:09:12.359806+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/9702-mount-tabor-rd-middletown-md-21769/4980374",
-      "price": 450000,
-      "acres": 10.3,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
     },
     {
       "source": "LandSearch",
@@ -2924,17 +2704,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/304-gatsby-pl-edgewater-md-21037/5030474",
-      "price": 1650000,
-      "acres": 2.16,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-06T14:27:16.720641+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/350-e-bay-front-rd-deale-md-20751/4804041",
       "price": 2150000,
       "acres": 20.0,
@@ -3144,17 +2913,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/982-wayson-way-davidsonville-md-21035/5030475",
-      "price": 1400000,
-      "acres": 2.22,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-06T14:27:16.720641+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/701-church-st-baltimore-md-21225/4992299",
       "price": 94900,
       "acres": 0.04,
@@ -3199,28 +2957,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/1439-dicus-mill-rd-severn-md-21144/5026106",
-      "price": 899900,
-      "acres": 2.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-04T19:53:33.685388+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/116-w-virginia-ave-severn-md-21144/4901265",
-      "price": 485000,
-      "acres": 0.12,
-      "thumbnail": null,
-      "status": "unknown",
-      "found_utc": "2026-02-03T05:07:05.234377+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/1814-and-1836-pleasant-plains-and-cherry-rd-annapolis-md-21409/4785924",
       "price": 1300000,
       "acres": 4.0,
@@ -3260,6 +2996,281 @@
       "thumbnail": null,
       "status": "unknown",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/ijamsville-md-21754/4663750",
+      "price": 925000,
+      "acres": 8.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-01T07:50:51.850812+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/king-george-va-22485/5021087",
+      "price": 200000,
+      "acres": 6.75,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-02T05:17:14.446298+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/196-matthews-cove-dr-montross-va-22520/4929617",
+      "price": 625000,
+      "acres": 2.34,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-02T05:17:14.446298+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/mountain-view-rd-stafford-va-22556/4245209",
+      "price": 1105645,
+      "acres": 4.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-02T05:17:14.446298+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/11019-cozy-ct-king-george-va-22485/5021687",
+      "price": 225000,
+      "acres": 1.78,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-03T05:07:05.234377+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/21320-bagby-rd-bowling-green-va-22427/4955408",
+      "price": 85000,
+      "acres": 1.84,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-03T05:07:05.234377+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/116-w-virginia-ave-severn-md-21144/4901265",
+      "price": 485000,
+      "acres": 0.12,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-03T05:07:05.234377+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/20-mccarty-rd-fredericksburg-va-22405/3511175",
+      "price": 1275000,
+      "acres": 3.9,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-04T04:58:31.479204+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/1439-dicus-mill-rd-severn-md-21144/5026106",
+      "price": 899900,
+      "acres": 2.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-04T19:53:33.685388+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/42-kinsley-ln-fredericksburg-va-22406/5026965",
+      "price": 780000,
+      "acres": 3.1,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-05T05:09:12.359806+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/kemptown-church-rd-monrovia-md-21770/5027345",
+      "price": 295000,
+      "acres": 0.87,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-05T05:09:12.359806+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/17717-pepmeier-hill-rd-woodford-va-22580/5028058",
+      "price": 850000,
+      "acres": 8.55,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QTBy/small/woodford-va-160208240.jpg",
+      "status": "unknown",
+      "found_utc": "2026-02-05T14:33:57.569975+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/7823-timmons-rd-union-bridge-md-21791/5028049",
+      "price": 525000,
+      "acres": 4.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-05T14:33:57.569975+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/4502-green-valley-rd-monrovia-md-21770/5028050",
+      "price": 545000,
+      "acres": 2.58,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-05T14:33:57.569975+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/10011-baltimore-national-pike-myersville-md-21773/4729986",
+      "price": 21773,
+      "acres": 6.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-06T05:06:56.133658+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/montross-va-22520/5030338",
+      "price": 1300000,
+      "acres": 7.7,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QVB4/small/montross-va-160196316.jpg",
+      "status": "unknown",
+      "found_utc": "2026-02-06T14:27:16.720641+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/304-gatsby-pl-edgewater-md-21037/5030474",
+      "price": 1650000,
+      "acres": 2.16,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-06T14:27:16.720641+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/982-wayson-way-davidsonville-md-21035/5030475",
+      "price": 1400000,
+      "acres": 2.22,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-06T14:27:16.720641+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/2240-monument-rd-myersville-md-21773/4936554",
+      "price": 700000,
+      "acres": 14.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-06T19:50:42.588168+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/245-saddle-ridge-ln-fredericksburg-va-22406/5021440",
+      "price": 755000,
+      "acres": 1.56,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-07T04:53:36.191554+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/104-dent-rd-stafford-va-22554/4716583",
+      "price": 799900,
+      "acres": 3.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-07T04:53:36.191554+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/kelly-rd-kinsale-va-22488/4935733",
+      "price": 55000,
+      "acres": 9.44,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-07T07:44:50.850312+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/6338-riverview-dr-king-george-va-22485/4893539",
+      "price": 22485,
+      "acres": 10.0,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-07T18:38:52.573053+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/6269-caledon-rd-king-george-va-22485/5014850",
+      "price": 22485,
+      "acres": 19.4,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-07T18:38:52.573053+00:00",
+      "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/14589-kings-hwy-king-george-va-22485/4866988",
+      "price": 22485,
+      "acres": 4.82,
+      "thumbnail": null,
+      "status": "unknown",
+      "found_utc": "2026-02-07T18:38:52.573053+00:00",
       "ever_top_match": false
     }
   ]
