@@ -670,24 +670,6 @@ for it in final:
             it["acres"] = info["acres"]
 
         enriched += 1
-# --------------------------------------------------------
-
-            # Replace title if current is generic/bad
-            if info.get("title") and is_bad_title(it.get("title")):
-                it["title"] = info["title"]
-
-            if (not it.get("thumbnail")) and info.get("thumbnail"):
-                it["thumbnail"] = info["thumbnail"]
-
-            s = (info.get("status") or "unknown").lower()
-            it["status"] = s if s in STATUS_VALUES else "unknown"
-
-            if it.get("price") is None and info.get("price") is not None:
-                it["price"] = info["price"]
-            if it.get("acres") is None and info.get("acres") is not None:
-                it["acres"] = info["acres"]
-
-            enriched += 1
 
     for it in final:
         s = (it.get("status") or "unknown").lower()
