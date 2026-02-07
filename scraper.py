@@ -644,18 +644,21 @@ def main():
         # reset status each run
         x["status"] = "unknown"
 
-        # drop leases again (in case title changed)
+        # drop leases early
         if is_lease_listing(x):
             continue
 
         final.append(x)
 
     # ------------------- Enrich (limited) -------------------
+    # Sort so enrichment hits: (1) current top matches, (2) broken/missing data, (3) newest first
+    # (stable sort = do newest first, then tier sort)
+    final.sort(key=lambda it: it.get("found_utc") or "", reverse=True)
     final.sort(key=lambda it: (
-    0 if should_enrich(it) else 1,
-    0 if it.get("ever_top_match") else 1,
-    it.get("found_utc") or ""
-))
+        0 if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE) else 1,
+        0 if should_enrich(it) else 1,
+    ))
+
     enriched = 0
     for it in final:
         if enriched >= DETAIL_ENRICH_LIMIT:
@@ -710,7 +713,3 @@ def main():
         json.dump(out, f, indent=2)
 
     print(f"Saved {len(final)} listings. Enriched: {enriched}.")
-
-
-if __name__ == "__main__":
-    main()
