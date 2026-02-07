@@ -641,7 +641,7 @@ def main():
         x["status"] = "unknown"
         final.append(x)
 
- # ------------------- Enrich (limited) -------------------
+# ------------------- Enrich (limited) -------------------
 enriched = 0
 for it in final:
     if enriched >= DETAIL_ENRICH_LIMIT:
@@ -671,27 +671,25 @@ for it in final:
 
         enriched += 1
 
-    for it in final:
-        s = (it.get("status") or "unknown").lower()
-        if s not in STATUS_VALUES:
-            it["status"] = "unknown"
+# Clamp status values
+for it in final:
+    s = (it.get("status") or "unknown").lower()
+    if s not in STATUS_VALUES:
+        it["status"] = "unknown"
 
-    for it in final:
-        if not it.get("ever_top_match"):
-            if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE):
-                it["ever_top_match"] = True
+# Update ever_top_match ONLY when it qualifies as a top match at least once
+for it in final:
+    if not it.get("ever_top_match"):
+        if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE):
+            it["ever_top_match"] = True
 
-    out = {
-        "last_updated_utc": run_utc,
-        "criteria": {"min_acres": MIN_ACRES, "max_acres": MAX_ACRES, "max_price": MAX_PRICE},
-        "items": final,
-    }
+out = {
+    "last_updated_utc": run_utc,
+    "criteria": {"min_acres": MIN_ACRES, "max_acres": MAX_ACRES, "max_price": MAX_PRICE},
+    "items": final,
+}
 
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(out, f, indent=2)
+with open(DATA_FILE, "w", encoding="utf-8") as f:
+    json.dump(out, f, indent=2)
 
-    print(f"Saved {len(final)} listings. Enriched: {enriched}.")
-
-
-if __name__ == "__main__":
-    main()
+print(f"Saved {len(final)} listings. Enriched: {enriched}.")
