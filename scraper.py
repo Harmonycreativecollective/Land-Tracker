@@ -48,7 +48,6 @@ DATA_FILE = "data/listings.json"
 session = requests.Session()
 session.headers.update(HEADERS)
 
-# NOTE: expanded with explicit generic titles you generate
 BAD_TITLE_SET = {
     "",
     "land listing",
@@ -72,16 +71,16 @@ LEASE_KEYWORDS = {
     "annual lease",
 }
 
+
 def is_lease_listing(it: Dict[str, Any]) -> bool:
     t = (it.get("title") or "").lower()
     u = (it.get("url") or "").lower()
 
-    # quick keyword check
     for kw in LEASE_KEYWORDS:
         if kw in t or kw in u:
             return True
-
     return False
+
 
 # ------------------- Fetch -------------------
 def fetch_html(url: str) -> str:
@@ -437,7 +436,6 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
 
 def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
-
     host = urlparse(base_url).netloc.lower()
 
     for block in blocks:
@@ -448,6 +446,7 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
             raw_url = d.get("url") or d.get("mainEntityOfPage") or d.get("sameAs") or ""
             if not raw_url:
                 continue
+
             url = normalize_url(base_url, str(raw_url))
             if not url:
                 continue
@@ -578,6 +577,9 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
     if not items:
         items.extend(extract_from_html_fallback(url, html, "LandSearch"))
 
+    # quick filter: drop lease-ish items early
+    items = [it for it in items if not is_lease_listing(it)]
+
     seen = set()
     out = []
     for it in items:
@@ -623,6 +625,7 @@ def main():
             continue
         all_items.extend(extract_listings(url, html))
 
+    # Dedup across sources by URL + persist fields
     seen = set()
     final: List[Dict[str, Any]] = []
     for x in all_items:
@@ -638,58 +641,71 @@ def main():
         if is_bad_title(x.get("title")):
             x["title"] = f"{x.get('source','Listing')} listing"
 
+        # reset status each run
         x["status"] = "unknown"
+
+        # drop leases again (in case title changed)
+        if is_lease_listing(x):
+            continue
+
         final.append(x)
 
-# ------------------- Enrich (limited) -------------------
-enriched = 0
-for it in final:
-    if enriched >= DETAIL_ENRICH_LIMIT:
-        break
+    # ------------------- Enrich (limited) -------------------
+    enriched = 0
+    for it in final:
+        if enriched >= DETAIL_ENRICH_LIMIT:
+            break
 
-    if should_enrich(it):
-        info = enrich_from_detail_page(it["url"])
+        if should_enrich(it):
+            info = enrich_from_detail_page(it["url"])
 
-        # Title
-        if info.get("title") and is_bad_title(it.get("title")):
-            it["title"] = info["title"]
+            # Title (replace only if current is generic/bad)
+            if info.get("title") and is_bad_title(it.get("title")):
+                it["title"] = info["title"]
 
-        # Thumbnail
-        if (not it.get("thumbnail")) and info.get("thumbnail"):
-            it["thumbnail"] = info["thumbnail"]
+            # Thumbnail
+            if (not it.get("thumbnail")) and info.get("thumbnail"):
+                it["thumbnail"] = info["thumbnail"]
 
-        # Status
-        s = (info.get("status") or "unknown").lower()
-        it["status"] = s if s in STATUS_VALUES else "unknown"
+            # Status
+            s = (info.get("status") or "unknown").lower()
+            it["status"] = s if s in STATUS_VALUES else "unknown"
 
-        # Price + acres (fill only if missing)
-        if it.get("price") is None and info.get("price") is not None:
-            it["price"] = info["price"]
+            # Price + acres (fill only if missing)
+            if it.get("price") is None and info.get("price") is not None:
+                it["price"] = info["price"]
 
-        if it.get("acres") is None and info.get("acres") is not None:
-            it["acres"] = info["acres"]
+            if it.get("acres") is None and info.get("acres") is not None:
+                it["acres"] = info["acres"]
 
-        enriched += 1
+            enriched += 1
 
-# Clamp status values
-for it in final:
-    s = (it.get("status") or "unknown").lower()
-    if s not in STATUS_VALUES:
-        it["status"] = "unknown"
+    # Drop leases after enrichment too (some titles update here)
+    final = [it for it in final if not is_lease_listing(it)]
 
-# Update ever_top_match ONLY when it qualifies as a top match at least once
-for it in final:
-    if not it.get("ever_top_match"):
-        if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE):
-            it["ever_top_match"] = True
+    # Clamp status values
+    for it in final:
+        s = (it.get("status") or "unknown").lower()
+        if s not in STATUS_VALUES:
+            it["status"] = "unknown"
 
-out = {
-    "last_updated_utc": run_utc,
-    "criteria": {"min_acres": MIN_ACRES, "max_acres": MAX_ACRES, "max_price": MAX_PRICE},
-    "items": final,
-}
+    # Update ever_top_match ONLY when it qualifies as a top match at least once
+    for it in final:
+        if not it.get("ever_top_match"):
+            if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE):
+                it["ever_top_match"] = True
 
-with open(DATA_FILE, "w", encoding="utf-8") as f:
-    json.dump(out, f, indent=2)
+    out = {
+        "last_updated_utc": run_utc,
+        "criteria": {"min_acres": MIN_ACRES, "max_acres": MAX_ACRES, "max_price": MAX_PRICE},
+        "items": final,
+    }
 
-print(f"Saved {len(final)} listings. Enriched: {enriched}.")
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(out, f, indent=2)
+
+    print(f"Saved {len(final)} listings. Enriched: {enriched}.")
+
+
+if __name__ == "__main__":
+    main()
