@@ -43,7 +43,6 @@ def format_last_updated_et(ts: str) -> str:
 
 # ---------- Header ----------
 def render_header():
-
     logo_b64 = ""
     if LOGO_PATH.exists():
         logo_b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("utf-8")
@@ -57,11 +56,12 @@ def render_header():
             gap:16px;
             margin-top: 0.25rem;
             margin-bottom: 0.35rem;
+            flex-wrap: wrap;
           }}
           .kb-logo {{
             width:110px;
             height:110px;
-            flex: 0 0 110px;
+            flex: 0 0 auto;
             border-radius: 16px;
             object-fit: contain;
           }}
@@ -181,15 +181,18 @@ c2.metric("Top matches", f"{len(top_matches)}")
 c3.metric("Possible matches", f"{len(possible_matches)}")
 c4.metric("New", f"{len(new_items)}")
 
+# Big mobile-friendly CTA to Properties
+if st.button("View all properties →", use_container_width=True):
+    st.switch_page("pages/2_properties.py")
+
 st.divider()
 
 # ---------- Quick Top Matches (small + useful) ----------
 st.subheader("Top matches (quick view)")
 
 if not top_matches:
-    st.info("No top matches right now. Check the Properties tab for everything found.")
+    st.info("No top matches right now. Check Properties for everything found.")
 else:
-    # Show 5 max, sorted newest-ish by found_utc if present
     def key_dt(it: Dict[str, Any]) -> str:
         return it.get("found_utc") or ""
 
@@ -221,5 +224,4 @@ else:
         st.write("")
 
 st.divider()
-
-st.caption("Tip: Use **Properties** to search, filter, and view all listings.")
+st.caption("Tip: Use Properties to search, filter, and view all listings.")
