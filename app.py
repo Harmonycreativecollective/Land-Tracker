@@ -13,7 +13,7 @@ LOGO_PATH = Path("assets/kblogo.png")
 
 # ---------- Page config ----------
 st.set_page_config(
-    page_title="Dashboard – KB’s Land Tracker",
+    page_title="KB’s Land Tracker",
     page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🗺️",
     layout="centered",
 )
@@ -30,7 +30,7 @@ last_updated = data.get("last_updated_utc")
 # ---------- Time formatting (Eastern) ----------
 def format_last_updated_et(ts: str) -> str:
     if not ts:
-        return ""
+        return "—"
     try:
         dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
         from zoneinfo import ZoneInfo
@@ -38,14 +38,10 @@ def format_last_updated_et(ts: str) -> str:
         dt_et = dt.astimezone(ZoneInfo("America/New_York"))
         return dt_et.strftime("%b %d, %Y • %I:%M %p ET")
     except Exception:
-        try:
-            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-            return dt.strftime("%b %d, %Y • %I:%M %p")
-        except Exception:
-            return ts
+        return ts
 
 # ---------- Header ----------
-def render_header():
+def render_header(last_updated_label: str):
     logo_b64 = ""
     if LOGO_PATH.exists():
         logo_b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("utf-8")
@@ -53,41 +49,82 @@ def render_header():
     st.markdown(
         f"""
         <style>
+          .kb-hero {{
+            border: 1px solid rgba(15,23,42,0.08);
+            border-radius: 22px;
+            padding: 18px 18px 14px 18px;
+            background: rgba(255,255,255,0.92);
+            box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+            margin-top: 8px;
+          }}
+
           .kb-header {{
             display:flex;
             align-items:center;
-            gap:16px;
-            margin-top: 0.25rem;
-            margin-bottom: 0.35rem;
+            gap:18px;
             flex-wrap: wrap;
           }}
+
           .kb-logo {{
-            width:140px;
-            height:140px;
+            width:160px;
+            height:160px;
             flex: 0 0 auto;
-            border-radius: 18px;
+            border-radius: 22px;
             object-fit: contain;
           }}
+
           .kb-text {{
             flex: 1 1 auto;
-            min-width: 0;
+            min-width: 240px;
           }}
+
           .kb-title {{
-            font-size: clamp(1.55rem, 3.3vw, 2.05rem);
-            font-weight: 900;
+            font-size: clamp(1.85rem, 3.5vw, 2.35rem);
+            font-weight: 950;
             line-height: 1.05;
             margin: 0;
             color: #0f172a;
-            overflow-wrap: anywhere;
-            word-break: break-word;
           }}
+
           .kb-caption {{
-            font-size: clamp(1.05rem, 2.5vw, 1.22rem);
-            color: rgba(49, 51, 63, 0.75);
-            margin-top: 8px;
+            font-size: clamp(1.05rem, 2.2vw, 1.22rem);
+            color: rgba(15,23,42,0.62);
+            margin-top: 10px;
             line-height: 1.35;
-            overflow-wrap: anywhere;
-            word-break: break-word;
+            font-weight: 650;
+          }}
+
+          .kb-chips {{
+            display:flex;
+            gap:10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+          }}
+
+          .kb-chip {{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(15,23,42,0.10);
+            background: rgba(255,255,255,0.75);
+          }}
+
+          .kb-chip-label {{
+            font-size: 0.85rem;
+            color: rgba(15,23,42,0.60);
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.0;
+          }}
+
+          .kb-chip-value {{
+            font-size: 0.95rem;
+            color: rgba(15,23,42,0.90);
+            font-weight: 900;
+            margin: 0;
+            line-height: 1.0;
           }}
 
           .kb-tiles {{
@@ -95,49 +132,63 @@ def render_header():
             grid-template-columns: 1fr 1fr;
             gap: 12px;
           }}
+
           .kb-tile {{
             border: 1px solid rgba(15,23,42,0.10);
             border-radius: 18px;
             padding: 14px 14px;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.92);
             box-shadow: 0 6px 18px rgba(15,23,42,0.06);
           }}
+
           .kb-tile-label {{
             font-size: 0.95rem;
             color: rgba(15,23,42,0.70);
             margin: 0 0 6px 0;
-            font-weight: 700;
+            font-weight: 800;
           }}
+
           .kb-tile-value {{
-            font-size: 1.9rem;
-            font-weight: 900;
+            font-size: 2.05rem;
+            font-weight: 950;
             line-height: 1.0;
             color: rgba(15,23,42,0.92);
             margin: 0;
           }}
+
           .kb-tile-sub {{
             margin-top: 6px;
             font-size: 0.9rem;
             color: rgba(15,23,42,0.55);
-            font-weight: 600;
+            font-weight: 650;
           }}
         </style>
 
-        <div class="kb-header">
-          {"<img class='kb-logo' src='data:image/png;base64," + logo_b64 + "' />" if logo_b64 else ""}
-          <div class="kb-text">
-            <div class="kb-title">{TITLE}</div>
-            <div class="kb-caption">{CAPTION}</div>
+        <div class="kb-hero">
+          <div class="kb-header">
+            {"<img class='kb-logo' src='data:image/png;base64," + logo_b64 + "' />" if logo_b64 else ""}
+            <div class="kb-text">
+              <div class="kb-title">{TITLE}</div>
+              <div class="kb-caption">{CAPTION}</div>
+
+              <div class="kb-chips">
+                <div class="kb-chip">
+                  <div>
+                    <div class="kb-chip-label">Last updated</div>
+                    <div class="kb-chip-value">{last_updated_label}</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-render_header()
-
 # ---------- Thumbnail renderer (server-side fetch + fallback) ----------
-def render_thumb(url: str, height: int = 140):
+def render_thumb(url: str, height: int = 160):
     try:
         if not url:
             st.markdown(
@@ -161,12 +212,12 @@ def render_thumb(url: str, height: int = 140):
             unsafe_allow_html=True,
         )
 
-if last_updated:
-    st.caption(f"Last updated: {format_last_updated_et(last_updated)}")
+# ----- Render hero/header -----
+render_header(format_last_updated_et(last_updated))
 
 st.write("")
 
-# ---------- Match logic (same as Properties defaults) ----------
+# ---------- Match logic (same defaults as Properties) ----------
 default_max_price = int(criteria.get("max_price", 600000) or 600000)
 default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
@@ -231,8 +282,15 @@ top_matches = [it for it in items if is_top_match(it)]
 possible_matches = [it for it in items if is_possible_match(it)]
 new_items = [it for it in items if is_new(it)]
 
-st.caption(f"Criteria: ${default_max_price:,.0f} max • {default_min_acres:g}–{default_max_acres:g} acres")
+# ---- Optional settings (hide the “criteria” vibe) ----
+with st.expander("Tracker settings", expanded=False):
+    st.caption("These are the current “Top match” rules used for the counts on this dashboard.")
+    st.write(f"**Max price:** ${default_max_price:,.0f}")
+    st.write(f"**Acre range:** {default_min_acres:g}–{default_max_acres:g} acres")
 
+st.write("")
+
+# ---------- Tiles ----------
 st.markdown(
     f"""
     <div class="kb-tiles">
@@ -267,7 +325,7 @@ if st.button("View all properties →", use_container_width=True):
 
 st.divider()
 
-# ---------- Quick Top Matches (now with thumbnails) ----------
+# ---------- Quick Top Matches (with thumbnails) ----------
 st.subheader("Top matches (quick view)")
 
 if not top_matches:
@@ -298,8 +356,7 @@ else:
                 line_bits.append(str(price))
 
         with st.container(border=True):
-            render_thumb(thumb, height=160)
-
+            render_thumb(thumb, height=170)
             st.write(f"**{title}**")
             if line_bits:
                 st.caption(" • ".join(line_bits))
@@ -308,3 +365,4 @@ else:
 
 st.divider()
 st.caption("Tip: Use Properties to search, filter, and view all listings.")
+
