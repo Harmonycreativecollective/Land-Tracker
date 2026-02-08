@@ -3,7 +3,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
+import requests
 import streamlit as st
+
 from data_access import load_data
 
 # ---------- Paths ----------
@@ -32,6 +34,7 @@ def format_last_updated_et(ts: str) -> str:
     try:
         dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
         from zoneinfo import ZoneInfo
+
         dt_et = dt.astimezone(ZoneInfo("America/New_York"))
         return dt_et.strftime("%b %d, %Y • %I:%M %p ET")
     except Exception:
@@ -86,6 +89,38 @@ def render_header():
             overflow-wrap: anywhere;
             word-break: break-word;
           }}
+
+          .kb-tiles {{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+          }}
+          .kb-tile {{
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 18px;
+            padding: 14px 14px;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+          }}
+          .kb-tile-label {{
+            font-size: 0.95rem;
+            color: rgba(15,23,42,0.70);
+            margin: 0 0 6px 0;
+            font-weight: 700;
+          }}
+          .kb-tile-value {{
+            font-size: 1.9rem;
+            font-weight: 900;
+            line-height: 1.0;
+            color: rgba(15,23,42,0.92);
+            margin: 0;
+          }}
+          .kb-tile-sub {{
+            margin-top: 6px;
+            font-size: 0.9rem;
+            color: rgba(15,23,42,0.55);
+            font-weight: 600;
+          }}
         </style>
 
         <div class="kb-header">
@@ -100,6 +135,31 @@ def render_header():
     )
 
 render_header()
+
+# ---------- Thumbnail renderer (server-side fetch + fallback) ----------
+def render_thumb(url: str, height: int = 140):
+    try:
+        if not url:
+            st.markdown(
+                f"<div style='width:100%;height:{height}px;border-radius:16px;background:#f2f2f2;'></div>",
+                unsafe_allow_html=True,
+            )
+            return
+
+        headers = {"User-Agent": "Mozilla/5.0"}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code == 200 and r.content:
+            st.image(r.content, use_container_width=True)
+        else:
+            st.markdown(
+                f"<div style='width:100%;height:{height}px;border-radius:16px;background:#f2f2f2;'></div>",
+                unsafe_allow_html=True,
+            )
+    except Exception:
+        st.markdown(
+            f"<div style='width:100%;height:{height}px;border-radius:16px;background:#f2f2f2;'></div>",
+            unsafe_allow_html=True,
+        )
 
 if last_updated:
     st.caption(f"Last updated: {format_last_updated_et(last_updated)}")
@@ -174,41 +234,6 @@ new_items = [it for it in items if is_new(it)]
 st.caption(f"Criteria: ${default_max_price:,.0f} max • {default_min_acres:g}–{default_max_acres:g} acres")
 
 st.markdown(
-    """
-    <style>
-      .kb-tiles { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-      .kb-tile {
-        border: 1px solid rgba(15,23,42,0.10);
-        border-radius: 18px;
-        padding: 14px 14px;
-        background: rgba(255,255,255,0.9);
-        box-shadow: 0 6px 18px rgba(15,23,42,0.06);
-      }
-      .kb-tile-label {
-        font-size: 0.95rem;
-        color: rgba(15,23,42,0.70);
-        margin: 0 0 6px 0;
-        font-weight: 700;
-      }
-      .kb-tile-value {
-        font-size: 1.9rem;
-        font-weight: 900;
-        line-height: 1.0;
-        color: rgba(15,23,42,0.92);
-        margin: 0;
-      }
-      .kb-tile-sub {
-        margin-top: 6px;
-        font-size: 0.9rem;
-        color: rgba(15,23,42,0.55);
-        font-weight: 600;
-      }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-st.markdown(
     f"""
     <div class="kb-tiles">
       <div class="kb-tile">
@@ -236,14 +261,13 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
 # Big mobile-friendly CTA to Properties
 if st.button("View all properties →", use_container_width=True):
     st.switch_page("pages/2_properties.py")
 
 st.divider()
 
-# ---------- Quick Top Matches (small + useful) ----------
+# ---------- Quick Top Matches (now with thumbnails) ----------
 st.subheader("Top matches (quick view)")
 
 if not top_matches:
@@ -259,6 +283,7 @@ else:
         url = it.get("url") or ""
         price = it.get("price")
         acres = it.get("acres")
+        thumb = it.get("thumbnail") or ""
 
         line_bits = []
         if acres is not None:
@@ -272,12 +297,14 @@ else:
             except Exception:
                 line_bits.append(str(price))
 
-        st.write(f"**{title}**")
-        if line_bits:
-            st.caption(" • ".join(line_bits))
-        if url:
-            st.link_button("Open listing ↗", url, use_container_width=True)
-        st.write("")
+        with st.container(border=True):
+            render_thumb(thumb, height=160)
+
+            st.write(f"**{title}**")
+            if line_bits:
+                st.caption(" • ".join(line_bits))
+            if url:
+                st.link_button("Open listing ↗", url, use_container_width=True)
 
 st.divider()
 st.caption("Tip: Use Properties to search, filter, and view all listings.")
