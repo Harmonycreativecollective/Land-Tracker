@@ -59,10 +59,10 @@ def render_header():
             flex-wrap: wrap;
           }}
           .kb-logo {{
-            width:110px;
-            height:110px;
+            width:140px;
+            height:140px;
             flex: 0 0 auto;
-            border-radius: 16px;
+            border-radius: 18px;
             object-fit: contain;
           }}
           .kb-text {{
@@ -173,13 +173,69 @@ new_items = [it for it in items if is_new(it)]
 
 st.caption(f"Criteria: ${default_max_price:,.0f} max • {default_min_acres:g}–{default_max_acres:g} acres")
 
-c1, c2 = st.columns(2)
-c3, c4 = st.columns(2)
+st.markdown(
+    """
+    <style>
+      .kb-tiles { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .kb-tile {
+        border: 1px solid rgba(15,23,42,0.10);
+        border-radius: 18px;
+        padding: 14px 14px;
+        background: rgba(255,255,255,0.9);
+        box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+      }
+      .kb-tile-label {
+        font-size: 0.95rem;
+        color: rgba(15,23,42,0.70);
+        margin: 0 0 6px 0;
+        font-weight: 700;
+      }
+      .kb-tile-value {
+        font-size: 1.9rem;
+        font-weight: 900;
+        line-height: 1.0;
+        color: rgba(15,23,42,0.92);
+        margin: 0;
+      }
+      .kb-tile-sub {
+        margin-top: 6px;
+        font-size: 0.9rem;
+        color: rgba(15,23,42,0.55);
+        font-weight: 600;
+      }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-c1.metric("All found", f"{len(items)}")
-c2.metric("Top matches", f"{len(top_matches)}")
-c3.metric("Possible matches", f"{len(possible_matches)}")
-c4.metric("New", f"{len(new_items)}")
+st.markdown(
+    f"""
+    <div class="kb-tiles">
+      <div class="kb-tile">
+        <div class="kb-tile-label">All found</div>
+        <div class="kb-tile-value">{len(items)}</div>
+        <div class="kb-tile-sub">Total listings</div>
+      </div>
+      <div class="kb-tile">
+        <div class="kb-tile-label">Top matches</div>
+        <div class="kb-tile-value">{len(top_matches)}</div>
+        <div class="kb-tile-sub">Meets acres + price</div>
+      </div>
+      <div class="kb-tile">
+        <div class="kb-tile-label">Possible matches</div>
+        <div class="kb-tile-value">{len(possible_matches)}</div>
+        <div class="kb-tile-sub">Price missing</div>
+      </div>
+      <div class="kb-tile">
+        <div class="kb-tile-label">New</div>
+        <div class="kb-tile-value">{len(new_items)}</div>
+        <div class="kb-tile-sub">Since last run</div>
+      </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 # Big mobile-friendly CTA to Properties
 if st.button("View all properties →", use_container_width=True):
