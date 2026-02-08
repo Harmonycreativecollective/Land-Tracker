@@ -43,7 +43,6 @@ def format_last_updated_et(ts: str) -> str:
 
 # ---------- Header ----------
 def render_header():
-st.subheader("Dashboard")
 
     logo_b64 = ""
     if LOGO_PATH.exists():
