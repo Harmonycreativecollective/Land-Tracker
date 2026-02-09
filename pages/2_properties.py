@@ -161,17 +161,18 @@ default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
 
 # ---------- Status helpers ----------
-STATUS_EMOJI = {
-    "available": "🟢 Available",
-    "under_contract": "🟡 Under contract",
-    "pending": "⏳ Pending",
-    "sold": "🛑 Sold",
-    "unknown": "⚪ Status unknown",
+# ✅ TEXT ONLY (no emojis)
+STATUS_LABEL = {
+    "available": "AVAILABLE",
+    "under_contract": "UNDER CONTRACT",
+    "pending": "PENDING",
+    "sold": "SOLD",
+    "unknown": "STATUS UNKNOWN",
 }
 
 def get_status(it: Dict[str, Any]) -> str:
     s = (it.get("status") or "unknown").strip().lower()
-    return s if s in STATUS_EMOJI else "unknown"
+    return s if s in STATUS_LABEL else "unknown"
 
 def is_unavailable(status: str) -> bool:
     return status in {"under_contract", "pending", "sold"}
@@ -283,11 +284,11 @@ with st.expander("Filters", expanded=False):
     selected_states = st.multiselect("State", options=states, default=states)
     selected_counties = st.multiselect("County", options=counties, default=counties)
 
-    # Matching toggles
-    show_top_only = st.toggle("✨ Top matches", value=True)   # default ON
-    show_possible = st.toggle("🧩 Possible matches", value=False)
+    # ✅ Matching toggles (no emojis)
+    show_top_only = st.toggle("Top matches", value=True)     # default ON
+    show_possible = st.toggle("Possible matches", value=False)
+    show_new_only = st.toggle("New only", value=False)
 
-    show_new_only = st.toggle("🆕 New only", value=False)
     sort_newest = st.toggle("Newest first", value=True)
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
@@ -409,22 +410,23 @@ def listing_card(it: Dict[str, Any]):
     co_ = it.get("county") or ""
 
     status = get_status(it)
-    status_badge = STATUS_EMOJI.get(status, STATUS_EMOJI["unknown"])
+    status_badge = STATUS_LABEL.get(status, STATUS_LABEL["unknown"])
 
     top = is_top_match(it, min_acres, max_acres, max_price)
     possible = is_possible_match(it, min_acres, max_acres)
     new_flag = is_new(it)
 
-    badges = []
+    # ✅ TEXT ONLY badges
+    badges: List[str] = []
     if top:
-        badges.append("✨️ Top match")
+        badges.append("TOP MATCH")
     elif possible:
-        badges.append("🧩 Possible match")
+        badges.append("POSSIBLE MATCH")
     else:
-        badges.append("🔎 Found")
+        badges.append("FOUND")
 
     if new_flag:
-        badges.append("🆕 NEW")
+        badges.append("NEW")
 
     badges.append(status_badge)
 
@@ -438,10 +440,17 @@ def listing_card(it: Dict[str, Any]):
 
         st.subheader(title)
 
-        meta_bits = [" • ".join(badges), source]
+        meta_bits = []
+        # badges as one grouped string to avoid extra visual clutter
+        if badges:
+            meta_bits.append(" • ".join(badges))
         if loc_line:
-            meta_bits.insert(1, loc_line)
-        st.caption(" • ".join(meta_bits))
+            meta_bits.append(loc_line)
+        if source:
+            meta_bits.append(source)
+
+        if meta_bits:
+            st.caption(" • ".join(meta_bits))
 
         if price is None:
             st.write("**Price:** —")
@@ -470,4 +479,3 @@ for idx, it in enumerate(filtered):
 
 if not filtered:
     st.info("No listings matched your current search/filters.")
-
