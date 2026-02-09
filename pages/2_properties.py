@@ -1,5 +1,4 @@
 import base64
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -22,30 +21,32 @@ TITLE = "KB’s Land Tracker"
 CAPTION = "What’s meant for you is already in motion."
 
 # ---------- Load data ----------
-data = load_data()
+data = load_data() or {}
 items: List[Dict[str, Any]] = data.get("items", []) or []
 criteria = data.get("criteria", {}) or {}
 last_updated = data.get("last_updated_utc")
+
 
 # ---------- Time formatting (Eastern) ----------
 def format_last_updated_et(ts: str) -> str:
     if not ts:
         return "—"
     try:
-        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
         from zoneinfo import ZoneInfo
 
         dt_et = dt.astimezone(ZoneInfo("America/New_York"))
         return dt_et.strftime("%b %d, %Y • %I:%M %p ET")
     except Exception:
         try:
-            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+            dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
             return dt.strftime("%b %d, %Y • %I:%M %p")
         except Exception:
             return str(ts)
 
+
 # ============================================================
-# ✅ UI: Header + Last Updated tile + Pill badges (DASHBOARD STYLE)
+# ✅ UI: Header + Last Updated tile + Pill badges (Dashboard style)
 # ============================================================
 
 st.markdown(
@@ -186,6 +187,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
 def render_header() -> None:
     logo_b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("utf-8") if LOGO_PATH.exists() else ""
     st.markdown(
@@ -201,6 +203,7 @@ def render_header() -> None:
         unsafe_allow_html=True,
     )
 
+
 def render_tile(label: str, value: str) -> None:
     st.markdown(
         f"""
@@ -212,8 +215,10 @@ def render_tile(label: str, value: str) -> None:
         unsafe_allow_html=True,
     )
 
+
 def pill(text: str, variant: str) -> str:
     return f"<span class='kb-pill kb-pill--{variant}'>{text}</span>"
+
 
 render_header()
 render_tile("Last updated", format_last_updated_et(last_updated))
@@ -231,7 +236,7 @@ default_max_price = int(criteria.get("max_price", 600000) or 600000)
 default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
 
-# ---------- Status helpers (FIXED: normalize + map variants) ----------
+# ---------- Status helpers ----------
 STATUS_LABEL = {
     "available": "AVAILABLE",
     "under_contract": "UNDER CONTRACT",
@@ -240,41 +245,15 @@ STATUS_LABEL = {
     "unknown": "STATUS UNKNOWN",
 }
 
+
 def get_status(it: Dict[str, Any]) -> str:
-    """
-    Normalize messy status strings into canonical keys:
-    available | under_contract | pending | sold | unknown
-    """
-    raw = str(it.get("status") or "").strip().lower()
+    s = (it.get("status") or "unknown").strip().lower()
+    return s if s in STATUS_LABEL else "unknown"
 
-    # Normalize separators + whitespace (handles newlines too)
-    raw = raw.replace("_", " ")
-    raw = raw.replace("-", " ")
-    raw = " ".join(raw.split())
-
-    if not raw:
-        return "unknown"
-
-    # Strong signals first
-    if "sold" in raw:
-        return "sold"
-    if "pending" in raw:
-        return "pending"
-    if "under contract" in raw or "in contract" in raw or "contingent" in raw:
-        return "under_contract"
-
-    # Treat "active" as available
-    if raw in {"active", "available", "for sale", "for sale by agent"}:
-        return "available"
-
-    # If it already matches canonical keys
-    if raw in STATUS_LABEL:
-        return raw
-
-    return "unknown"
 
 def is_unavailable(status: str) -> bool:
     return status in {"under_contract", "pending", "sold"}
+
 
 # ---------- Match logic ----------
 def meets_acres(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
@@ -286,6 +265,7 @@ def meets_acres(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
     except Exception:
         return False
 
+
 def meets_price(it: Dict[str, Any], max_p: int) -> bool:
     price = it.get("price")
     if price is None:
@@ -294,6 +274,7 @@ def meets_price(it: Dict[str, Any], max_p: int) -> bool:
         return int(price) <= int(max_p)
     except Exception:
         return False
+
 
 def is_missing_price(it: Dict[str, Any]) -> bool:
     p = it.get("price")
@@ -309,11 +290,13 @@ def is_missing_price(it: Dict[str, Any]) -> bool:
             return True
     return False
 
+
 def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
     status = get_status(it)
     if is_unavailable(status):
         return False
     return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
+
 
 def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
     status = get_status(it)
@@ -322,6 +305,7 @@ def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
     if not meets_acres(it, min_a, max_a):
         return False
     return is_missing_price(it)
+
 
 def searchable_text(it: Dict[str, Any]) -> str:
     return " ".join(
@@ -334,8 +318,10 @@ def searchable_text(it: Dict[str, Any]) -> str:
         ]
     ).lower()
 
+
 def parse_dt(it: Dict[str, Any]) -> str:
     return it.get("found_utc") or ""
+
 
 def is_new(it: Dict[str, Any]) -> bool:
     try:
@@ -343,9 +329,11 @@ def is_new(it: Dict[str, Any]) -> bool:
     except Exception:
         return False
 
+
 # ---------- Location options ----------
 def norm_opt(x: Optional[str]) -> str:
     return (x or "").strip()
+
 
 # ---------- Keep only real property pages ----------
 def is_property_listing(it: Dict[str, Any]) -> bool:
@@ -353,35 +341,45 @@ def is_property_listing(it: Dict[str, Any]) -> bool:
     if not url:
         return False
 
+    # LandSearch: /properties/<slug>/<numeric_id>
     if "landsearch.com" in url:
         parts = url.rstrip("/").split("/")
         return ("/properties/" in url) and parts[-1].isdigit()
 
+    # LandWatch: /property/
     if "landwatch.com" in url:
         return "/property/" in url
 
     return True
+
 
 items = [it for it in items if is_property_listing(it)]
 
 states = sorted({norm_opt(it.get("state")) for it in items if norm_opt(it.get("state"))})
 counties = sorted({norm_opt(it.get("county")) for it in items if norm_opt(it.get("county"))})
 
-# ---------- Filters ----------
+# ---------- Filters (re-ordered + renamed + Location nested) ----------
 with st.expander("Filters", expanded=False):
+    # ✅ Fast mode switches FIRST
+    show_top_only = st.toggle("Show top matches", value=True)
+    show_possible = st.toggle("Include possible", value=False)
+    show_new_only = st.toggle("New only", value=False)
+    sort_newest = st.toggle("Newest first", value=True)
+
+    show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
+
+    st.divider()
+
+    # ✅ Then numbers (criteria)
     max_price = st.number_input("Max price (Top match)", min_value=0, value=default_max_price, step=10000)
     min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
     max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
 
-    selected_states = st.multiselect("State", options=states, default=states)
-    selected_counties = st.multiselect("County", options=counties, default=counties)
+    # ✅ Location tucked away (cleaner on mobile)
+    with st.expander("Location", expanded=False):
+        selected_states = st.multiselect("State", options=states, default=states)
+        selected_counties = st.multiselect("County", options=counties, default=counties)
 
-    show_top_only = st.toggle("Top matches", value=True)
-    show_possible = st.toggle("Possible matches", value=False)
-    show_new_only = st.toggle("New only", value=False)
-
-    sort_newest = st.toggle("Newest first", value=True)
-    show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
 def passes_location(it: Dict[str, Any]) -> bool:
     st_ = norm_opt(it.get("state"))
@@ -397,6 +395,7 @@ def passes_location(it: Dict[str, Any]) -> bool:
         return False
 
     return True
+
 
 loc_items = [it for it in items if passes_location(it)]
 
@@ -428,6 +427,7 @@ if search_query.strip():
 if show_new_only:
     filtered = [it for it in filtered if is_new(it)]
 
+# Matching rules
 if show_top_only:
     allowed = []
     for it in filtered:
@@ -440,6 +440,7 @@ else:
     if not show_possible:
         filtered = [it for it in filtered if not is_possible_match(it, min_acres, max_acres)]
 
+# Sorting
 def sort_key(it: Dict[str, Any]):
     if is_top_match(it, min_acres, max_acres, max_price):
         tier = 3
@@ -448,6 +449,7 @@ def sort_key(it: Dict[str, Any]):
     else:
         tier = 1
     return (tier, parse_dt(it))
+
 
 if sort_newest:
     filtered = sorted(filtered, key=sort_key, reverse=True)
@@ -479,6 +481,7 @@ def render_placeholder():
             unsafe_allow_html=True,
         )
 
+
 # ---------- Listing cards ----------
 def listing_card(it: Dict[str, Any]):
     title = it.get("title") or f"{it.get('source', 'Land')} listing"
@@ -495,7 +498,9 @@ def listing_card(it: Dict[str, Any]):
     possible = is_possible_match(it, min_acres, max_acres)
     new_flag = is_new(it)
 
+    # Build pill row
     pills: List[str] = []
+
     if new_flag:
         pills.append(pill("NEW", "new"))
 
@@ -525,6 +530,7 @@ def listing_card(it: Dict[str, Any]):
             render_placeholder()
 
         st.subheader(title)
+
         st.markdown(f"<div class='kb-badges'>{''.join(pills)}</div>", unsafe_allow_html=True)
 
         meta_bits = []
@@ -553,6 +559,7 @@ def listing_card(it: Dict[str, Any]):
 
         if url:
             st.link_button("Open listing ↗", url, use_container_width=True)
+
 
 # Grid (2 columns)
 cols = st.columns(2)
