@@ -19,17 +19,13 @@ st.set_page_config(
 TITLE = "KB’s Land Tracker"
 CAPTION = "What’s meant for you is already in motion."
 
-
 # ---------- Load data ----------
 data = load_data() or {}
 items: List[Dict[str, Any]] = data.get("items", []) or []
 criteria = data.get("criteria", {}) or {}
 last_updated = data.get("last_updated_utc")  # keep as-is (your code relies on it)
 
-
-# ---------- Your existing helpers (assumed present elsewhere in your file/project) ----------
-# NOTE: These names are referenced by your original functions below.
-# If they already exist in your app, keep your originals and remove duplicates.
+# ---------- Your existing helpers ----------
 STATUS_VALUES_UNAVAILABLE = {"unavailable", "sold", "pending", "off market", "removed"}
 
 
@@ -57,27 +53,28 @@ def meets_price(it: Dict[str, Any], max_price: float) -> bool:
 
 def format_last_updated_et(dt_str: Any) -> str:
     """
-    Keep this lightweight & compatible with your existing dt string.
-    If you already have a better formatter, keep yours.
+    ✅ FIX: Convert stored UTC -> America/New_York so Dashboard matches Properties.
     """
     if not dt_str:
         return "—"
     try:
-        # dt_str likely already in ET display or ISO; keep it simple
-        # If it's ISO, show a friendly line.
+        # Expect ISO string, often ends in Z
         s = str(dt_str).replace("Z", "+00:00")
         dt = datetime.fromisoformat(s)
-        return dt.strftime("%b %d, %Y • %I:%M %p ET")
+
+        # Convert to ET
+        from zoneinfo import ZoneInfo
+
+        dt_et = dt.astimezone(ZoneInfo("America/New_York"))
+        return dt_et.strftime("%b %d, %Y • %I:%M %p ET")
     except Exception:
         return str(dt_str)
 
 
 # ---------- Defaults (assumed from your criteria system) ----------
-# If you already define these elsewhere, keep your originals.
 default_min_acres = criteria.get("min_acres", 0) or 0
 default_max_acres = criteria.get("max_acres", 10**9) or 10**9
 default_max_price = criteria.get("max_price", 10**12) or 10**12
-
 
 # ============================================================
 # ✅ YOUR MATCH LOGIC (UNCHANGED)
@@ -127,7 +124,6 @@ top_matches = [it for it in items if is_top_match(it)]
 possible_matches = [it for it in items if is_possible_match(it)]
 new_items = [it for it in items if is_new(it)]
 
-
 # ============================================================
 # ✅ UI / STYLING (SAFE: does NOT affect match logic)
 # ============================================================
@@ -141,19 +137,16 @@ st.markdown(
   background: rgba(240, 242, 246, 0.65);
   border: 1px solid rgba(0,0,0,0.07);
 }
-
 .kb-tile:hover {
   box-shadow: 0 4px 14px rgba(0,0,0,0.08);
   transform: translateY(-1px);
 }
-
 .kb-tile-label {
   font-size: 0.85rem;
   color: rgba(0,0,0,0.55);
   margin-bottom: 6px;
   font-weight: 600;
 }
-
 .kb-tile-value {
   font-size: 1.65rem;
   font-weight: 850;
@@ -161,26 +154,40 @@ st.markdown(
   margin: 0;
   color: #0f172a;
 }
-
 .kb-tile-help {
   font-size: 0.82rem;
   color: rgba(0,0,0,0.48);
   margin-top: 8px;
 }
 
-/* Dashboard badges */
-.kb-badges { display:flex; flex-wrap:wrap; gap:6px; margin: 6px 0 2px 0; }
-.kb-badge {
-  display:inline-block;
-  padding: 2px 8px;
+/* ✅ Muted pill badges (match Properties vibe) */
+.kb-badges {
+  display:flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 4px 0;
+}
+.kb-pill {
+  display:inline-flex;
+  align-items:center;
+  padding: 4px 10px;
   border-radius: 999px;
   font-size: 0.72rem;
-  font-weight: 800;
-  color: white;
+  font-weight: 850;
+  letter-spacing: 0.35px;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: rgba(240, 242, 246, 0.80);
+  color: rgba(15, 23, 42, 0.90);
+  text-transform: uppercase;
+  white-space: nowrap;
 }
-.kb-badge-new { background:#2563eb; }
-.kb-badge-top { background:#16a34a; }
-.kb-badge-missing { background:#d97706; }
+
+/* Variants */
+.kb-pill--top       { background: rgba(16, 185, 129, 0.16); border-color: rgba(16, 185, 129, 0.35); }
+.kb-pill--new       { background: rgba(59, 130, 246, 0.16); border-color: rgba(59, 130, 246, 0.35); }
+.kb-pill--possible  { background: rgba(245, 158, 11, 0.16); border-color: rgba(245, 158, 11, 0.35); }
+.kb-pill--found     { background: rgba(148, 163, 184, 0.22); border-color: rgba(148, 163, 184, 0.40); }
+.kb-pill--status    { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
 </style>
 """,
     unsafe_allow_html=True,
@@ -200,29 +207,33 @@ def render_tile(label: str, value: str, help_text: str = "") -> None:
     )
 
 
-# ✅ NEW: Dashboard-only badge renderer (visual only; uses your existing match logic)
+def pill(text: str, variant: str) -> str:
+    return f"<span class='kb-pill kb-pill--{variant}'>{text}</span>"
+
+
+# ✅ Dashboard badge renderer (visual only; uses your existing match logic)
 def render_badges_dashboard(it: Dict[str, Any]) -> None:
-    badges: List[str] = []
+    pills: List[str] = []
 
     if is_new(it):
-        badges.append("<span class='kb-badge kb-badge-new'>NEW</span>")
+        pills.append(pill("NEW", "new"))
 
-    # On the dashboard "top matches" list, TOP MATCH will almost always be true,
-    # but keeping this makes it reusable if you ever show mixed lists here.
     if is_top_match(it):
-        badges.append("<span class='kb-badge kb-badge-top'>TOP MATCH</span>")
+        pills.append(pill("TOP MATCH", "top"))
+    elif is_possible_match(it):
+        pills.append(pill("POSSIBLE", "possible"))
+    else:
+        pills.append(pill("FOUND", "found"))
 
-    # Only show missing-data badge when it applies
-    if is_possible_match(it):
-        badges.append("<span class='kb-badge kb-badge-missing'>MISSING DATA</span>")
+    # Status pill (muted)
+    status_raw = get_status(it)
+    status_label = "STATUS UNKNOWN" if not status_raw else status_raw.replace("_", " ").upper()
+    pills.append(pill(status_label, "status"))
 
-    if not badges:
-        return
-
-    st.markdown(f"<div class='kb-badges'>{''.join(badges)}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='kb-badges'>{''.join(pills)}</div>", unsafe_allow_html=True)
 
 
-# ---------- Header (your original, kept) ----------
+# ---------- Header ----------
 logo_b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("utf-8") if LOGO_PATH.exists() else ""
 
 st.markdown(
@@ -278,7 +289,7 @@ render_tile("Last updated", f"{format_last_updated_et(last_updated)}")
 
 st.write("")
 
-# ---------- Tiles (2x2) – STYLIZED, BUT COUNTS UNCHANGED ----------
+# ---------- Tiles (2x2) ----------
 c1, c2 = st.columns(2, gap="small")
 c3, c4 = st.columns(2, gap="small")
 
@@ -338,7 +349,7 @@ else:
 
             st.write(f"**{title}**")
 
-            # ✅ NEW: badges on dashboard quick view
+            # ✅ Muted pills (same vibe as Properties)
             render_badges_dashboard(it)
 
             if bits:
