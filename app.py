@@ -26,7 +26,7 @@ criteria = data.get("criteria", {}) or {}
 last_updated = data.get("last_updated_utc")  # keep as-is (your code relies on it)
 
 # ---------- Your existing helpers ----------
-STATUS_VALUES_UNAVAILABLE = {"unavailable", "sold", "pending", "off market", "removed", "under contract", "under_contract","contingent"}
+STATUS_VALUES_UNAVAILABLE = {"unavailable", "sold", "pending", "off market", "removed", "under contract", "under_contract","contingent","unknown"}
 
 
 def get_status(it: Dict[str, Any]) -> str:
