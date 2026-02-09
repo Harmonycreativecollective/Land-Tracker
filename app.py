@@ -29,46 +29,36 @@ last_updated = data.get("last_updated_utc")  # keep as-is (your code relies on i
 STATUS_VALUES_UNAVAILABLE = {"unavailable", "sold", "pending", "off market", "removed", "under contract", "under_contract","contingent","unknown"}
 
 
+import re
+
 def get_status(it: Dict[str, Any]) -> str:
-    return str(it.get("status") or "").strip().lower()
+    s = str(it.get("status") or "").strip().lower()
+    s = s.replace("-", " ").replace("_", " ")
+    s = re.sub(r"\s+", " ", s).strip()
 
+    # map variants into a small known set
+    if not s:
+        return "unknown"
 
-def meets_acres(it: Dict[str, Any], min_acres: float, max_acres: float) -> bool:
-    try:
-        a = float(it.get("acres"))
-        return (min_acres is None or a >= min_acres) and (max_acres is None or a <= max_acres)
-    except Exception:
-        return False
+    if "sold" in s:
+        return "sold"
 
+    if "pending" in s:
+        return "pending"
 
-def meets_price(it: Dict[str, Any], max_price: float) -> bool:
-    try:
-        p = it.get("price")
-        if p is None or p == "":
-            return False
-        return float(p) <= float(max_price)
-    except Exception:
-        return False
+    if "under contract" in s or "active under contract" in s or "contract" in s:
+        return "under contract"
 
+    if "contingent" in s:
+        return "contingent"
 
-def format_last_updated_et(dt_str: Any) -> str:
-    """
-    ✅ FIX: Convert stored UTC -> America/New_York so Dashboard matches Properties.
-    """
-    if not dt_str:
-        return "—"
-    try:
-        # Expect ISO string, often ends in Z
-        s = str(dt_str).replace("Z", "+00:00")
-        dt = datetime.fromisoformat(s)
+    if "off market" in s or "removed" in s or "unavailable" in s:
+        return "off market"
 
-        # Convert to ET
-        from zoneinfo import ZoneInfo
+    if "available" in s or "active" in s:
+        return "available"
 
-        dt_et = dt.astimezone(ZoneInfo("America/New_York"))
-        return dt_et.strftime("%b %d, %Y • %I:%M %p ET")
-    except Exception:
-        return str(dt_str)
+    return "unknown"
 
 
 # ---------- Defaults (assumed from your criteria system) ----------
@@ -98,9 +88,9 @@ def is_missing_price(it: Dict[str, Any]) -> bool:
 
     return False
 
-
 def is_top_match(it: Dict[str, Any]) -> bool:
-    if get_status(it) in STATUS_VALUES_UNAVAILABLE:
+    status = get_status(it)
+    if status != "available":
         return False
     return meets_acres(it, default_min_acres, default_max_acres) and meets_price(it, default_max_price)
 
