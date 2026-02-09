@@ -30,10 +30,11 @@ last_updated = data.get("last_updated_utc")
 # ---------- Time formatting (Eastern) ----------
 def format_last_updated_et(ts: str) -> str:
     if not ts:
-        return ""
+        return "—"
     try:
         dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
         from zoneinfo import ZoneInfo
+
         dt_et = dt.astimezone(ZoneInfo("America/New_York"))
         return dt_et.strftime("%b %d, %Y • %I:%M %p ET")
     except Exception:
@@ -41,95 +42,154 @@ def format_last_updated_et(ts: str) -> str:
             dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
             return dt.strftime("%b %d, %Y • %I:%M %p")
         except Exception:
-            return ts
+            return str(ts)
 
-# ---------- Header ----------
-def render_header():
-    logo_b64 = ""
-    if LOGO_PATH.exists():
-        logo_b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("utf-8")
+# ============================================================
+# ✅ UI: Header + Last Updated tile + Pill badges (DASHBOARD STYLE)
+# ============================================================
 
+st.markdown(
+    """
+<style>
+/* --- Header (match dashboard) --- */
+.kb-header {
+  display:flex;
+  align-items:center;
+  gap:18px;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+  margin-bottom: 0.35rem;
+}
+.kb-logo {
+  width:140px;
+  height:140px;
+  flex: 0 0 auto;
+  border-radius: 22px;
+  object-fit: contain;
+}
+.kb-text {
+  flex: 1 1 auto;
+  min-width: 240px;
+}
+.kb-title {
+  font-size: clamp(2.0rem, 4vw, 2.8rem);
+  font-weight: 950;
+  line-height: 1.05;
+  margin: 0;
+  color: #0f172a;
+}
+.kb-caption {
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  color: rgba(15, 23, 42, 0.62);
+  margin-top: 10px;
+  font-weight: 750;
+}
+
+/* --- Full-width "tile" card --- */
+.kb-tile {
+  padding: 14px 14px;
+  border-radius: 14px;
+  background: rgba(240, 242, 246, 0.65);
+  border: 1px solid rgba(0,0,0,0.07);
+}
+.kb-tile-label {
+  font-size: 0.85rem;
+  color: rgba(0,0,0,0.55);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.kb-tile-value {
+  font-size: 1.65rem;
+  font-weight: 850;
+  line-height: 1.05;
+  margin: 0;
+  color: #0f172a;
+}
+
+/* --- Pill badges (clean + consistent) --- */
+.kb-badges {
+  display:flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 8px 0;
+}
+.kb-pill {
+  display:inline-flex;
+  align-items:center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.35px;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: rgba(240, 242, 246, 0.80);
+  color: rgba(15, 23, 42, 0.90);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Pill variants (subtle, not loud) */
+.kb-pill--top       { background: rgba(16, 185, 129, 0.16); border-color: rgba(16, 185, 129, 0.35); }
+.kb-pill--new       { background: rgba(59, 130, 246, 0.16); border-color: rgba(59, 130, 246, 0.35); }
+.kb-pill--possible  { background: rgba(245, 158, 11, 0.16); border-color: rgba(245, 158, 11, 0.35); }
+.kb-pill--found     { background: rgba(148, 163, 184, 0.22); border-color: rgba(148, 163, 184, 0.40); }
+
+.kb-pill--available      { background: rgba(34, 197, 94, 0.16); border-color: rgba(34, 197, 94, 0.35); }
+.kb-pill--under_contract { background: rgba(234, 179, 8, 0.16);  border-color: rgba(234, 179, 8, 0.35); }
+.kb-pill--pending        { background: rgba(249, 115, 22, 0.16); border-color: rgba(249, 115, 22, 0.35); }
+.kb-pill--sold           { background: rgba(239, 68, 68, 0.14);  border-color: rgba(239, 68, 68, 0.32); }
+.kb-pill--unknown        { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
+
+/* Placeholder */
+.kb-ph {
+  width:100%;
+  height:220px;
+  border-radius:16px;
+  overflow:hidden;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.kb-ph img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.kb-ph::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.0) 0%,
+    rgba(255,255,255,0.30) 45%,
+    rgba(255,255,255,0.70) 100%
+  );
+}
+.kb-ph-label {
+  position:absolute;
+  z-index:2;
+  text-align:center;
+  font-weight:800;
+  letter-spacing:0.2px;
+  color: rgba(15, 23, 42, 0.78);
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(15,23,42,0.08);
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+def render_header() -> None:
+    logo_b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("utf-8") if LOGO_PATH.exists() else ""
     st.markdown(
         f"""
-        <style>
-          .kb-header {{
-            display:flex;
-            align-items:center;
-            gap:16px;
-            margin-top: 0.25rem;
-            margin-bottom: 0.35rem;
-          }}
-          .kb-logo {{
-            width:140px;
-            height:140px;
-            flex: 0 0 140px;
-            border-radius: 16px;
-            object-fit: contain;
-          }}
-          .kb-text {{
-            flex: 1 1 auto;
-            min-width: 0;
-          }}
-          .kb-title {{
-            font-size: clamp(1.55rem, 3.3vw, 2.05rem);
-            font-weight: 900;
-            line-height: 1.05;
-            margin: 0;
-            color: #0f172a;
-            overflow-wrap: anywhere;
-            word-break: break-word;
-          }}
-          .kb-caption {{
-            font-size: clamp(1.05rem, 2.5vw, 1.22rem);
-            color: rgba(49, 51, 63, 0.75);
-            margin-top: 8px;
-            line-height: 1.35;
-            overflow-wrap: anywhere;
-            word-break: break-word;
-          }}
-
-          .kb-ph {{
-            width:100%;
-            height:220px;
-            border-radius:16px;
-            overflow:hidden;
-            position:relative;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-          }}
-          .kb-ph img {{
-            width:100%;
-            height:100%;
-            object-fit:cover;
-            display:block;
-          }}
-          .kb-ph::after {{
-            content:"";
-            position:absolute;
-            inset:0;
-            background: linear-gradient(
-              to bottom,
-              rgba(255,255,255,0.0) 0%,
-              rgba(255,255,255,0.30) 45%,
-              rgba(255,255,255,0.70) 100%
-            );
-          }}
-          .kb-ph-label {{
-            position:absolute;
-            z-index:2;
-            text-align:center;
-            font-weight:800;
-            letter-spacing:0.2px;
-            color: rgba(15, 23, 42, 0.78);
-            padding: 10px 14px;
-            border-radius: 999px;
-            background: rgba(255,255,255,0.65);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(15,23,42,0.08);
-          }}
-        </style>
-
         <div class="kb-header">
           {"<img class='kb-logo' src='data:image/png;base64," + logo_b64 + "' />" if logo_b64 else ""}
           <div class="kb-text">
@@ -141,11 +201,22 @@ def render_header():
         unsafe_allow_html=True,
     )
 
+def render_tile(label: str, value: str) -> None:
+    st.markdown(
+        f"""
+        <div class="kb-tile">
+          <div class="kb-tile-label">{label}</div>
+          <div class="kb-tile-value">{value}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+def pill(text: str, variant: str) -> str:
+    return f"<span class='kb-pill kb-pill--{variant}'>{text}</span>"
+
 render_header()
-
-if last_updated:
-    st.caption(f"Last updated: {format_last_updated_et(last_updated)}")
-
+render_tile("Last updated", format_last_updated_et(last_updated))
 st.write("")
 
 # ✅ Search stays top-of-page
@@ -161,7 +232,6 @@ default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
 
 # ---------- Status helpers ----------
-# ✅ TEXT ONLY (no emojis)
 STATUS_LABEL = {
     "available": "AVAILABLE",
     "under_contract": "UNDER CONTRACT",
@@ -217,7 +287,6 @@ def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> 
     return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
 
 def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
-    # Possible match = acres fits, but price missing
     status = get_status(it)
     if is_unavailable(status):
         return False
@@ -255,20 +324,15 @@ def is_property_listing(it: Dict[str, Any]) -> bool:
     if not url:
         return False
 
-    # LandSearch: property pages look like:
-    # https://www.landsearch.com/properties/<slug...>/<numeric_id>
     if "landsearch.com" in url:
         parts = url.rstrip("/").split("/")
         return ("/properties/" in url) and parts[-1].isdigit()
 
-    # LandWatch: property pages typically contain /property/
     if "landwatch.com" in url:
         return "/property/" in url
 
-    # Unknown source: keep it (for future sites), but you can change to False if you want strict
     return True
 
-# APPLY the property filter so junk nav pages disappear
 items = [it for it in items if is_property_listing(it)]
 
 states = sorted({norm_opt(it.get("state")) for it in items if norm_opt(it.get("state"))})
@@ -280,41 +344,33 @@ with st.expander("Filters", expanded=False):
     min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
     max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
 
-    # Location filters (won't break if empty)
     selected_states = st.multiselect("State", options=states, default=states)
     selected_counties = st.multiselect("County", options=counties, default=counties)
 
-    # ✅ Matching toggles (no emojis)
-    show_top_only = st.toggle("Top matches", value=True)     # default ON
+    show_top_only = st.toggle("Top matches", value=True)
     show_possible = st.toggle("Possible matches", value=False)
     show_new_only = st.toggle("New only", value=False)
 
     sort_newest = st.toggle("Newest first", value=True)
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
-# ---------- Location filter ----------
 def passes_location(it: Dict[str, Any]) -> bool:
     st_ = norm_opt(it.get("state"))
     co_ = norm_opt(it.get("county"))
 
-    # If scraper doesn't provide location fields yet, don't filter
     if not states and not counties:
         return True
 
-    # If user selected some states and item has state, enforce it
     if selected_states and st_ and st_ not in selected_states:
         return False
 
-    # If user selected some counties and item has county, enforce it
     if selected_counties and co_ and co_ not in selected_counties:
         return False
 
-    # Missing state/county stays visible
     return True
 
 loc_items = [it for it in items if passes_location(it)]
 
-# ---------- Details counts ----------
 top_matches_all = [it for it in loc_items if is_top_match(it, min_acres, max_acres, max_price)]
 possible_all = [it for it in loc_items if is_possible_match(it, min_acres, max_acres)]
 new_all = [it for it in loc_items if is_new(it)]
@@ -328,7 +384,6 @@ with st.expander("Details", expanded=False):
     c3.metric("Possible matches", f"{len(possible_all)}")
     c4.metric("New", f"{len(new_all)}")
 
-    # Helpful debug to see what scraper is actually returning
     with st.expander("Debug (first 5 items)", expanded=False):
         st.json(loc_items[:5])
 
@@ -344,7 +399,6 @@ if search_query.strip():
 if show_new_only:
     filtered = [it for it in filtered if is_new(it)]
 
-# Matching rules
 if show_top_only:
     allowed = []
     for it in filtered:
@@ -354,11 +408,9 @@ if show_top_only:
             allowed.append(it)
     filtered = allowed
 else:
-    # If not "top only", optionally hide possibles
     if not show_possible:
         filtered = [it for it in filtered if not is_possible_match(it, min_acres, max_acres)]
 
-# Sorting
 def sort_key(it: Dict[str, Any]):
     if is_top_match(it, min_acres, max_acres, max_price):
         tier = 3
@@ -410,25 +462,33 @@ def listing_card(it: Dict[str, Any]):
     co_ = it.get("county") or ""
 
     status = get_status(it)
-    status_badge = STATUS_LABEL.get(status, STATUS_LABEL["unknown"])
-
     top = is_top_match(it, min_acres, max_acres, max_price)
     possible = is_possible_match(it, min_acres, max_acres)
     new_flag = is_new(it)
 
-    # ✅ TEXT ONLY badges
-    badges: List[str] = []
-    if top:
-        badges.append("TOP MATCH")
-    elif possible:
-        badges.append("POSSIBLE MATCH")
-    else:
-        badges.append("FOUND")
+    # Build pill row (like dashboard)
+    pills: List[str] = []
 
     if new_flag:
-        badges.append("NEW")
+        pills.append(pill("NEW", "new"))
 
-    badges.append(status_badge)
+    if top:
+        pills.append(pill("TOP MATCH", "top"))
+    elif possible:
+        pills.append(pill("POSSIBLE", "possible"))
+    else:
+        pills.append(pill("FOUND", "found"))
+
+    # status pill variant based on status
+    status_variant = {
+        "available": "available",
+        "under_contract": "under_contract",
+        "pending": "pending",
+        "sold": "sold",
+        "unknown": "unknown",
+    }.get(status, "unknown")
+
+    pills.append(pill(STATUS_LABEL.get(status, "STATUS UNKNOWN"), status_variant))
 
     loc_line = " • ".join([x for x in [co_, st_] if x])
 
@@ -440,15 +500,15 @@ def listing_card(it: Dict[str, Any]):
 
         st.subheader(title)
 
+        # pills row
+        st.markdown(f"<div class='kb-badges'>{''.join(pills)}</div>", unsafe_allow_html=True)
+
+        # small meta line
         meta_bits = []
-        # badges as one grouped string to avoid extra visual clutter
-        if badges:
-            meta_bits.append(" • ".join(badges))
         if loc_line:
             meta_bits.append(loc_line)
         if source:
             meta_bits.append(source)
-
         if meta_bits:
             st.caption(" • ".join(meta_bits))
 
