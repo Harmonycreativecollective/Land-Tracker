@@ -231,7 +231,7 @@ default_max_price = int(criteria.get("max_price", 600000) or 600000)
 default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
 
-# ---------- Status helpers ----------
+# ---------- Status helpers (FIXED: normalize + map variants) ----------
 STATUS_LABEL = {
     "available": "AVAILABLE",
     "under_contract": "UNDER CONTRACT",
@@ -241,8 +241,37 @@ STATUS_LABEL = {
 }
 
 def get_status(it: Dict[str, Any]) -> str:
-    s = (it.get("status") or "unknown").strip().lower()
-    return s if s in STATUS_LABEL else "unknown"
+    """
+    Normalize messy status strings into canonical keys:
+    available | under_contract | pending | sold | unknown
+    """
+    raw = str(it.get("status") or "").strip().lower()
+
+    # Normalize separators + whitespace (handles newlines too)
+    raw = raw.replace("_", " ")
+    raw = raw.replace("-", " ")
+    raw = " ".join(raw.split())
+
+    if not raw:
+        return "unknown"
+
+    # Strong signals first
+    if "sold" in raw:
+        return "sold"
+    if "pending" in raw:
+        return "pending"
+    if "under contract" in raw or "in contract" in raw or "contingent" in raw:
+        return "under_contract"
+
+    # Treat "active" as available
+    if raw in {"active", "available", "for sale", "for sale by agent"}:
+        return "available"
+
+    # If it already matches canonical keys
+    if raw in STATUS_LABEL:
+        return raw
+
+    return "unknown"
 
 def is_unavailable(status: str) -> bool:
     return status in {"under_contract", "pending", "sold"}
@@ -466,9 +495,7 @@ def listing_card(it: Dict[str, Any]):
     possible = is_possible_match(it, min_acres, max_acres)
     new_flag = is_new(it)
 
-    # Build pill row (like dashboard)
     pills: List[str] = []
-
     if new_flag:
         pills.append(pill("NEW", "new"))
 
@@ -479,7 +506,6 @@ def listing_card(it: Dict[str, Any]):
     else:
         pills.append(pill("FOUND", "found"))
 
-    # status pill variant based on status
     status_variant = {
         "available": "available",
         "under_contract": "under_contract",
@@ -499,11 +525,8 @@ def listing_card(it: Dict[str, Any]):
             render_placeholder()
 
         st.subheader(title)
-
-        # pills row
         st.markdown(f"<div class='kb-badges'>{''.join(pills)}</div>", unsafe_allow_html=True)
 
-        # small meta line
         meta_bits = []
         if loc_line:
             meta_bits.append(loc_line)
