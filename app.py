@@ -13,7 +13,7 @@ LOGO_PATH = Path("assets/kblogo.png")
 st.set_page_config(
     page_title="Dashboard – KB’s Land Tracker",
     page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🗺️",
-    layout="centered",
+    layout="wide",
 )
 
 TITLE = "KB’s Land Tracker"
