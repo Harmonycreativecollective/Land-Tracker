@@ -131,7 +131,6 @@ new_items = [it for it in items if is_new(it)]
 # ============================================================
 # ✅ UI / STYLING (SAFE: does NOT affect match logic)
 # ============================================================
-# Make tiles look like “real dashboard cards” without touching logic.
 st.markdown(
     """
 <style>
@@ -168,6 +167,20 @@ st.markdown(
   color: rgba(0,0,0,0.48);
   margin-top: 8px;
 }
+
+/* Dashboard badges */
+.kb-badges { display:flex; flex-wrap:wrap; gap:6px; margin: 6px 0 2px 0; }
+.kb-badge {
+  display:inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: white;
+}
+.kb-badge-new { background:#2563eb; }
+.kb-badge-top { background:#16a34a; }
+.kb-badge-missing { background:#d97706; }
 </style>
 """,
     unsafe_allow_html=True,
@@ -185,6 +198,28 @@ def render_tile(label: str, value: str, help_text: str = "") -> None:
 """,
         unsafe_allow_html=True,
     )
+
+
+# ✅ NEW: Dashboard-only badge renderer (visual only; uses your existing match logic)
+def render_badges_dashboard(it: Dict[str, Any]) -> None:
+    badges: List[str] = []
+
+    if is_new(it):
+        badges.append("<span class='kb-badge kb-badge-new'>NEW</span>")
+
+    # On the dashboard "top matches" list, TOP MATCH will almost always be true,
+    # but keeping this makes it reusable if you ever show mixed lists here.
+    if is_top_match(it):
+        badges.append("<span class='kb-badge kb-badge-top'>TOP MATCH</span>")
+
+    # Only show missing-data badge when it applies
+    if is_possible_match(it):
+        badges.append("<span class='kb-badge kb-badge-missing'>MISSING DATA</span>")
+
+    if not badges:
+        return
+
+    st.markdown(f"<div class='kb-badges'>{''.join(badges)}</div>", unsafe_allow_html=True)
 
 
 # ---------- Header (your original, kept) ----------
@@ -257,7 +292,7 @@ with c3:
     render_tile("New", f"{len(new_items)}", "Found in the last run")
 
 with c4:
-    render_tile("Possible", f"{len(possible_matches)}", "Missing Data ")
+    render_tile("Possible", f"{len(possible_matches)}", "Missing Data")
 
 st.write("")
 
@@ -302,6 +337,10 @@ else:
                     bits.append(str(price))
 
             st.write(f"**{title}**")
+
+            # ✅ NEW: badges on dashboard quick view
+            render_badges_dashboard(it)
+
             if bits:
                 st.caption(" • ".join(bits))
             if url:
