@@ -1,4 +1,17 @@
+import base64
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List
 
+import streamlit as st
+from data_access import load_data
+
+# ---------- Paths ----------
+LOGO_PATH = Path("assets/kblogo.png")
+
+# ---------- Page config ----------
+st.set_page_config(
+    page_title="Dashboard – KB’s Land Tracker",
     page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🗺️",
     layout="wide",
 )
@@ -16,6 +29,7 @@ last_updated = data.get("last_updated_utc")  # keep as-is (your code relies on i
 STATUS_VALUES_UNAVAILABLE = {"unavailable", "sold", "pending", "off market", "removed", "under contract", "under_contract","contingent","unknown"}
 
 
+import re
 
 def get_status(it: Dict[str, Any]) -> str:
     s = str(it.get("status") or "").strip().lower()
@@ -73,9 +87,10 @@ def is_missing_price(it: Dict[str, Any]) -> bool:
             return True
 
     return False
-    
+
 def is_top_match(it: Dict[str, Any]) -> bool:
-    if get_status(it) != "available":
+    status = get_status(it)
+    if status != "available":
         return False
     return meets_acres(it, default_min_acres, default_max_acres) and meets_price(it, default_max_price)
 
@@ -98,27 +113,7 @@ def is_new(it: Dict[str, Any]) -> bool:
 top_matches = [it for it in items if is_top_match(it)]
 possible_matches = [it for it in items if is_possible_match(it)]
 new_items = [it for it in items if is_new(it)]
-top_matches = [it for it in items if is_top_match(it)]
-possible_matches = [it for it in items if is_possible_match(it)]
-new_items = [it for it in items if is_new(it)]
 
-# --- DEBUG: top matches sanity check ---
-bad = []
-for it in top_matches:
-    if get_status(it) != "available":
-        bad.append(
-            {
-                "title": it.get("title"),
-                "url": it.get("url"),
-                "raw_status": it.get("status"),
-                "normalized_status": get_status(it),
-                "ever_top_match": it.get("ever_top_match"),
-            }
-        )
-
-st.write("Top matches with non-available status:", len(bad))
-if bad:
-    st.json(bad[:10])
 # ============================================================
 # ✅ UI / STYLING (SAFE: does NOT affect match logic)
 # ============================================================
