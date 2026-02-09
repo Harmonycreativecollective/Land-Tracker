@@ -113,7 +113,27 @@ def is_new(it: Dict[str, Any]) -> bool:
 top_matches = [it for it in items if is_top_match(it)]
 possible_matches = [it for it in items if is_possible_match(it)]
 new_items = [it for it in items if is_new(it)]
+top_matches = [it for it in items if is_top_match(it)]
+possible_matches = [it for it in items if is_possible_match(it)]
+new_items = [it for it in items if is_new(it)]
 
+# --- DEBUG: top matches sanity check ---
+bad = []
+for it in top_matches:
+    if get_status(it) != "available":
+        bad.append(
+            {
+                "title": it.get("title"),
+                "url": it.get("url"),
+                "raw_status": it.get("status"),
+                "normalized_status": get_status(it),
+                "ever_top_match": it.get("ever_top_match"),
+            }
+        )
+
+st.write("Top matches with non-available status:", len(bad))
+if bad:
+    st.json(bad[:10])
 # ============================================================
 # ✅ UI / STYLING (SAFE: does NOT affect match logic)
 # ============================================================
