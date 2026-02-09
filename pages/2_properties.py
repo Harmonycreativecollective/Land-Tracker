@@ -32,23 +32,22 @@ def format_last_updated_et(ts: str) -> str:
     if not ts:
         return "—"
     try:
-        dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
         from zoneinfo import ZoneInfo
 
         dt_et = dt.astimezone(ZoneInfo("America/New_York"))
         return dt_et.strftime("%b %d, %Y • %I:%M %p ET")
     except Exception:
         try:
-            dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
             return dt.strftime("%b %d, %Y • %I:%M %p")
         except Exception:
             return str(ts)
 
 
 # ============================================================
-# ✅ UI: Header + Last Updated tile + Pill badges (Dashboard style)
+# ✅ UI: Header + Last Updated tile + Muted Pill badges
 # ============================================================
-
 st.markdown(
     """
 <style>
@@ -105,6 +104,23 @@ st.markdown(
   line-height: 1.05;
   margin: 0;
   color: #0f172a;
+}
+
+/* --- Section "boxes" inside Filters --- */
+.kb-filter-box {
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(240, 242, 246, 0.55);
+  border: 1px solid rgba(0,0,0,0.08);
+  margin: 12px 0;
+}
+.kb-filter-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  color: rgba(15,23,42,0.65);
+  margin-bottom: 10px;
+  text-transform: uppercase;
 }
 
 /* --- Pill badges (clean + consistent) --- */
@@ -236,6 +252,7 @@ default_max_price = int(criteria.get("max_price", 600000) or 600000)
 default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
 
+
 # ---------- Status helpers ----------
 STATUS_LABEL = {
     "available": "AVAILABLE",
@@ -252,7 +269,8 @@ def get_status(it: Dict[str, Any]) -> str:
 
 
 def is_unavailable(status: str) -> bool:
-    return status in {"under_contract", "pending", "sold"}
+    # If you also use "off market"/"removed" in scraper, add them here:
+    return status in {"under_contract", "pending", "sold", "off market", "removed", "unavailable"}
 
 
 # ---------- Match logic ----------
@@ -341,12 +359,10 @@ def is_property_listing(it: Dict[str, Any]) -> bool:
     if not url:
         return False
 
-    # LandSearch: /properties/<slug>/<numeric_id>
     if "landsearch.com" in url:
         parts = url.rstrip("/").split("/")
         return ("/properties/" in url) and parts[-1].isdigit()
 
-    # LandWatch: /property/
     if "landwatch.com" in url:
         return "/property/" in url
 
@@ -358,9 +374,20 @@ items = [it for it in items if is_property_listing(it)]
 states = sorted({norm_opt(it.get("state")) for it in items if norm_opt(it.get("state"))})
 counties = sorted({norm_opt(it.get("county")) for it in items if norm_opt(it.get("county"))})
 
-# ---------- Filters (re-ordered + renamed + Location nested) ----------
+
+# ============================================================
+# ✅ Filters (toggles first + boxed Criteria + boxed Location)
+# ============================================================
 with st.expander("Filters", expanded=False):
-    # ✅ Fast mode switches FIRST
+    # --- Quick filters (toggles + slider) ---
+    st.markdown(
+        """
+        <div class="kb-filter-box">
+          <div class="kb-filter-title">Quick filters</div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     show_top_only = st.toggle("Show top matches", value=True)
     show_possible = st.toggle("Include possible", value=False)
     show_new_only = st.toggle("New only", value=False)
@@ -368,17 +395,36 @@ with st.expander("Filters", expanded=False):
 
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
-    st.divider()
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    # ✅ Then numbers (criteria)
+    # --- Criteria box ---
+    st.markdown(
+        """
+        <div class="kb-filter-box">
+          <div class="kb-filter-title">Criteria</div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     max_price = st.number_input("Max price (Top match)", min_value=0, value=default_max_price, step=10000)
     min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
     max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
 
-    # ✅ Location tucked away (cleaner on mobile)
-    with st.expander("Location", expanded=False):
-        selected_states = st.multiselect("State", options=states, default=states)
-        selected_counties = st.multiselect("County", options=counties, default=counties)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # --- Location box (nested controls, but visually a box) ---
+    st.markdown(
+        """
+        <div class="kb-filter-box">
+          <div class="kb-filter-title">Location</div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    selected_states = st.multiselect("State", options=states, default=states)
+    selected_counties = st.multiselect("County", options=counties, default=counties)
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def passes_location(it: Dict[str, Any]) -> bool:
@@ -405,17 +451,14 @@ new_all = [it for it in loc_items if is_new(it)]
 
 with st.expander("Details", expanded=False):
     st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
-
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("All listings", f"{len(loc_items)}")
     c2.metric("Top matches", f"{len(top_matches_all)}")
-    c3.metric("Possible matches", f"{len(possible_all)}")
+    c3.metric("Possible", f"{len(possible_all)}")
     c4.metric("New", f"{len(new_all)}")
 
-    with st.expander("Debug (first 5 items)", expanded=False):
-        st.json(loc_items[:5])
-
 st.divider()
+
 
 # ---------- Apply filters ----------
 filtered = loc_items[:]
@@ -427,9 +470,8 @@ if search_query.strip():
 if show_new_only:
     filtered = [it for it in filtered if is_new(it)]
 
-# Matching rules
 if show_top_only:
-    allowed = []
+    allowed: List[Dict[str, Any]] = []
     for it in filtered:
         if is_top_match(it, min_acres, max_acres, max_price):
             allowed.append(it)
@@ -440,7 +482,7 @@ else:
     if not show_possible:
         filtered = [it for it in filtered if not is_possible_match(it, min_acres, max_acres)]
 
-# Sorting
+
 def sort_key(it: Dict[str, Any]):
     if is_top_match(it, min_acres, max_acres, max_price):
         tier = 3
@@ -455,6 +497,7 @@ if sort_newest:
     filtered = sorted(filtered, key=sort_key, reverse=True)
 
 filtered = filtered[:show_n]
+
 
 # ---------- Placeholder renderer ----------
 def render_placeholder():
@@ -498,7 +541,7 @@ def listing_card(it: Dict[str, Any]):
     possible = is_possible_match(it, min_acres, max_acres)
     new_flag = is_new(it)
 
-    # Build pill row
+    # Pills row (muted)
     pills: List[str] = []
 
     if new_flag:
