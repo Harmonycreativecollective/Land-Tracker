@@ -1,4 +1,5 @@
 import base64
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -137,6 +138,7 @@ st.markdown(
 .kb-pill--under_contract { background: rgba(234, 179, 8, 0.16);  border-color: rgba(234, 179, 8, 0.35); }
 .kb-pill--pending        { background: rgba(249, 115, 22, 0.16); border-color: rgba(249, 115, 22, 0.35); }
 .kb-pill--sold           { background: rgba(239, 68, 68, 0.14);  border-color: rgba(239, 68, 68, 0.32); }
+.kb-pill--off_market     { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
 .kb-pill--unknown        { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
 
 /* Placeholder */
@@ -231,7 +233,7 @@ default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
 
 # ============================================================
-# ✅ Status + Match logic (and UNAVAILABLE)
+# ✅ STATUS NORMALIZATION (match app.py vibe)
 # ============================================================
 
 STATUS_LABEL = {
@@ -239,25 +241,40 @@ STATUS_LABEL = {
     "under_contract": "UNDER CONTRACT",
     "pending": "PENDING",
     "sold": "SOLD",
+    "contingent": "CONTINGENT",
+    "off_market": "OFF MARKET",
     "unknown": "STATUS UNKNOWN",
 }
 
-UNAVAILABLE_STATUSES = {"under_contract", "pending", "sold"}
-
 def get_status(it: Dict[str, Any]) -> str:
-    s = (it.get("status") or "unknown")
-    s = str(s).strip().lower().replace("-", "_").replace(" ", "_")
-    return s if s in STATUS_LABEL else "unknown"
+    s = str(it.get("status") or "").strip().lower()
+    s = s.replace("-", " ").replace("_", " ")
+    s = re.sub(r"\s+", " ", s).strip()
 
-def is_unavailable(status: str) -> bool:
-    return status in UNAVAILABLE_STATUSES
+    if not s:
+        return "unknown"
+
+    if "sold" in s:
+        return "sold"
+    if "pending" in s:
+        return "pending"
+    if "contingent" in s:
+        return "contingent"
+    if "under contract" in s or "active under contract" in s or s == "contract" or " contract" in s:
+        return "under_contract"
+    if "off market" in s or "removed" in s or "unavailable" in s:
+        return "off_market"
+    if "available" in s or "active" in s:
+        return "available"
+
+    return "unknown"
 
 def meets_acres(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
     acres = it.get("acres")
     if acres is None:
         return False
     try:
-        return min_a <= float(acres) <= max_a
+        return float(min_a) <= float(acres) <= float(max_a)
     except Exception:
         return False
 
@@ -284,15 +301,20 @@ def is_missing_price(it: Dict[str, Any]) -> bool:
             return True
     return False
 
+def is_new(it: Dict[str, Any]) -> bool:
+    try:
+        return bool(it.get("found_utc")) and bool(last_updated) and it.get("found_utc") == last_updated
+    except Exception:
+        return False
+
+# ✅ MATCH RULES (match app.py): only AVAILABLE can be Top/Possible
 def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
-    status = get_status(it)
-    if is_unavailable(status):
+    if get_status(it) != "available":
         return False
     return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
 
 def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
-    status = get_status(it)
-    if is_unavailable(status):
+    if get_status(it) != "available":
         return False
     if not meets_acres(it, min_a, max_a):
         return False
@@ -314,41 +336,28 @@ def searchable_text(it: Dict[str, Any]) -> str:
 def parse_dt(it: Dict[str, Any]) -> str:
     return it.get("found_utc") or ""
 
-def is_new(it: Dict[str, Any]) -> bool:
-    try:
-        return bool(it.get("found_utc")) and bool(last_updated) and it.get("found_utc") == last_updated
-    except Exception:
-        return False
+# ============================================================
+# ✅ Lease removal + property page validation (STRONGER)
+# ============================================================
 
-# ============================================================
-# ✅ Lease removal + property page validation
-# ============================================================
+LEASE_RE = re.compile(
+    r"\b(lease|leasing|rental|rent|for lease|land for lease|for rent|/mo|per month|tenant)\b",
+    re.IGNORECASE,
+)
 
 def is_lease_listing(it: Dict[str, Any]) -> bool:
-    url = (it.get("url") or "").strip().lower()
-    title = (it.get("title") or "").strip().lower()
-    source = (it.get("source") or "").strip().lower()
-
-    markers = [
-        "for lease", "for-lease", "/lease", " lease ", "lease/", "leases",
-        "rent", "rental", "for rent", "for-rent", "/rent", "/rental",
-        "tenant", "tenants",
-    ]
-
-    if any(m in url for m in markers):
-        return True
-    if any(m in f" {title} " for m in markers):
-        return True
-    if "lease" in source or "rental" in source:
-        return True
-    return False
+    title = str(it.get("title") or "")
+    url = str(it.get("url") or "")
+    source = str(it.get("source") or "")
+    combined = " ".join([title, url, source])
+    return bool(LEASE_RE.search(combined))
 
 def is_property_listing(it: Dict[str, Any]) -> bool:
     url = (it.get("url") or "").strip().lower()
     if not url:
         return False
 
-    # ✅ HARD REMOVE: leases
+    # HARD REMOVE: leases
     if is_lease_listing(it):
         return False
 
@@ -542,14 +551,7 @@ def listing_card(it: Dict[str, Any]):
     else:
         pills.append(pill("FOUND", "found"))
 
-    status_variant = {
-        "available": "available",
-        "under_contract": "under_contract",
-        "pending": "pending",
-        "sold": "sold",
-        "unknown": "unknown",
-    }.get(status, "unknown")
-
+    status_variant = status if status in {"available", "under_contract", "pending", "sold", "off_market"} else "unknown"
     pills.append(pill(STATUS_LABEL.get(status, "STATUS UNKNOWN"), status_variant))
 
     loc_line = " • ".join([x for x in [co_, st_] if x])
