@@ -12,7 +12,7 @@ PREVIEW_PATH = Path("assets/previewkb.png")  # branded placeholder
 
 # ---------- Page config ----------
 st.set_page_config(
-    page_title="KB’s Land Tracker",
+    page_title="KB’s Land Tracker – Properties",
     page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🗺️",
     layout="centered",
 )
@@ -26,28 +26,25 @@ items: List[Dict[str, Any]] = data.get("items", []) or []
 criteria = data.get("criteria", {}) or {}
 last_updated = data.get("last_updated_utc")
 
-
 # ---------- Time formatting (Eastern) ----------
 def format_last_updated_et(ts: Any) -> str:
     if not ts:
         return "—"
-    s = str(ts)
     try:
-        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
         from zoneinfo import ZoneInfo
 
         dt_et = dt.astimezone(ZoneInfo("America/New_York"))
         return dt_et.strftime("%b %d, %Y • %I:%M %p ET")
     except Exception:
         try:
-            dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+            dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
             return dt.strftime("%b %d, %Y • %I:%M %p")
         except Exception:
-            return s
-
+            return str(ts)
 
 # ============================================================
-# UI: Header + Last Updated tile + Muted pill badges
+# ✅ UI: Header + Last Updated tile + Muted pill badges
 # ============================================================
 
 st.markdown(
@@ -108,7 +105,7 @@ st.markdown(
   color: #0f172a;
 }
 
-/* --- Pill badges (muted) --- */
+/* --- Muted pill badges --- */
 .kb-badges {
   display:flex;
   flex-wrap: wrap;
@@ -130,7 +127,7 @@ st.markdown(
   white-space: nowrap;
 }
 
-/* Pill variants (subtle) */
+/* variants (muted) */
 .kb-pill--top       { background: rgba(16, 185, 129, 0.16); border-color: rgba(16, 185, 129, 0.35); }
 .kb-pill--new       { background: rgba(59, 130, 246, 0.16); border-color: rgba(59, 130, 246, 0.35); }
 .kb-pill--possible  { background: rgba(245, 158, 11, 0.16); border-color: rgba(245, 158, 11, 0.35); }
@@ -188,7 +185,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
 def render_header() -> None:
     logo_b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("utf-8") if LOGO_PATH.exists() else ""
     st.markdown(
@@ -204,7 +200,6 @@ def render_header() -> None:
         unsafe_allow_html=True,
     )
 
-
 def render_tile(label: str, value: str) -> None:
     st.markdown(
         f"""
@@ -216,15 +211,12 @@ def render_tile(label: str, value: str) -> None:
         unsafe_allow_html=True,
     )
 
-
 def pill(text: str, variant: str) -> str:
     return f"<span class='kb-pill kb-pill--{variant}'>{text}</span>"
-
 
 render_header()
 render_tile("Last updated", format_last_updated_et(last_updated))
 st.write("")
-
 
 # ✅ Search stays top-of-page
 search_query = st.text_input(
@@ -233,147 +225,13 @@ search_query = st.text_input(
     placeholder="Try: king george, port royal, landwatch, 20 acres…",
 )
 
-
 # ---------- Defaults ----------
 default_max_price = int(criteria.get("max_price", 600000) or 600000)
 default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
 default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
 
-
 # ============================================================
-# Lease + Property-page filtering (IMPORTANT)
-# ============================================================
-
-LEASE_WORDS = {" lease ", " for lease", " leasing", " rent ", " for rent"}
-
-
-def is_lease_listing(it: Dict[str, Any]) -> bool:
-    t = f" {str(it.get('title') or '').lower()} "
-    u = (it.get("url") or "").strip().lower()
-
-    # title-based (strong signal)
-    if any(w in t for w in LEASE_WORDS):
-        return True
-
-    # url-based (strong signal)
-    if "lease" in u or "for-lease" in u or "forrent" in u or "for-rent" in u:
-        return True
-
-    return False
-
-
-def is_property_listing(it: Dict[str, Any]) -> bool:
-    url = (it.get("url") or "").strip().lower()
-    if not url:
-        return False
-
-    # Exclude leases FIRST
-    if is_lease_listing(it):
-        return False
-
-    # LandSearch property pages:
-    # https://www.landsearch.com/properties/<slug>/<numeric_id>
-    if "landsearch.com" in url:
-        parts = url.rstrip("/").split("/")
-        return ("/properties/" in url) and parts[-1].isdigit()
-
-    # LandWatch property pages typically contain /property/
-    if "landwatch.com" in url:
-        return "/property/" in url
-
-    # Unknown source: keep it (future sites)
-    return True
-
-
-items = [it for it in items if is_property_listing(it)]
-
-
-# ============================================================
-# Derived Location helpers (county/state from title)
-# ============================================================
-
-US_STATE_NAMES = {
-    "alabama","alaska","arizona","arkansas","california","colorado","connecticut","delaware",
-    "florida","georgia","hawaii","idaho","illinois","indiana","iowa","kansas","kentucky","louisiana",
-    "maine","maryland","massachusetts","michigan","minnesota","mississippi","missouri","montana",
-    "nebraska","nevada","new hampshire","new jersey","new mexico","new york","north carolina","north dakota",
-    "ohio","oklahoma","oregon","pennsylvania","rhode island","south carolina","south dakota","tennessee",
-    "texas","utah","vermont","virginia","washington","west virginia","wisconsin","wyoming","district of columbia"
-}
-
-STATE_ABBR = {
-    "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD",
-    "MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC",
-    "SD","TN","TX","UT","VT","VA","WA","WV","WI","WY","DC"
-}
-
-
-def norm_opt(x: Optional[str]) -> str:
-    return (x or "").strip()
-
-
-def get_state(it: Dict[str, Any]) -> str:
-    # Prefer existing derived fields from scraper
-    v = norm_opt(it.get("derived_state")) or norm_opt(it.get("state"))
-    if v:
-        return v
-
-    loc = norm_opt(it.get("location_raw")) or norm_opt(it.get("location"))
-    if loc and "," in loc:
-        parts = [p.strip() for p in loc.split(",") if p.strip()]
-        if parts:
-            maybe = parts[-1]
-            if maybe.lower() in US_STATE_NAMES or maybe.upper() in STATE_ABBR:
-                return maybe.title() if maybe.lower() in US_STATE_NAMES else maybe.upper()
-
-    title = norm_opt(it.get("title"))
-    tl = title.lower()
-    if " in " in tl and "," in title:
-        after_in = title.split(" in ")[-1].strip()  # "King George, Virginia"
-        parts = [p.strip() for p in after_in.split(",") if p.strip()]
-        if len(parts) >= 2:
-            st_ = parts[-1]
-            if st_.lower() in US_STATE_NAMES:
-                return st_.title()
-            if st_.upper() in STATE_ABBR:
-                return st_.upper()
-
-    return ""
-
-
-def get_county(it: Dict[str, Any]) -> str:
-    # Prefer explicit county if scraper ever provides it
-    v = norm_opt(it.get("derived_county")) or norm_opt(it.get("county"))
-    if v:
-        return v
-
-    loc = norm_opt(it.get("location_raw")) or norm_opt(it.get("location"))
-    if loc and "," in loc:
-        parts = [p.strip() for p in loc.split(",") if p.strip()]
-        if len(parts) >= 2:
-            place = parts[0]
-            return place.replace(" County", "").replace(" county", "").strip()
-
-    title = norm_opt(it.get("title"))
-    tl = title.lower()
-    if " in " in tl and "," in title:
-        after_in = title.split(" in ")[-1].strip()
-        parts = [p.strip() for p in after_in.split(",") if p.strip()]
-        if len(parts) >= 2:
-            place = parts[0]
-            return place.replace(" County", "").replace(" county", "").strip()
-
-    return ""
-
-
-# Stamp derived fields used by UI + filtering
-for it in items:
-    it["_state"] = get_state(it)
-    it["_county"] = get_county(it)
-
-
-# ============================================================
-# Status + Match logic
+# ✅ Status + Match logic (and UNAVAILABLE)
 # ============================================================
 
 STATUS_LABEL = {
@@ -386,15 +244,13 @@ STATUS_LABEL = {
 
 UNAVAILABLE_STATUSES = {"under_contract", "pending", "sold"}
 
-
 def get_status(it: Dict[str, Any]) -> str:
-    s = (it.get("status") or "unknown").strip().lower()
+    s = (it.get("status") or "unknown")
+    s = str(s).strip().lower().replace("-", "_").replace(" ", "_")
     return s if s in STATUS_LABEL else "unknown"
-
 
 def is_unavailable(status: str) -> bool:
     return status in UNAVAILABLE_STATUSES
-
 
 def meets_acres(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
     acres = it.get("acres")
@@ -405,7 +261,6 @@ def meets_acres(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
     except Exception:
         return False
 
-
 def meets_price(it: Dict[str, Any], max_p: int) -> bool:
     price = it.get("price")
     if price is None or price == "":
@@ -414,7 +269,6 @@ def meets_price(it: Dict[str, Any], max_p: int) -> bool:
         return float(price) <= float(max_p)
     except Exception:
         return False
-
 
 def is_missing_price(it: Dict[str, Any]) -> bool:
     p = it.get("price")
@@ -430,13 +284,11 @@ def is_missing_price(it: Dict[str, Any]) -> bool:
             return True
     return False
 
-
 def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
     status = get_status(it)
     if is_unavailable(status):
         return False
     return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
-
 
 def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
     status = get_status(it)
@@ -446,6 +298,21 @@ def is_possible_match(it: Dict[str, Any], min_a: float, max_a: float) -> bool:
         return False
     return is_missing_price(it)
 
+def searchable_text(it: Dict[str, Any]) -> str:
+    return " ".join(
+        [
+            str(it.get("title", "")),
+            str(it.get("county", "")),
+            str(it.get("state", "")),
+            str(it.get("derived_county", "")),
+            str(it.get("derived_state", "")),
+            str(it.get("source", "")),
+            str(it.get("url", "")),
+        ]
+    ).lower()
+
+def parse_dt(it: Dict[str, Any]) -> str:
+    return it.get("found_utc") or ""
 
 def is_new(it: Dict[str, Any]) -> bool:
     try:
@@ -453,93 +320,132 @@ def is_new(it: Dict[str, Any]) -> bool:
     except Exception:
         return False
 
+# ============================================================
+# ✅ Lease removal + property page validation
+# ============================================================
 
-def searchable_text(it: Dict[str, Any]) -> str:
-    return " ".join(
-        [
-            str(it.get("title", "")),
-            str(it.get("_county", "")),
-            str(it.get("_state", "")),
-            str(it.get("source", "")),
-            str(it.get("url", "")),
-        ]
-    ).lower()
+def is_lease_listing(it: Dict[str, Any]) -> bool:
+    url = (it.get("url") or "").strip().lower()
+    title = (it.get("title") or "").strip().lower()
+    source = (it.get("source") or "").strip().lower()
 
+    markers = [
+        "for lease", "for-lease", "/lease", " lease ", "lease/", "leases",
+        "rent", "rental", "for rent", "for-rent", "/rent", "/rental",
+        "tenant", "tenants",
+    ]
 
-def parse_dt(it: Dict[str, Any]) -> str:
-    return it.get("found_utc") or ""
+    if any(m in url for m in markers):
+        return True
+    if any(m in f" {title} " for m in markers):
+        return True
+    if "lease" in source or "rental" in source:
+        return True
+    return False
 
+def is_property_listing(it: Dict[str, Any]) -> bool:
+    url = (it.get("url") or "").strip().lower()
+    if not url:
+        return False
 
-# ---------- Location options ----------
-states = sorted({norm_opt(it.get("_state")) for it in items if norm_opt(it.get("_state"))})
-counties = sorted({norm_opt(it.get("_county")) for it in items if norm_opt(it.get("_county"))})
+    # ✅ HARD REMOVE: leases
+    if is_lease_listing(it):
+        return False
 
+    # LandSearch property pages
+    if "landsearch.com" in url:
+        parts = url.rstrip("/").split("/")
+        return ("/properties/" in url) and parts[-1].isdigit()
+
+    # LandWatch property pages
+    if "landwatch.com" in url:
+        return "/property/" in url
+
+    # Unknown sources: keep (future-proof)
+    return True
+
+# Apply property filter (removes leases too)
+items = [it for it in items if is_property_listing(it)]
 
 # ============================================================
-# Filters UI (toggles first, boxed criteria + location)
+# ✅ Location helpers (use derived_* first)
+# ============================================================
+
+def norm_opt(x: Optional[str]) -> str:
+    return (x or "").strip()
+
+def get_state(it: Dict[str, Any]) -> str:
+    return norm_opt(it.get("derived_state")) or norm_opt(it.get("state")) or norm_opt(it.get("state_raw"))
+
+def get_county(it: Dict[str, Any]) -> str:
+    c = norm_opt(it.get("derived_county")) or norm_opt(it.get("county")) or norm_opt(it.get("county_raw"))
+    if c.lower() in {"", "unknown", "n/a", "na", "none"}:
+        return ""
+    return c
+
+states = sorted({get_state(it) for it in items if get_state(it)})
+counties = sorted({get_county(it) for it in items if get_county(it)})
+
+# ============================================================
+# ✅ Filters UI (toggles first + location expander)
 # ============================================================
 
 with st.expander("Filters", expanded=False):
-    # Toggles first (what users care about most)
+    # toggles first
     show_top_only = st.toggle("Show top matches", value=True)
     show_possible = st.toggle("Include possible", value=False)
     show_new_only = st.toggle("New only", value=False)
     sort_newest = st.toggle("Newest first", value=True)
-
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
     st.write("")
 
-    # Criteria box
-    with st.container(border=True):
-        st.caption("Criteria (Top match)")
-        max_price = st.number_input("Max price", min_value=0, value=default_max_price, step=10000)
-        min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
-        max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
+    # criteria box
+    max_price = st.number_input("Max price (Top match)", min_value=0, value=default_max_price, step=10000)
+    min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
+    max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
 
-    st.write("")
-
-    # Location box
-    with st.container(border=True):
-        st.caption("Location")
+    # location in its own expander (clean)
+    with st.expander("Location", expanded=False):
         selected_states = st.multiselect("State", options=states, default=states)
-        selected_counties = st.multiselect("County / Area", options=counties, default=counties)
+        selected_counties = st.multiselect("County", options=counties, default=counties)
 
+    # debug toggle
+    show_debug = st.toggle("Show debug", value=False)
 
 def passes_location(it: Dict[str, Any]) -> bool:
-    st_ = norm_opt(it.get("_state"))
-    co_ = norm_opt(it.get("_county"))
+    st_ = get_state(it)
+    co_ = get_county(it)
 
     if selected_states and st_ and st_ not in selected_states:
         return False
     if selected_counties and co_ and co_ not in selected_counties:
         return False
-
     return True
-
 
 loc_items = [it for it in items if passes_location(it)]
 
-
-# ---------- Details ----------
+# details counts
 top_matches_all = [it for it in loc_items if is_top_match(it, min_acres, max_acres, max_price)]
 possible_all = [it for it in loc_items if is_possible_match(it, min_acres, max_acres)]
 new_all = [it for it in loc_items if is_new(it)]
 
 with st.expander("Details", expanded=False):
     st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
-
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("All listings", f"{len(loc_items)}")
     c2.metric("Top matches", f"{len(top_matches_all)}")
     c3.metric("Possible matches", f"{len(possible_all)}")
     c4.metric("New", f"{len(new_all)}")
 
+    if show_debug:
+        st.markdown("**Debug (first 8 items):**")
+        st.json(loc_items[:8])
+
 st.divider()
 
-
 # ============================================================
-# Apply filters
+# ✅ Apply filters
 # ============================================================
 
 filtered = loc_items[:]
@@ -563,7 +469,6 @@ else:
     if not show_possible:
         filtered = [it for it in filtered if not is_possible_match(it, min_acres, max_acres)]
 
-
 def sort_key(it: Dict[str, Any]):
     if is_top_match(it, min_acres, max_acres, max_price):
         tier = 3
@@ -573,15 +478,13 @@ def sort_key(it: Dict[str, Any]):
         tier = 1
     return (tier, parse_dt(it))
 
-
 if sort_newest:
     filtered = sorted(filtered, key=sort_key, reverse=True)
 
 filtered = filtered[:show_n]
 
-
 # ============================================================
-# Placeholder renderer
+# ✅ Placeholder renderer
 # ============================================================
 
 def render_placeholder():
@@ -608,9 +511,8 @@ def render_placeholder():
             unsafe_allow_html=True,
         )
 
-
 # ============================================================
-# Listing card
+# ✅ Listing cards
 # ============================================================
 
 def listing_card(it: Dict[str, Any]):
@@ -621,8 +523,8 @@ def listing_card(it: Dict[str, Any]):
     acres = it.get("acres")
     thumb = it.get("thumbnail")
 
-    st_ = norm_opt(it.get("_state"))
-    co_ = norm_opt(it.get("_county"))
+    st_ = get_state(it)
+    co_ = get_county(it)
 
     status = get_status(it)
     top = is_top_match(it, min_acres, max_acres, max_price)
@@ -647,6 +549,7 @@ def listing_card(it: Dict[str, Any]):
         "sold": "sold",
         "unknown": "unknown",
     }.get(status, "unknown")
+
     pills.append(pill(STATUS_LABEL.get(status, "STATUS UNKNOWN"), status_variant))
 
     loc_line = " • ".join([x for x in [co_, st_] if x])
@@ -658,10 +561,9 @@ def listing_card(it: Dict[str, Any]):
             render_placeholder()
 
         st.subheader(title)
-
         st.markdown(f"<div class='kb-badges'>{''.join(pills)}</div>", unsafe_allow_html=True)
 
-        meta_bits = []
+        meta_bits: List[str] = []
         if loc_line:
             meta_bits.append(loc_line)
         if source:
@@ -687,7 +589,6 @@ def listing_card(it: Dict[str, Any]):
 
         if url:
             st.link_button("Open listing ↗", url, use_container_width=True)
-
 
 # Grid (2 columns)
 cols = st.columns(2)
