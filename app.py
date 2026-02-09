@@ -251,13 +251,13 @@ with c1:
     render_tile("All found", f"{len(items)}", "Total listings loaded")
 
 with c2:
-    render_tile("Top matches", f"{len(top_matches)}", "Meets target acres + max price")
+    render_tile("Top matches", f"{len(top_matches)}", "Meets Criteria")
 
 with c3:
-    render_tile("New", f"{len(new_items)}", "Found exactly at the most recent run time")
+    render_tile("New", f"{len(new_items)}", "Found During Last One")
 
 with c4:
-    render_tile("Possible", f"{len(possible_matches)}", "Acre range fits but price is missing")
+    render_tile("Possible", f"{len(possible_matches)}", "Criteria Missing")
 
 st.write("")
 
