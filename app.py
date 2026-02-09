@@ -254,10 +254,10 @@ with c2:
     render_tile("Top matches", f"{len(top_matches)}", "Meets Criteria")
 
 with c3:
-    render_tile("New", f"{len(new_items)}", "Found During Last One")
+    render_tile("New", f"{len(new_items)}", "Found in the last run")
 
 with c4:
-    render_tile("Possible", f"{len(possible_matches)}", "Criteria Missing")
+    render_tile("Possible", f"{len(possible_matches)}", "Missing Data ")
 
 st.write("")
 
