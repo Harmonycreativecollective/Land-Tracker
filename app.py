@@ -3,6 +3,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
+
+import re
 import streamlit as st
 from data_access import load_data
 
@@ -29,7 +31,6 @@ last_updated = data.get("last_updated_utc")  # keep as-is (your code relies on i
 STATUS_VALUES_UNAVAILABLE = {"unavailable", "sold", "pending", "off market", "removed", "under contract", "under_contract","contingent","unknown"}
 
 
-import re
 
 def get_status(it: Dict[str, Any]) -> str:
     s = str(it.get("status") or "").strip().lower()
@@ -87,10 +88,9 @@ def is_missing_price(it: Dict[str, Any]) -> bool:
             return True
 
     return False
-
+    
 def is_top_match(it: Dict[str, Any]) -> bool:
-    status = get_status(it)
-    if status != "available":
+    if get_status(it) != "available":
         return False
     return meets_acres(it, default_min_acres, default_max_acres) and meets_price(it, default_max_price)
 
