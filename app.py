@@ -37,6 +37,7 @@ data = load_data() or {}
 items: List[Dict[str, Any]] = data.get("items", []) or []
 criteria = data.get("criteria", {}) or {}
 last_updated = data.get("last_updated_utc")
+last_attempted = data.get("last_attempted_utc")
 
 # ============================================================
 # Helpers (MUST exist in app.py)
@@ -312,9 +313,18 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ---------- Last updated ----------
-render_tile("Last updated", format_last_updated_et(last_updated))
+# ---------- Last updated / refresh ----------
+if last_attempted and (last_attempted != last_updated):
+    render_tile(
+        "Last updated",
+        f"{format_last_updated_et(last_updated)}",
+        f"Refresh attempt: {format_last_updated_et(last_attempted)}",
+    )
+else:
+    render_tile("Last updated", format_last_updated_et(last_updated or last_attempted))
+
 st.write("")
+
 
 # ---------- Tiles ----------
 c1, c2 = st.columns(2, gap="small")
