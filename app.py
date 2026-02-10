@@ -21,11 +21,14 @@ st.set_page_config(
 
 
 # ---------- Manual Refresh ----------
-if st.button("Force refresh"):
-    st.cache_data.clear()
-    run_update()
-    st.rerun()
-
+with st.sidebar:
+    if st.button("🔄 Force refresh"):
+        with st.spinner("Updating listings…"):
+            st.cache_data.clear()
+            run_update()
+            st.success("Updated just now ✨")
+            st.rerun()
+            
 TITLE = "KB’s Land Tracker"
 CAPTION = "What’s meant for you is already in motion."
 
