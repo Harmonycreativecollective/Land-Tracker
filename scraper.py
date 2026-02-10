@@ -17,37 +17,12 @@ START_URLS = [
     "https://www.landsearch.com/properties/caroline-county-va",
     "https://www.landsearch.com/properties/frederick-county-md",
     "https://www.landsearch.com/properties/anne-arundel-county-md",
-
-    # ---- LandWatch is currently 403 blocked in your logs ----
-    # Leave these commented out until you make a dedicated LandWatch scraper
-    # "https://www.landwatch.com/virginia-land-for-sale/king-george",
-    # "https://www.landwatch.com/virginia-land-for-sale/westmoreland-county",
-    # "https://www.landwatch.com/virginia-land-for-sale/stafford-county",
-    # "https://www.landwatch.com/maryland-land-for-sale/caroline-county",
-    # "https://www.landwatch.com/maryland-land-for-sale/frederick-county",
-    # "https://www.landwatch.com/maryland-land-for-sale/anne-arundel-county",
+    # LandWatch currently blocked in logs (403), keep off for now
 ]
 
 MIN_ACRES = 10.0
 MAX_ACRES = 50.0
 MAX_PRICE = 600_000
-
-LEASE_KEYWORDS = {
-    "lease",
-    "for lease",
-    "leasing",
-    "rent",
-    "rental",
-    "ground lease",
-    "land lease",
-    "annual lease",
-}
-
-def is_lease_listing(it: Dict[str, Any]) -> bool:
-    t = (it.get("title") or "").lower()
-    u = (it.get("url") or "").lower()
-
-    return any(kw in t or kw in u for kw in LEASE_KEYWORDS)
 
 # Enrich missing titles/thumbs/status/price by visiting a few detail pages
 DETAIL_ENRICH_LIMIT = 80
@@ -92,11 +67,7 @@ LEASE_KEYWORDS = {
 def is_lease_listing(it: Dict[str, Any]) -> bool:
     t = (it.get("title") or "").lower()
     u = (it.get("url") or "").lower()
-
-    for kw in LEASE_KEYWORDS:
-        if kw in t or kw in u:
-            return True
-    return False
+    return any(kw in t or kw in u for kw in LEASE_KEYWORDS)
 
 
 # ------------------- Fetch -------------------
@@ -259,7 +230,6 @@ def is_bad_title(title: Optional[str]) -> bool:
     t = (title or "").strip().lower()
     if t in BAD_TITLE_SET:
         return True
-    # Treat anything like "<source> listing" as bad too
     if t.endswith(" listing"):
         return True
     return False
@@ -361,13 +331,7 @@ def enrich_from_detail_page(url: str) -> Dict[str, Any]:
             if p2 is not None:
                 price = price or p2
 
-            a2 = parse_acres(
-                d.get("acres")
-                or d.get("lotSizeAcres")
-                or d.get("lotSize")
-                or d.get("size")
-                or d.get("area")
-            )
+            a2 = parse_acres(d.get("acres") or d.get("lotSizeAcres") or d.get("lotSize") or d.get("size") or d.get("area"))
             if a2 is not None:
                 acres = acres or a2
 
@@ -482,14 +446,7 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
                 or ((d.get("offers") or {}).get("price") if isinstance(d.get("offers"), dict) else None)
             )
 
-            acres = parse_acres(
-                d.get("acres")
-                or d.get("lotSize")
-                or d.get("lotSizeAcres")
-                or d.get("size")
-                or d.get("area")
-            )
-
+            acres = parse_acres(d.get("acres") or d.get("lotSize") or d.get("lotSizeAcres") or d.get("size") or d.get("area"))
             thumb = try_thumbnail_from_dict(d)
 
             items.append(
@@ -594,7 +551,6 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
     if not items:
         items.extend(extract_from_html_fallback(url, html, "LandSearch"))
 
-    # quick filter: drop lease-ish items early
     items = [it for it in items if not is_lease_listing(it)]
 
     seen = set()
@@ -642,7 +598,6 @@ def main():
             continue
         all_items.extend(extract_listings(url, html))
 
-    # Dedup across sources by URL + persist fields
     seen = set()
     final: List[Dict[str, Any]] = []
     for x in all_items:
@@ -658,25 +613,22 @@ def main():
         if is_bad_title(x.get("title")):
             x["title"] = f"{x.get('source','Listing')} listing"
 
-        # reset status each run
         x["status"] = "unknown"
 
         # drop leases early
         if is_lease_listing(x):
             continue
-# drop leases (before enrichment)
-        if is_lease_listing(x):
-            continue
+
         final.append(x)
 
     # ------------------- Enrich (limited) -------------------
-    # Sort so enrichment hits: (1) current top matches, (2) broken/missing data, (3) newest first
-    # (stable sort = do newest first, then tier sort)
     final.sort(key=lambda it: it.get("found_utc") or "", reverse=True)
-    final.sort(key=lambda it: (
-        0 if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE) else 1,
-        0 if should_enrich(it) else 1,
-    ))
+    final.sort(
+        key=lambda it: (
+            0 if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE) else 1,
+            0 if should_enrich(it) else 1,
+        )
+    )
 
     enriched = 0
     for it in final:
@@ -686,19 +638,15 @@ def main():
         if should_enrich(it):
             info = enrich_from_detail_page(it["url"])
 
-            # Title (replace only if current is generic/bad)
             if info.get("title") and is_bad_title(it.get("title")):
                 it["title"] = info["title"]
 
-            # Thumbnail
             if (not it.get("thumbnail")) and info.get("thumbnail"):
                 it["thumbnail"] = info["thumbnail"]
 
-            # Status
             s = (info.get("status") or "unknown").lower()
             it["status"] = s if s in STATUS_VALUES else "unknown"
 
-            # Price + acres (fill only if missing)
             if it.get("price") is None and info.get("price") is not None:
                 it["price"] = info["price"]
 
@@ -707,16 +655,13 @@ def main():
 
             enriched += 1
 
-    # Drop leases after enrichment too (some titles update here)
     final = [it for it in final if not is_lease_listing(it)]
 
-    # Clamp status values
     for it in final:
         s = (it.get("status") or "unknown").lower()
         if s not in STATUS_VALUES:
             it["status"] = "unknown"
 
-    # Update ever_top_match ONLY when it qualifies as a top match at least once
     for it in final:
         if not it.get("ever_top_match"):
             if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE):
@@ -728,7 +673,7 @@ def main():
         "items": final,
     }
 
-    # ✅ SAFETY: if scrape returns 0, keep the existing file
+    # ✅ SAFETY: don't overwrite good data with an empty run
     if len(final) == 0 and os.path.exists(DATA_FILE):
         print("⚠️ Scrape returned 0 listings. Keeping existing data file.")
         return
@@ -737,8 +682,12 @@ def main():
         json.dump(out, f, indent=2)
 
     print(f"Saved {len(final)} listings. Enriched: {enriched}.")
-    def run_update():
+
+
+def run_update():
     main()
+
 
 if __name__ == "__main__":
     main()
+
