@@ -326,7 +326,7 @@ else:
 st.write("")
 
 # ---------- Refresh control ----------
-if st.button("🔄 Refresh listings", use_container_width=True):
+if st.button("🔄 Check for new listings", use_container_width=True):
     with st.spinner("Checking for new listings…"):
         st.cache_data.clear()
         run_update()
