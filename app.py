@@ -281,7 +281,7 @@ st.markdown(
       }}
       .kb-desc {{
         font-size: clamp(0.95rem, 2vw, 1.05rem);
-        color: rgba(15, 23, 42, 0.62);
+        color: rgba(15, 23, 42, 0.55);
         margin-top: 4px;
         font-weight: 600;
         font-style: italic;
@@ -289,7 +289,7 @@ st.markdown(
       .kb-caption {{
         font-size: clamp(1.05rem, 2.2vw, 1.25rem);
         color: rgba(15, 23, 42, 0.62);
-        margin-top: 10px;
+        margin-top: 14px;
         font-weight: 750;
       }}
     </style>
