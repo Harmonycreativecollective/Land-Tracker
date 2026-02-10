@@ -17,7 +17,6 @@ START_URLS = [
     "https://www.landsearch.com/properties/caroline-county-va",
     "https://www.landsearch.com/properties/frederick-county-md",
     "https://www.landsearch.com/properties/anne-arundel-county-md",
-    # LandWatch currently blocked in logs (403), keep off for now
 ]
 
 MIN_ACRES = 10.0
@@ -209,7 +208,7 @@ def get_next_data_json(html: str) -> Optional[dict]:
 
 def get_json_ld(html: str) -> List[dict]:
     soup = BeautifulSoup(html, "html.parser")
-    out = []
+    out: List[dict] = []
     for tag in soup.find_all("script", type="application/ld+json"):
         if not tag.string:
             continue
@@ -583,11 +582,22 @@ def load_existing_maps() -> Dict[str, Dict[str, Any]]:
     return out
 
 
+def load_existing_file() -> Dict[str, Any]:
+    if not os.path.exists(DATA_FILE):
+        return {}
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
 def main():
     os.makedirs("data", exist_ok=True)
     run_utc = datetime.now(timezone.utc).isoformat()
 
     old_map = load_existing_maps()
+    old_file = load_existing_file()
 
     all_items: List[Dict[str, Any]] = []
     for url in START_URLS:
@@ -667,16 +677,22 @@ def main():
             if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE):
                 it["ever_top_match"] = True
 
+    # If scrape returns 0, keep old items but record attempt time
+    if len(final) == 0 and os.path.exists(DATA_FILE):
+        print("⚠️ Scrape returned 0 listings. Keeping existing items, updating last_attempted_utc.")
+        if not isinstance(old_file, dict):
+            old_file = {}
+        old_file["last_attempted_utc"] = run_utc
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(old_file, f, indent=2)
+        return
+
     out = {
         "last_updated_utc": run_utc,
+        "last_attempted_utc": run_utc,
         "criteria": {"min_acres": MIN_ACRES, "max_acres": MAX_ACRES, "max_price": MAX_PRICE},
         "items": final,
     }
-
-    # ✅ SAFETY: don't overwrite good data with an empty run
-    if len(final) == 0 and os.path.exists(DATA_FILE):
-        print("⚠️ Scrape returned 0 listings. Keeping existing data file.")
-        return
 
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
@@ -690,4 +706,3 @@ def run_update():
 
 if __name__ == "__main__":
     main()
-
