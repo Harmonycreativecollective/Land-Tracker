@@ -732,3 +732,9 @@ def main():
         json.dump(out, f, indent=2)
 
     print(f"Saved {len(final)} listings. Enriched: {enriched}.")
+
+def run_update():
+    main()
+
+if __name__ == "__main__":
+    main()
