@@ -325,7 +325,13 @@ else:
 
 st.write("")
 
-
+# ---------- Refresh control ----------
+if st.button("🔄 Refresh listings", use_container_width=True):
+    with st.spinner("Checking for new listings…"):
+        st.cache_data.clear()
+        run_update()
+        st.rerun()
+        
 # ---------- Tiles ----------
 c1, c2 = st.columns(2, gap="small")
 c3, c4 = st.columns(2, gap="small")
