@@ -18,6 +18,8 @@ st.set_page_config(
     page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🗺️",
     layout="wide",
 )
+
+
 # ---------- Manual Refresh ----------
 if st.button("Force refresh"):
     st.cache_data.clear()
