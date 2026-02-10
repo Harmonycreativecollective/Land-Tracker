@@ -24,14 +24,13 @@ st.set_page_config(
 DESCRIPTION = "Quietly tracks land listings so you don’t have to."
 CAPTION = "What’s meant for you is already in motion."
 
-# ---------- Manual Refresh (match dashboard) ----------
-with st.sidebar:
-    if st.button("🔄 Check for new listings"):
-        with st.spinner("Updating listings…"):
-            st.cache_data.clear()
-            run_update()
-            st.success("Updated just now ✨")
-            st.rerun()
+# ---------- Manual Refresh ----------
+if st.button("🔄 Check for new listings", use_container_width=True):
+    with st.spinner("Updating listings…"):
+        st.cache_data.clear()
+        run_update()
+        st.success("Updated just now ✨")
+        st.rerun()
 
 # ---------- Load data ----------
 data = load_data() or {}
