@@ -21,7 +21,7 @@ st.set_page_config(
 
 # ---------- Header text ----------
 # Keep your personal caption, but add a smaller italic description
-DESCRIPTION = "A private land listing tracker that monitors acreage and flags qualifying properties."
+DESCRIPTION = "Quietly tracks land listings so you don’t have to."
 CAPTION = "What’s meant for you is already in motion."
 
 # ---------- Load data ----------
