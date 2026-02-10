@@ -280,7 +280,7 @@ st.markdown(
         min-width: 240px;
       }}
       .kb-desc {{
-        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        font-size: clamp(0.80rem, 2vw, 1.05rem);
         color: rgba(15, 23, 42, 0.55);
         margin-top: 4px;
         font-weight: 600;
