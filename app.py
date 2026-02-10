@@ -289,7 +289,7 @@ st.markdown(
       .kb-caption {{
         font-size: clamp(1.05rem, 2.2vw, 1.25rem);
         color: rgba(15, 23, 42, 0.62);
-        margin-top: 14px;
+        margin-top: 10px;
         font-weight: 750;
       }}
     </style>
