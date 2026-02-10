@@ -728,6 +728,11 @@ def main():
         "items": final,
     }
 
+    # ✅ SAFETY: if scrape returns 0, keep the existing file
+if len(final) == 0 and os.path.exists(DATA_FILE):
+    print("⚠️ Scrape returned 0 listings. Keeping existing data file.")
+    return
+
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
 
