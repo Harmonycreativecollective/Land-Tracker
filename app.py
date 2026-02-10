@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 import streamlit as st
 from data_access import load_data
-from updater import run_update   
+from scraper import run_update   
 
 
 # ---------- Paths ----------
