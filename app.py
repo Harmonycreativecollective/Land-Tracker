@@ -6,6 +6,8 @@ from typing import Any, Dict, List
 
 import streamlit as st
 from data_access import load_data
+from updater import run_update   
+
 
 # ---------- Paths ----------
 LOGO_PATH = Path("assets/kblogo.png")
@@ -16,6 +18,11 @@ st.set_page_config(
     page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🗺️",
     layout="wide",
 )
+# ---------- Manual Refresh ----------
+if st.button("Force refresh"):
+    st.cache_data.clear()
+    run_update()
+    st.rerun()
 
 TITLE = "KB’s Land Tracker"
 CAPTION = "What’s meant for you is already in motion."
