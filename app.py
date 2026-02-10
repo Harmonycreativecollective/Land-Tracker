@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 import streamlit as st
 from data_access import load_data
-from scraper import run_update   
+from scraper import run_update
 
 
 # ---------- Paths ----------
@@ -19,17 +19,9 @@ st.set_page_config(
     layout="wide",
 )
 
-
-# ---------- Manual Refresh ----------
-with st.sidebar:
-    if st.button("🔄 Force refresh"):
-        with st.spinner("Updating listings…"):
-            st.cache_data.clear()
-            run_update()
-            st.success("Updated just now ✨")
-            st.rerun()
-            
-TITLE = "KB’s Land Tracker"
+# ---------- Header text ----------
+# Keep your personal caption, but add a smaller italic description
+DESCRIPTION = "A private land listing tracker that monitors acreage and flags qualifying properties."
 CAPTION = "What’s meant for you is already in motion."
 
 # ---------- Load data ----------
@@ -287,12 +279,12 @@ st.markdown(
         flex: 1 1 auto;
         min-width: 240px;
       }}
-      .kb-title {{
-        font-size: clamp(2.0rem, 4vw, 2.8rem);
-        font-weight: 950;
-        line-height: 1.05;
-        margin: 0;
-        color: #0f172a;
+      .kb-desc {{
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        color: rgba(15, 23, 42, 0.62);
+        margin-top: 4px;
+        font-weight: 600;
+        font-style: italic;
       }}
       .kb-caption {{
         font-size: clamp(1.05rem, 2.2vw, 1.25rem);
@@ -305,7 +297,7 @@ st.markdown(
     <div class="kb-header">
       {"<img class='kb-logo' src='data:image/png;base64," + logo_b64 + "' />" if logo_b64 else ""}
       <div class="kb-text">
-        <div class="kb-title">{TITLE}</div>
+        <div class="kb-desc">{DESCRIPTION}</div>
         <div class="kb-caption">{CAPTION}</div>
       </div>
     </div>
