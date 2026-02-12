@@ -2,7 +2,7 @@
 base="light"
 
 # soft grey background
-backgroundColor="#EBEBEB"
+backgroundColor="#F3F3F3"
 secondaryBackgroundColor="#FFFFFF"
 
 # text colors
