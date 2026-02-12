@@ -3,7 +3,7 @@ base="light"
 
 # soft grey background
 backgroundColor="#EBEBEB"
-secondaryBackgroundColor="#FFFFFF"
+secondaryBackgroundColor="#F3F3F3"
 
 # text colors
 textColor="#111827"
