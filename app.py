@@ -437,3 +437,28 @@ else:
                 st.link_button("Open listing ↗", url, use_container_width=True)
 
 st.caption("Tip: Use Properties to search, filter, and view all listings.")
+
+# ============================================================
+# Overview (bottom)
+# ============================================================
+
+st.divider()
+st.subheader("Details")
+
+st.caption(
+    f"Loaded **{len(items)}** listings • **{len(top_matches)}** top matches • "
+    f"**{len(new_items)}** new since last run • **{len(possible_matches)}** possible (missing price)"
+)
+
+with st.expander("Debug (for me)", expanded=False):
+    st.write("**Last updated (UTC raw):**", last_updated)
+    st.write("**Last attempted (UTC raw):**", last_attempted)
+    st.write("**Criteria:**", criteria)
+
+    # Optional: quick counts by status 
+    try:
+        from collections import Counter
+        status_counts = Counter(get_status(it) for it in items)
+        st.write("**Status counts:**", dict(status_counts))
+    except Exception as e:
+        st.write("Status count error:", e)
