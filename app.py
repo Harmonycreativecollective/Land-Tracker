@@ -22,9 +22,20 @@ st.set_page_config(
 # ---------- Background Color ----------
 st.markdown("""
 <style>
-    .stApp {
-        background-color: #F4F3F3;
-    }
+/* Entire app background */
+[data-testid="stAppViewContainer"] {
+  background: #F3F3F3;
+}
+
+/* Main content area */
+[data-testid="stMain"] {
+  background: #F3F3F3;
+}
+
+/* Sidebar (optional — keeps it consistent) */
+[data-testid="stSidebar"] {
+  background: #F3F3F3;
+}
 </style>
 """, unsafe_allow_html=True)
 
