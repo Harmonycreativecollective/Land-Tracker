@@ -70,6 +70,54 @@ def meets_price(it: Dict[str, Any], max_price: float) -> bool:
     except Exception:
         return False
 
+import statistics
+
+def _safe_int(x: Any) -> int | None:
+    if x is None:
+        return None
+    try:
+        s = str(x).replace("$", "").replace(",", "").strip()
+        if s == "":
+            return None
+        return int(float(s))
+    except Exception:
+        return None
+
+def _safe_float(x: Any) -> float | None:
+    if x is None:
+        return None
+    try:
+        s = str(x).replace(",", "").strip()
+        if s == "":
+            return None
+        return float(s)
+    except Exception:
+        return None
+
+def median_price_top_matches(top_matches: List[Dict[str, Any]]) -> int | None:
+    prices: List[int] = []
+    for it in top_matches:
+        p = _safe_int(it.get("price"))
+        if p is not None and p > 0:
+            prices.append(p)
+    if not prices:
+        return None
+    return int(statistics.median(prices))
+
+def median_acres_top_matches(top_matches: List[Dict[str, Any]]) -> float | None:
+    acres: List[float] = []
+    for it in top_matches:
+        a = _safe_float(it.get("acres"))
+        if a is not None and a > 0:
+            acres.append(a)
+    if not acres:
+        return None
+    return float(statistics.median(acres))
+
+def format_median_tile(acres_med: float | None, price_med: int | None) -> str:
+    acres_str = "— ac" if acres_med is None else f"{acres_med:,.1f} ac"
+    price_str = "—" if price_med is None else f"${price_med:,.0f}"
+    return f"{acres_str}  |  {price_str}"
 
 # ---------- Status normalization ----------
 
@@ -155,8 +203,14 @@ def is_new(it: Dict[str, Any]) -> bool:
 
 
 top_matches = [it for it in items if is_top_match(it)]
-possible_matches = [it for it in items if is_possible_match(it)]
-new_items = [it for it in items if is_new(it)]
+possible_matches = [it for it in items if is_possible_match(it)]  # keeping for now (used in badges)
+new_top_matches = [it for it in top_matches if is_new(it)]        # ✅ New tile = new TOP matches only
+
+# Favorites placeholder until Supabase is wired
+favorites_count = 0
+
+median_top_price = median_price_top_matches(top_matches)
+median_top_acres = median_acres_top_matches(top_matches)
 
 # ============================================================
 # UI / Styling
@@ -329,20 +383,16 @@ c1, c2 = st.columns(2, gap="small")
 c3, c4 = st.columns(2, gap="small")
 
 with c1:
-    render_tile("All found", f"{len(items)}", "Total listings loaded")
+    render_tile("Top Matches", f"{len(top_matches)}", "Meets Criteria (Available only)")
+
 with c2:
-    render_tile("Top matches", f"{len(top_matches)}", "Meets Criteria (Available only)")
+    render_tile("New", f"{len(new_top_matches)}", "New Top Matches since last run")
+
 with c3:
-    render_tile("New", f"{len(new_items)}", "Found in the last run")
+    render_tile("Favorites ❤️", f"{favorites_count}", "Saved listings (persistent)")
+
 with c4:
-    render_tile("Possible", f"{len(possible_matches)}", "Missing price (Available only)")
-
-st.write("")
-
-if st.button("View all properties →", use_container_width=True):
-    st.switch_page("pages/2_properties.py")
-
-st.divider()
+    render_tile("Median Top Matches", format_median_tile(median_top_acres, median_top_price), "Acreage | Price (Top Matches only)")
 
 # ---------- Quick Top Matches ----------
 st.subheader("Top matches (quick view)")
