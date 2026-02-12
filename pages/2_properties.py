@@ -22,7 +22,7 @@ st.set_page_config(
 
 # ---------- Header copy ----------
 DESCRIPTION = "Quietly tracks land listings so you don’t have to."
-CAPTION = "Preview"
+CAPTION = "What's mean for you is already in motion."
 
 
 # ---------- Load data ----------
