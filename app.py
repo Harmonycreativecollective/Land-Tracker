@@ -20,9 +20,9 @@ st.set_page_config(
 )
 
 # ---------- Header text ----------
-# Keep your personal caption, but add a smaller italic description
+#
 DESCRIPTION = "Quietly tracks land listings so you don’t have to."
-CAPTION = "Preview"
+CAPTION = "What's mean for you is already in motion."
 
 # ---------- Load data ----------
 data = load_data() or {}
