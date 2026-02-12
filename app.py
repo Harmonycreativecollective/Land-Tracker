@@ -32,7 +32,7 @@ last_updated = data.get("last_updated_utc")
 last_attempted = data.get("last_attempted_utc")
 
 # ============================================================
-# Helpers (MUST exist in app.py)
+# Helpers 
 # ============================================================
 
 def format_last_updated_et(dt_str: Any) -> str:
@@ -72,7 +72,7 @@ def meets_price(it: Dict[str, Any], max_price: float) -> bool:
 
 
 # ---------- Status normalization ----------
-# NOTE: we *normalize* status strings and then use these normalized values everywhere.
+
 STATUS_VALUES_UNAVAILABLE = {
     "unavailable",
     "sold",
