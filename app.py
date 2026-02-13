@@ -436,29 +436,44 @@ else:
             if url:
                 st.link_button("Open listing ↗", url, use_container_width=True)
 
-st.caption("Tip: Use Properties to search, filter, and view all listings.")
-
 # ============================================================
-# Overview (bottom)
+# Overview (System State)
 # ============================================================
 
 st.divider()
-st.subheader("Details")
+st.subheader("Overview")
 
-st.caption(
-    f"Loaded **{len(items)}** listings • **{len(top_matches)}** top matches • "
-    f"**{len(new_items)}** new since last run • **{len(possible_matches)}** possible (missing price)"
-)
+# Derived counts
+total_count = len(items)
+top_count = len(top_matches)
+possible_count = len(possible_matches)
+new_count = len(new_items)
 
-with st.expander("Debug (for me)", expanded=False):
-    st.write("**Last updated (UTC raw):**", last_updated)
-    st.write("**Last attempted (UTC raw):**", last_attempted)
-    st.write("**Criteria:**", criteria)
+unavailable_count = len([
+    it for it in items
+    if get_status(it) in STATUS_VALUES_UNAVAILABLE
+])
 
-    # Optional: quick counts by status 
-    try:
-        from collections import Counter
-        status_counts = Counter(get_status(it) for it in items)
-        st.write("**Status counts:**", dict(status_counts))
-    except Exception as e:
-        st.write("Status count error:", e)
+last_updated_display = format_last_updated_et(last_updated or last_attempted)
+
+st.write("**Listing Counts**")
+st.caption(f"All found: {total_count}")
+st.caption(f"Top matches: {top_count}")
+st.caption(f"Possible (missing price): {possible_count}")
+st.caption(f"New since last run: {new_count}")
+st.caption(f"Unavailable: {unavailable_count}")
+
+st.write("")
+
+st.write("**Active Criteria**")
+st.caption(f"Min acres: {default_min_acres:g}")
+st.caption(f"Max acres: {default_max_acres:g}")
+st.caption(f"Max price: ${int(default_max_price):,}")
+
+st.write("")
+
+st.write("**Last Updated**")
+st.caption(last_updated_display)
+
+st.caption("Tip: Use Properties to search, filter, and view all listings.")
+
