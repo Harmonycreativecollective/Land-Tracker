@@ -394,6 +394,9 @@ with c3:
 with c4:
     render_tile("Median Top Matches", format_median_tile(median_top_acres, median_top_price), "Acreage | Price (Top Matches only)")
 
+if st.button("View all properties →", use_container_width=True):
+    st.switch_page("pages/2_properties.py")
+    
 # ---------- Quick Top Matches ----------
 st.subheader("Top matches (quick view)")
 
