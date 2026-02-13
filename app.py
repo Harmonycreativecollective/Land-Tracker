@@ -503,9 +503,9 @@ with st.expander("Overview", expanded=False):
     with col1:
         st.write("### Listing Health")
         st.caption(f"Total listings: {total_count}")
-        st.caption(f"Active (available): {available_count}")
-        st.caption(f"Inactive (not available): {inactive_count}")
-        st.caption(f"Unknown status: {unknown_count}")
+        st.caption(f"Available: {available_count}")
+        st.caption(f"Unavailable): {inactive_count}")
+        st.caption(f"Unknown/Not labeled: {unknown_count}")
 
     with col2:
         st.write("### Match Breakdown")
