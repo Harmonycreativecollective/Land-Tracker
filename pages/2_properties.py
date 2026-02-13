@@ -234,12 +234,26 @@ render_tile("Last updated", format_last_updated_et(last_updated))
 st.write("")
 
 # ---------- Manual Refresh ----------
-if st.button("🔄 Check for new listings", use_container_width=True):
-    with st.spinner("Updating listings…"):
-        st.cache_data.clear()
-        run_update()
-        st.success("Updated just now ✨")
-        st.rerun()
+# ---------- Manual Refresh (disabled while running) ----------
+if "is_updating" not in st.session_state:
+    st.session_state.is_updating = False
+
+btn_clicked = st.button(
+    "🔄 Check for new listings",
+    use_container_width=True,
+    disabled=st.session_state.is_updating,
+)
+
+if btn_clicked:
+    st.session_state.is_updating = True
+    try:
+        with st.spinner("Updating listings…"):
+            st.cache_data.clear()
+            run_update()
+            st.success("Updated just now ✨")
+    finally:
+        st.session_state.is_updating = False
+    st.rerun()
 
 # ✅ Search stays top-of-page
 search_query = st.text_input(
@@ -442,7 +456,6 @@ counties = sorted({get_county(it) for it in items if get_county(it)})
 
 with st.expander("Filters", expanded=False):
     show_top_only = st.toggle("Show top matches", value=True)
-    show_possible = st.toggle("Include possible", value=False)
     show_new_only = st.toggle("New only", value=False)
     sort_newest = st.toggle("Newest first", value=True)
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
@@ -473,20 +486,34 @@ def passes_location(it: Dict[str, Any]) -> bool:
 
 loc_items = [it for it in items if passes_location(it)]
 
+# Counts for Details (location-scoped, not search-scoped)
+available_loc = [it for it in loc_items if get_status(it) == "available"]
 top_matches_all = [it for it in loc_items if is_top_match(it, min_acres, max_acres, max_price)]
-possible_all = [it for it in loc_items if is_possible_match(it, min_acres, max_acres)]
-new_all = [it for it in loc_items if is_new(it)]
+new_top_matches_all = [it for it in top_matches_all if is_new(it)]
+
+# Source breakdown (location-scoped)
+source_counts: Dict[str, int] = {}
+for it in loc_items:
+    src = (it.get("source") or "Unknown").strip() or "Unknown"
+    source_counts[src] = source_counts.get(src, 0) + 1
 
 
 with st.expander("Details", expanded=False):
     st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
+
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("All listings", f"{len(loc_items)}")
-    c2.metric("Top matches", f"{len(top_matches_all)}")
-    c3.metric("Possible matches", f"{len(possible_all)}")
-    c4.metric("New", f"{len(new_all)}")
+    c2.metric("Available", f"{len(available_loc)}")
+    c3.metric("Top matches", f"{len(top_matches_all)}")
+    c4.metric("New top matches", f"{len(new_top_matches_all)}")
+
+    st.write("")
+    st.markdown("**Sources**")
+    for src, n in sorted(source_counts.items(), key=lambda x: x[1], reverse=True):
+        st.caption(f"{src}: {n}")
 
     if show_debug:
+        st.write("")
         st.markdown("**Debug (first 8 items):**")
         st.json(loc_items[:8])
 
@@ -499,33 +526,23 @@ st.divider()
 
 filtered = loc_items[:]
 
+# Search
 if search_query.strip():
     q = search_query.strip().lower()
     filtered = [it for it in filtered if q in searchable_text(it)]
 
+# New only = NEW TOP MATCHES only (to match Dashboard meaning)
 if show_new_only:
-    filtered = [it for it in filtered if is_new(it)]
+    filtered = [it for it in filtered if is_new(it) and is_top_match(it, min_acres, max_acres, max_price)]
 
+# Top only
 if show_top_only:
-    allowed: List[Dict[str, Any]] = []
-    for it in filtered:
-        if is_top_match(it, min_acres, max_acres, max_price):
-            allowed.append(it)
-        elif show_possible and is_possible_match(it, min_acres, max_acres):
-            allowed.append(it)
-    filtered = allowed
-else:
-    if not show_possible:
-        filtered = [it for it in filtered if not is_possible_match(it, min_acres, max_acres)]
+    filtered = [it for it in filtered if is_top_match(it, min_acres, max_acres, max_price)]
 
 
 def sort_key(it: Dict[str, Any]):
-    if is_top_match(it, min_acres, max_acres, max_price):
-        tier = 3
-    elif is_possible_match(it, min_acres, max_acres):
-        tier = 2
-    else:
-        tier = 1
+    # Only 2 tiers now: Top match vs everything else
+    tier = 2 if is_top_match(it, min_acres, max_acres, max_price) else 1
     return (tier, parse_dt(it))
 
 
@@ -533,8 +550,6 @@ if sort_newest:
     filtered = sorted(filtered, key=sort_key, reverse=True)
 
 filtered = filtered[:show_n]
-
-
 # ============================================================
 # Placeholder renderer
 # ============================================================
@@ -581,17 +596,9 @@ def listing_card(it: Dict[str, Any]):
 
     status = get_status(it)
     top = is_top_match(it, min_acres, max_acres, max_price)
-    possible = is_possible_match(it, min_acres, max_acres)
-    new_flag = is_new(it)
-
-    pills: List[str] = []
-    if new_flag:
-        pills.append(pill("NEW", "new"))
-
+  # (No "possible" category in UI anymore)
     if top:
         pills.append(pill("TOP MATCH", "top"))
-    elif possible:
-        pills.append(pill("POSSIBLE", "possible"))
     else:
         pills.append(pill("FOUND", "found"))
 
