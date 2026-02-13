@@ -430,8 +430,30 @@ items = [it for it in items if is_property_listing(it)]
 # Location helpers (derive from URL when fields are missing)
 # ============================================================
 
+def norm_opt(x: Optional[str]) -> str:
+    return (x or "").strip()
+
+
+ADDRESSY_RE = re.compile(r"\d")  # any digit = very likely an address
+STREET_WORDS_RE = re.compile(
+    r"\b(rd|road|st|street|ave|avenue|ln|lane|dr|drive|ct|court|blvd|boulevard|hwy|highway|way|pkwy|parkway)\b",
+    re.IGNORECASE,
+)
+
+def looks_like_address(s: str) -> bool:
+    s = (s or "").strip()
+    if not s:
+        return False
+    if ADDRESSY_RE.search(s):
+        return True
+    if STREET_WORDS_RE.search(s):
+        return True
+    if len(s) > 40:
+        return True
+    return False
+
+
 US_STATE_ABBR = {"va": "VA", "md": "MD"}
-US_STATE_FULL = {"virginia": "VA", "maryland": "MD"}
 
 def _titleize_slug(s: str) -> str:
     s = (s or "").replace("-", " ").strip()
@@ -439,8 +461,7 @@ def _titleize_slug(s: str) -> str:
 
 def derive_state_county_from_url(url: str) -> tuple[str, str]:
     """
-    Returns (state_abbr, county_label) where county_label is something like 'King George County'
-    or 'King George' when we can't confidently add 'County'.
+    Returns (state_abbr, county_label) e.g. ('VA', 'King George County')
     """
     if not url:
         return ("", "")
@@ -448,7 +469,7 @@ def derive_state_county_from_url(url: str) -> tuple[str, str]:
     u = url.lower().strip()
 
     # ---------- LandSearch ----------
-    # Example: https://www.landsearch.com/properties/king-george-county-va/1234567
+    # https://www.landsearch.com/properties/king-george-county-va/1234567
     if "landsearch.com" in u and "/properties/" in u:
         try:
             slug = u.split("/properties/")[1].split("/")[0]  # king-george-county-va
@@ -464,72 +485,64 @@ def derive_state_county_from_url(url: str) -> tuple[str, str]:
                 i = parts.index("county")
                 county = _titleize_slug("-".join(parts[:i])) + " County"
             else:
-                # Sometimes it's just "king-george" (no literal "county")
                 county = _titleize_slug("-".join(parts))
+                if county:
+                    county += " County"
 
             return (st, county)
         except Exception:
             return ("", "")
 
     # ---------- LandWatch ----------
-    # Example: https://www.landwatch.com/virginia-land-for-sale/king-george
+    # https://www.landwatch.com/virginia-land-for-sale/king-george
     if "landwatch.com" in u:
         try:
             path = u.split("landwatch.com", 1)[1]
-            # state from "virginia-land-for-sale" / "maryland-land-for-sale"
-            st = ""
-            if "virginia-land-for-sale" in path:
-                st = "VA"
-            elif "maryland-land-for-sale" in path:
-                st = "MD"
+            st = "VA" if "virginia-land-for-sale" in path else ("MD" if "maryland-land-for-sale" in path else "")
+            slug = path.rstrip("/").split("/")[-1]
 
-            slug = path.rstrip("/").split("/")[-1]  # king-george or westmoreland-county
-            county = _titleize_slug(slug.replace("-county", "")) + " County" if "county" in slug else _titleize_slug(slug)
+            # normalize
+            slug = slug.replace("-county", "")
+            county = _titleize_slug(slug)
+            if county:
+                county += " County"
 
             return (st, county)
         except Exception:
             return ("", "")
 
     # ---------- LandAndFarm ----------
-    # Example: https://www.landandfarm.com/search/virginia/king-george-county-land-for-sale/
+    # https://www.landandfarm.com/search/virginia/king-george-county-land-for-sale/
     if "landandfarm.com" in u:
         try:
             parts = [p for p in u.split("/") if p]
-            st = ""
-            if "virginia" in parts:
-                st = "VA"
-            elif "maryland" in parts:
-                st = "MD"
-
-            slug = parts[-1]  # king-george-county-land-for-sale
+            st = "VA" if "virginia" in parts else ("MD" if "maryland" in parts else "")
+            slug = parts[-1]
             slug = slug.replace("-land-for-sale", "")
             slug = slug.replace("-county", "")
-            county = _titleize_slug(slug) + " County"
-
+            county = _titleize_slug(slug)
+            if county:
+                county += " County"
             return (st, county)
         except Exception:
             return ("", "")
 
     # ---------- Land.com ----------
-    # Example: https://www.land.com/King-George-County-VA/all-land/
+    # https://www.land.com/King-George-County-VA/all-land/
     if "land.com" in u:
         try:
             parts = [p for p in u.split("/") if p]
-            # find something like King-George-County-VA
-            slug = ""
-            for p in parts:
-                if p.endswith("-va") or p.endswith("-md") or p.endswith("-va".upper()) or p.endswith("-md".upper()):
-                    slug = p
-                    break
-            if not slug:
-                slug = parts[-2] if len(parts) >= 2 else parts[-1]
-
+            # usually the segment right before "all-land"
+            slug = parts[-2] if len(parts) >= 2 else parts[-1]
             slug_l = slug.lower()
-            st = "VA" if slug_l.endswith("-va") else ("MD" if slug_l.endswith("-md") else "")
 
+            st = "VA" if slug_l.endswith("-va") else ("MD" if slug_l.endswith("-md") else "")
             slug_core = slug_l.replace("-va", "").replace("-md", "")
             slug_core = slug_core.replace("-county", "")
-            county = _titleize_slug(slug_core) + " County"
+
+            county = _titleize_slug(slug_core)
+            if county:
+                county += " County"
 
             return (st, county)
         except Exception:
@@ -539,95 +552,39 @@ def derive_state_county_from_url(url: str) -> tuple[str, str]:
 
 
 def get_state(it: Dict[str, Any]) -> str:
-    # prefer existing fields if present
-    st_ = (it.get("derived_state") or it.get("state") or it.get("state_raw") or "").strip()
+    # prefer stored fields
+    st_ = norm_opt(it.get("derived_state")) or norm_opt(it.get("state")) or norm_opt(it.get("state_raw"))
     if st_:
         return st_.upper()
 
-    st2, _ = derive_state_county_from_url((it.get("url") or "").strip())
+    st2, _ = derive_state_county_from_url(norm_opt(it.get("url")))
     return st2
 
 
 def get_county(it: Dict[str, Any]) -> str:
-    c = (
-        norm_opt(it.get("derived_county"))
-        or norm_opt(it.get("county"))
-        or norm_opt(it.get("county_raw"))
-    )
+    # prefer stored fields
+    c = norm_opt(it.get("derived_county")) or norm_opt(it.get("county")) or norm_opt(it.get("county_raw"))
+    if c:
+        low = c.lower()
+        if low in {"unknown", "n/a", "na", "none"}:
+            c = ""
+        elif looks_like_address(c):
+            c = ""
 
-    c = (c or "").strip()
+    # fallback: derive from URL
     if not c:
-        return ""
+        _, c2 = derive_state_county_from_url(norm_opt(it.get("url")))
+        c = c2
 
-    low = c.lower()
-    if low in {"unknown", "n/a", "na", "none"}:
-        return ""
-
-    # 🚫 kill addressy junk
+    # final sanity
     if looks_like_address(c):
         return ""
-
     return c
-    _, co2 = derive_state_county_from_url((it.get("url") or "").strip())
-    return co2
 
-
-ADDRESSY_RE = re.compile(r"\d")  # any digit = very likely an address
-STREET_WORDS_RE = re.compile(
-    r"\b(rd|road|st|street|ave|avenue|ln|lane|dr|drive|ct|court|blvd|boulevard|hwy|highway|way|pkwy|parkway)\b",
-    re.IGNORECASE,
-)
-
-def looks_like_address(s: str) -> bool:
-    s = (s or "").strip()
-    if not s:
-        return True
-    if ADDRESSY_RE.search(s):
-        return True
-    if STREET_WORDS_RE.search(s):
-        return True
-    if len(s) > 40:
-        return True
-    return False
 
 # Build options AFTER helpers exist
 states = sorted({get_state(it) for it in items if get_state(it)})
 counties = sorted({get_county(it) for it in items if get_county(it)})
-
-# ============================================================
-# Filters UI
-# ============================================================
-
-with st.expander("Filters", expanded=False):
-    show_top_only = st.toggle("Show top matches", value=True)
-    show_new_only = st.toggle("New only", value=False)
-    sort_newest = st.toggle("Newest first", value=True)
-    show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
-
-    st.write("")
-
-    max_price = st.number_input("Max price (Top match)", min_value=0, value=default_max_price, step=10000)
-    min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
-    max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
-
-st.write("")
-st.markdown("**Location**")
-
-colA, colB = st.columns(2)
-with colA:
-    selected_states = st.multiselect(
-        "State",
-        options=states,
-        default=states if states else [],
-    )
-with colB:
-    selected_counties = st.multiselect(
-        "County",
-        options=counties,
-        default=counties if counties else [],
-    )
-
-    show_debug = st.toggle("Show debug", value=False)
 
 
 def passes_location(it: Dict[str, Any]) -> bool:
@@ -640,13 +597,6 @@ def passes_location(it: Dict[str, Any]) -> bool:
     if selected_counties and co_ not in selected_counties:
         return False
     return True
-
-    if selected_states and st_ and st_ not in selected_states:
-        return False
-    if selected_counties and co_ and co_ not in selected_counties:
-        return False
-    return True
-
 
 loc_items = [it for it in items if passes_location(it)]
 
