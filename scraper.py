@@ -590,7 +590,33 @@ def load_existing_file() -> Dict[str, Any]:
             return json.load(f)
     except Exception:
         return {}
+def context_from_start_url(start_url: str) -> tuple[str, str]:
+    u = (start_url or "").strip().lower()
 
+    # LandSearch county pages:
+    # https://www.landsearch.com/properties/king-george-county-va
+    if "landsearch.com" in u and "/properties/" in u:
+        try:
+            slug = u.split("/properties/")[1].split("/")[0]  # king-george-county-va
+            parts = [p for p in slug.split("-") if p]
+
+            st = ""
+            if parts and parts[-1] in {"va", "md"}:
+                st = parts[-1].upper()
+                parts = parts[:-1]
+
+            # remove trailing literal "county"
+            if parts and parts[-1] == "county":
+                parts = parts[:-1]
+
+            county_name = " ".join([w.capitalize() for w in parts])
+            county = f"{county_name} County" if county_name else ""
+
+            return (st, county)
+        except Exception:
+            return ("", "")
+
+    return ("", "")
 
 def main():
     os.makedirs("data", exist_ok=True)
@@ -600,13 +626,25 @@ def main():
     old_file = load_existing_file()
 
     all_items: List[Dict[str, Any]] = []
-    for url in START_URLS:
-        try:
-            html = fetch_html(url)
-        except Exception as e:
-            print(f"Failed to fetch {url}: {e}")
-            continue
-        all_items.extend(extract_listings(url, html))
+   for url in START_URLS:
+    context_state, context_county = context_from_start_url(url)
+
+    try:
+        html = fetch_html(url)
+    except Exception as e:
+        print(f"Failed to fetch {url}: {e}")
+        continue
+
+    batch = extract_listings(url, html)
+
+    # stamp context onto every listing from this start page
+    for it in batch:
+        if context_state:
+            it["derived_state"] = context_state
+        if context_county:
+            it["derived_county"] = context_county
+
+    all_items.extend(batch)
 
     seen = set()
     final: List[Dict[str, Any]] = []
