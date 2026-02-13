@@ -389,7 +389,7 @@ with c2:
     render_tile("New", f"{len(new_top_matches)}", "New Top Matches since last run")
 
 with c3:
-    render_tile("Favorites ❤️", f"{favorites_count}", "Saved listings (persistent)")
+    render_tile("Favorites ❤️", f"{favorites_count}", "Saved listings ")
 
 with c4:
     render_tile("Median Top Matches", format_median_tile(median_top_acres, median_top_price), "Acreage | Price (Top Matches only)")
