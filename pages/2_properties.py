@@ -405,21 +405,6 @@ def is_property_listing(it: Dict[str, Any]) -> bool:
 items = [it for it in items if is_property_listing(it)]
 
 
-# ============================================================
-# Filters UI (expander)
-# ============================================================
-
-with st.expander("Filters", expanded=False):
-    show_top_only = st.toggle("Show top matches", value=True)
-    show_new_only = st.toggle("New only", value=False)
-    sort_newest = st.toggle("Newest first", value=True)
-    show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
-
-    st.write("")
-    max_price = st.number_input("Max price (Top match)", min_value=0, value=default_max_price, step=10000)
-    min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
-    max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
-
 
 # ============================================================
 # Location helpers (derive from URL when fields are missing)
