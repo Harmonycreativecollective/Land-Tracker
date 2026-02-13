@@ -435,7 +435,27 @@ else:
                 st.caption(" • ".join(bits))
             if url:
                 st.link_button("Open listing ↗", url, use_container_width=True)
+# ============================================================
+# Overview Calculations (Safe)
+# ============================================================
 
+# Total
+total_count = len(items)
+
+# Active vs Inactive
+active_count = len([it for it in items if get_status(it) == "available"])
+inactive_count = total_count - active_count
+
+# Match counts
+top_count = len(top_matches)
+possible_count = len(possible_matches)
+new_top_count = len(new_top_matches)
+
+# Source breakdown
+source_counts = {}
+for it in items:
+    src = (it.get("source") or "Unknown").strip()
+    source_counts[src] = source_counts.get(src, 0) + 1
 # ============================================================
 # Overview (System State) — dropdown
 # ============================================================
@@ -444,36 +464,34 @@ st.divider()
 
 with st.expander("Overview", expanded=False):
 
-    # Safe counts (these variables should already exist above)
-    total_count = len(items)
-    top_count = len(top_matches)
-    possible_count = len(possible_matches)
-    new_count = len(new_top_matches)
-
-    # Unavailable count (fallback-safe)
-    try:
-        unavailable_count = len([it for it in items if get_status(it) in STATUS_VALUES_UNAVAILABLE])
-    except Exception:
-        unavailable_count = 0
-
-    last_updated_display = format_last_updated_et(last_updated or last_attempted)
-
-    st.write("**Listing Counts**")
-    st.caption(f"All found: {total_count}")
-    st.caption(f"Top matches: {top_count}")
-    st.caption(f"Possible (missing price): {possible_count}")
-    st.caption(f"New Top Matches since last run: {new_count}")
-    st.caption(f"Unavailable: {unavailable_count}")
+    st.write("### Listing Health")
+    st.caption(f"Total listings: {total_count}")
+    st.caption(f"Active (available): {active_count}")
+    st.caption(f"Inactive: {inactive_count}")
 
     st.write("")
-    st.write("**Active Criteria**")
+    st.write("### Match Breakdown")
+    st.caption(f"Top matches: {top_count}")
+    st.caption(f"Possible (missing price): {possible_count}")
+    st.caption(f"New top matches (since last run): {new_top_count}")
+
+    st.write("")
+    st.write("### Sources")
+    if source_counts:
+        for src, count in sorted(source_counts.items()):
+            st.caption(f"{src}: {count}")
+    else:
+        st.caption("No source data available.")
+
+    st.write("")
+    st.write("### Active Criteria")
     st.caption(f"Min acres: {default_min_acres:g}")
     st.caption(f"Max acres: {default_max_acres:g}")
     st.caption(f"Max price: ${int(default_max_price):,}")
 
     st.write("")
-    st.write("**Last Updated**")
-    st.caption(last_updated_display)
+    st.write("### System")
+    st.caption(f"Last updated: {format_last_updated_et(last_updated or last_attempted)}")
     
 st.caption("Tip: Use Properties to search, filter, and view all listings.")
 
