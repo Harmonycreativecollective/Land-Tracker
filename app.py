@@ -498,38 +498,41 @@ last_attempted_display = format_last_updated_et(last_attempted) if last_attempte
 
 with st.expander("Overview", expanded=False):
 
-    st.write("### Listing Health")
-    st.caption(f"Total listings: {total_count}")
-    st.caption(f"Active (available): {available_count}")
-    st.caption(f"Inactive (not available): {inactive_count}")
-    st.caption(f"Unknown status: {unknown_count}")
+    col1, col2, col3 = st.columns(3)
 
-    st.write("")
-    st.write("### Match Breakdown")
-    st.caption(f"Top matches: {top_count}")
-    st.caption(f"Possible (missing price): {possible_count}")
-    st.caption(f"New top matches (since last run): {new_top_count}")
+    with col1:
+        st.write("### Listing Health")
+        st.caption(f"Total listings: {total_count}")
+        st.caption(f"Active (available): {available_count}")
+        st.caption(f"Inactive (not available): {inactive_count}")
+        st.caption(f"Unknown status: {unknown_count}")
+
+    with col2:
+        st.write("### Match Breakdown")
+        st.caption(f"Top matches: {top_count}")
+        st.caption(f"Possible (missing price): {possible_count}")
+        st.caption(f"New top matches: {new_top_count}")
+
+        # Optional: coverage %
+        if available_count:
+            pct = (top_count / available_count) * 100
+            st.caption(f"Top match rate: {pct:.0f}% of active")
+
+    with col3:
+        st.write("### Active Criteria")
+        st.caption(f"Min acres: {default_min_acres:g}")
+        st.caption(f"Max acres: {default_max_acres:g}")
+        st.caption(f"Max price: ${int(default_max_price):,}")
+
+        st.write("")
+        st.write("### System")
+        st.caption(f"Last updated: {last_updated_display}")
+        if last_attempted and (last_attempted != last_updated):
+            st.caption(f"Last attempted: {last_attempted_display}")
 
     st.write("")
     st.write("### Sources")
-    if source_counts:
-        for src, count in sorted(source_counts.items(), key=lambda x: (-x[1], x[0].lower())):
-            st.caption(f"{src}: {count}")
-    else:
-        st.caption("No source data available.")
-
-    st.write("")
-    st.write("### Active Criteria")
-    st.caption(f"Min acres: {default_min_acres:g}")
-    st.caption(f"Max acres: {default_max_acres:g}")
-    st.caption(f"Max price: ${int(default_max_price):,}")
-
-    st.write("")
-    st.write("### System")
-    st.caption(f"Last updated: {last_updated_display}")
-
-    # If attempted != updated, show both (helps detect scrape failures)
-    if last_attempted and (last_attempted != last_updated):
-        st.caption(f"Last attempted: {last_attempted_display}")
+    for src, count in sorted(source_counts.items(), key=lambda x: (-x[1], x[0].lower())):
+        st.caption(f"{src}: {count}")
 st.caption("Tip: Use Properties to search, filter, and view all listings.")
 
