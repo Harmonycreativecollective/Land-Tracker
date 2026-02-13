@@ -596,7 +596,15 @@ def listing_card(it: Dict[str, Any]):
 
     status = get_status(it)
     top = is_top_match(it, min_acres, max_acres, max_price)
-  # (No "possible" category in UI anymore)
+    new_flag = is_new(it)
+
+    # ✅ FIX: pills must be initialized
+    pills: List[str] = []
+
+    if new_flag:
+        pills.append(pill("NEW", "new"))
+
+    # ✅ No possible category anymore
     if top:
         pills.append(pill("TOP MATCH", "top"))
     else:
@@ -642,7 +650,6 @@ def listing_card(it: Dict[str, Any]):
 
         if url:
             st.link_button("Open listing ↗", url, use_container_width=True)
-
 
 # Grid (2 columns)
 cols = st.columns(2)
