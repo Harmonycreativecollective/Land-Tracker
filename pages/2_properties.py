@@ -424,7 +424,9 @@ with st.expander("Filters", expanded=False):
 # ============================================================
 # Location helpers + Location UI (NOT in expander)
 # ============================================================
-
+def norm_opt(x: Optional[str]) -> str:
+    return (x or "").strip() 
+    
 DIGIT_RE = re.compile(r"\d")
 STREET_WORDS_RE = re.compile(
     r"\b(rd|road|st|street|ave|avenue|ln|lane|dr|drive|ct|court|blvd|boulevard|hwy|highway|way|pkwy|parkway|cir|circle|trl|trail|pl|place)\b",
