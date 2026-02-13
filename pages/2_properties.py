@@ -2,7 +2,8 @@ import base64
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
+from urllib.parse import urlparse
 
 import streamlit as st
 from data_access import load_data
@@ -406,8 +407,150 @@ items = [it for it in items if is_property_listing(it)]
 
 
 # ============================================================
-# Filters UI (expander)
+# Location helpers (safe: counties from derived fields only)
 # ============================================================
+
+def norm_opt(x: Optional[str]) -> str:
+    return (x or "").strip()
+
+STATE_ABBR = {"va": "VA", "md": "MD"}
+STATE_WORDS = {"virginia": "VA", "maryland": "MD"}
+
+def get_state_from_text(text: str) -> str:
+    t = (text or "").lower()
+    for k, v in STATE_WORDS.items():
+        if k in t:
+            return v
+    m = re.search(r"\b(va|md)\b", t)
+    return STATE_ABBR.get(m.group(1).lower(), "") if m else ""
+
+def get_state(it: Dict[str, Any]) -> str:
+    st_ = norm_opt(it.get("derived_state")) or norm_opt(it.get("state")) or norm_opt(it.get("state_raw"))
+    if st_:
+        return st_.upper()
+    blob = " ".join([norm_opt(it.get("title")), norm_opt(it.get("url"))])
+    return get_state_from_text(blob)
+
+def normalize_county(c: str) -> str:
+    """
+    Normalize county labels WITHOUT turning cities into counties.
+    If it's a real county label already, we format it consistently.
+    """
+    c = norm_opt(c)
+    if not c:
+        return ""
+
+    low = c.lower()
+    if low in {"unknown", "n/a", "na", "none"}:
+        return ""
+
+    # strip trailing ", VA" etc
+    c = re.sub(r",\s*(VA|MD)\b", "", c, flags=re.IGNORECASE).strip()
+
+    # If it already contains County/Co, normalize it; otherwise leave it alone
+    has_county_word = bool(re.search(r"\b(county|co\.?)\b", c, flags=re.IGNORECASE))
+
+    if has_county_word:
+        c = re.sub(r"\bco\.?\b", "County", c, flags=re.IGNORECASE)
+        c = re.sub(r"\bcounty\b", "County", c, flags=re.IGNORECASE)
+        c = re.sub(r"\s+", " ", c).strip()
+
+    # Title case words except "County"
+    parts = c.split()
+    parts = [p.capitalize() if p.lower() != "county" else "County" for p in parts]
+    return " ".join(parts).strip()
+
+def get_county(it: Dict[str, Any]) -> str:
+    """
+    IMPORTANT:
+    Only use derived_county/county fields (which should come from the START_URL context).
+    DO NOT infer county from a property URL slug — that’s how we got Middletown County.
+    """
+    c = norm_opt(it.get("derived_county")) or norm_opt(it.get("county")) or norm_opt(it.get("county_raw"))
+    c = normalize_county(c)
+
+    # only accept if it truly looks like a county label
+    if c and re.search(r"\bCounty\b", c):
+        return c
+    return ""
+
+# A separate "place/city" helper for cards only
+STREET_STOPWORDS = {
+    "rd","road","st","street","ave","avenue","ln","lane","dr","drive","ct","court",
+    "blvd","boulevard","hwy","highway","way","pkwy","parkway","cir","circle",
+    "trl","trail","pl","place","ter","terrace","sq","square","loop","pike",
+    "unit","apt","suite","mount","mt","tabor"
+}
+DIGIT_RE = re.compile(r"\d")
+
+def titleize_words(words: List[str]) -> str:
+    return " ".join(w.capitalize() for w in words if w)
+
+def derive_state_and_place_from_landsearch_url(url: str) -> tuple[str, str]:
+    """
+    For LandSearch property URLs, derive (state, place/city-ish).
+    We ONLY use this for the listing card caption, not for county filters.
+    """
+    u = norm_opt(url).lower()
+    if "landsearch.com" not in u or "/properties/" not in u:
+        return ("", "")
+
+    try:
+        after = u.split("/properties/")[1].strip("/")
+        slug = after.split("/")[0]
+        parts = [p for p in slug.split("-") if p]
+
+        st_idx = None
+        for i in range(len(parts) - 1, -1, -1):
+            if parts[i] in STATE_ABBR:
+                st_idx = i
+                break
+        if st_idx is None:
+            return ("", "")
+
+        st = STATE_ABBR[parts[st_idx]]
+
+        place_tokens: List[str] = []
+        for j in range(st_idx - 1, -1, -1):
+            tok = parts[j]
+            if tok.isdigit() or DIGIT_RE.search(tok):
+                break
+            if tok in STREET_STOPWORDS:
+                break
+            place_tokens.append(tok)
+            if len(place_tokens) >= 3:
+                break
+
+        place_tokens = list(reversed(place_tokens))
+        place = titleize_words(place_tokens)
+        return (st, place)
+    except Exception:
+        return ("", "")
+
+def get_place_for_card(it: Dict[str, Any]) -> str:
+    # if you ever add a city field later, it can go first here
+    url = norm_opt(it.get("url"))
+    _, place = derive_state_and_place_from_landsearch_url(url)
+    return place
+
+
+# ============================================================
+# Filters UI (expander) + Location INSIDE Filters
+# ============================================================
+
+# Build state list from items
+states = sorted({s for s in (get_state(it) for it in items) if s})
+
+# Build state -> counties map (county labels ONLY, state-scoped)
+state_to_counties: Dict[str, Set[str]] = {}
+for it in items:
+    st_ = get_state(it)
+    co_ = get_county(it)
+    if not st_ or not co_:
+        continue
+    state_to_counties.setdefault(st_, set()).add(co_)
+
+state_to_counties_sorted: Dict[str, List[str]] = {k: sorted(list(v)) for k, v in state_to_counties.items()}
 
 with st.expander("Filters", expanded=False):
     show_top_only = st.toggle("Show top matches", value=True)
@@ -420,190 +563,50 @@ with st.expander("Filters", expanded=False):
     min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
     max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
 
+    st.write("")
+    st.markdown("**Location**")
 
-# ============================================================
-# Location helpers + Location UI (NOT in expander)
-# ============================================================
+    colA, colB = st.columns(2)
+    with colA:
+        selected_states = st.multiselect(
+            "State",
+            options=states,
+            default=states if states else [],
+        )
 
-def norm_opt(x: Optional[str]) -> str:
-    return (x or "").strip()
+    # counties limited to selected states
+    counties_for_selected_states: List[str] = []
+    for st_ in selected_states:
+        counties_for_selected_states.extend(state_to_counties_sorted.get(st_, []))
+    counties_for_selected_states = sorted(set(counties_for_selected_states))
 
-# Words that usually indicate we're in "street name" territory
-STREET_STOPWORDS = {
-    "rd","road","st","street","ave","avenue","ln","lane","dr","drive","ct","court",
-    "blvd","boulevard","hwy","highway","way","pkwy","parkway","cir","circle",
-    "trl","trail","pl","place","ter","terrace","sq","square","loop","pike",
-    "unit","apt","suite"
-}
+    with colB:
+        selected_counties = st.multiselect(
+            "County",
+            options=counties_for_selected_states,
+            default=counties_for_selected_states,
+            disabled=(len(counties_for_selected_states) == 0),
+        )
 
-STATE_ABBR = {"va": "VA", "md": "MD"}
-STATE_WORDS = {"virginia": "VA", "maryland": "MD"}
+    show_debug = st.toggle("Show debug", value=False)
 
-ZIP_RE = re.compile(r"\b\d{5}(?:-\d{4})?\b")
-DIGIT_RE = re.compile(r"\d")
+    if show_debug:
+        st.write("### Debug (first 12 items)")
+        st.json(
+            [
+                {
+                    "title": it.get("title"),
+                    "url": it.get("url"),
+                    "derived_state": it.get("derived_state"),
+                    "derived_county": it.get("derived_county"),
+                    "state_calc": get_state(it),
+                    "county_calc": get_county(it),
+                    "place_for_card": get_place_for_card(it),
+                }
+                for it in items[:12]
+            ]
+        )
 
-def titleize_words(words: List[str]) -> str:
-    return " ".join(w.capitalize() for w in words if w)
-
-def get_state_from_text(text: str) -> str:
-    t = (text or "").lower()
-    # look for full state words
-    for k, v in STATE_WORDS.items():
-        if k in t:
-            return v
-    # look for VA/MD as tokens
-    m = re.search(r"\b(va|md)\b", t)
-    return STATE_ABBR.get(m.group(1).lower(), "") if m else ""
-
-def derive_state_and_place_from_landsearch_url(url: str) -> tuple[str, str]:
-    """
-    LandSearch property URLs often look like:
-      /properties/<slug>/<id>
-    Where <slug> might be:
-      1-ridge-rd-colonial-beach-va-22443
-      potomac-landing-dr-king-george-va-22485
-    We'll:
-      - find the 'va'/'md' token anywhere in the slug
-      - take a "place-ish" phrase by walking backwards from the state token
-        until we hit numbers or street-ish words
-    Returns: (state, place_phrase)
-    """
-    u = norm_opt(url).lower()
-    if "landsearch.com" not in u or "/properties/" not in u:
-        return ("", "")
-
-    try:
-        after = u.split("/properties/")[1].strip("/")
-        slug = after.split("/")[0]  # first path segment after /properties/
-        parts = [p for p in slug.split("-") if p]
-
-        # Find state token anywhere (va/md)
-        st_idx = None
-        for i in range(len(parts) - 1, -1, -1):
-            if parts[i] in STATE_ABBR:
-                st_idx = i
-                break
-        if st_idx is None:
-            return ("", "")
-
-        st = STATE_ABBR[parts[st_idx]]
-
-        # Walk backwards from just before state token to get "place"
-        place_tokens: List[str] = []
-        for j in range(st_idx - 1, -1, -1):
-            tok = parts[j]
-
-            # stop if we hit zip / numbers
-            if tok.isdigit() or DIGIT_RE.search(tok):
-                break
-
-            # stop if we hit obvious street words
-            if tok in STREET_STOPWORDS:
-                break
-
-            place_tokens.append(tok)
-
-            # cap place length (avoid swallowing too much)
-            if len(place_tokens) >= 3:
-                break
-
-        place_tokens = list(reversed(place_tokens))
-        place = titleize_words(place_tokens)
-        return (st, place)
-    except Exception:
-        return ("", "")
-
-def clean_county_label(place: str) -> str:
-    p = norm_opt(place)
-    if not p:
-        return ""
-    # don't accept obvious address blocks
-    if ZIP_RE.search(p):
-        return ""
-    if len(p) > 45:
-        return ""
-    # normalize
-    p = re.sub(r"\bcounty\b", "", p, flags=re.IGNORECASE).strip()
-    p = re.sub(r"\bco\.?\b", "", p, flags=re.IGNORECASE).strip()
-    p = re.sub(r"\s+", " ", p).strip()
-    if not p:
-        return ""
-    return f"{p} County"
-
-def get_state(it: Dict[str, Any]) -> str:
-    # prefer stored fields
-    st_ = norm_opt(it.get("derived_state")) or norm_opt(it.get("state")) or norm_opt(it.get("state_raw"))
-    if st_:
-        return st_.upper()
-
-    # try LandSearch URL
-    st2, _ = derive_state_and_place_from_landsearch_url(norm_opt(it.get("url")))
-    if st2:
-        return st2
-
-    # fallback to title/url text for “Virginia/Maryland”
-    blob = " ".join([norm_opt(it.get("title")), norm_opt(it.get("url"))])
-    return get_state_from_text(blob)
-
-def get_county(it: Dict[str, Any]) -> str:
-    # prefer stored fields
-    c = norm_opt(it.get("derived_county")) or norm_opt(it.get("county")) or norm_opt(it.get("county_raw"))
-    c = clean_county_label(c)
-    if c:
-        return c
-
-    # Try LandSearch URL “place” near the state token
-    _, place = derive_state_and_place_from_landsearch_url(norm_opt(it.get("url")))
-    c2 = clean_county_label(place)
-    if c2:
-        return c2
-
-    # LAST fallback: attempt "in X, Virginia" style from title
-    title = norm_opt(it.get("title")).lower()
-    m = re.search(r"\bin\s+([^,]+),\s*(virginia|maryland)\b", title, re.IGNORECASE)
-    if m:
-        return clean_county_label(m.group(1))
-
-    return ""
-
-# Build options AFTER helpers exist (no blanks)
-states = sorted({s for s in (get_state(it) for it in items) if s})
-counties = sorted({c for c in (get_county(it) for it in items) if c})
-
-st.write("")
-st.markdown("**Location**")
-
-colA, colB = st.columns(2)
-with colA:
-    selected_states = st.multiselect("State", options=states, default=states)
-
-# Build a state -> counties map (based on derived fields you now stamp)
-state_to_counties: Dict[str, List[str]] = {}
-for it in items:
-    st_ = get_state(it)
-    co_ = get_county(it)
-    if not st_ or not co_:
-        continue
-    state_to_counties.setdefault(st_, set()).add(co_)
-
-# normalize sets -> sorted lists
-state_to_counties = {k: sorted(list(v)) for k, v in state_to_counties.items()}
-
-# County options depend on state selection
-counties_for_selected_states: List[str] = []
-for st_ in selected_states:
-    counties_for_selected_states.extend(state_to_counties.get(st_, []))
-
-counties_for_selected_states = sorted(set(counties_for_selected_states))
-
-with colB:
-    selected_counties = st.multiselect(
-        "County",
-        options=counties_for_selected_states,
-        default=counties_for_selected_states,
-        disabled=(len(counties_for_selected_states) == 0),
-    )
-show_debug = st.toggle("Show debug", value=False)
 
 def passes_location(it: Dict[str, Any]) -> bool:
     st_ = get_state(it)
@@ -611,42 +614,15 @@ def passes_location(it: Dict[str, Any]) -> bool:
 
     if selected_states and st_ not in selected_states:
         return False
+
+    # If counties are selected (they will be by default if any exist), enforce them
     if selected_counties and co_ not in selected_counties:
         return False
+
     return True
 
-loc_items = [it for it in items if passes_location(it)]
 
-if show_debug:
-    st.write("### Debug (first 12 items)")
-    st.json(
-        [
-            {
-                "title": it.get("title"),
-                "url": it.get("url"),
-                "state": get_state(it),
-                "county": get_county(it),
-                "raw_state": it.get("state") or it.get("derived_state") or it.get("state_raw"),
-                "raw_county": it.get("county") or it.get("derived_county") or it.get("county_raw"),
-            }
-            for it in items[:12]
-        ]
-    )
-if show_debug:
-    st.write("### Debug (first 12 items)")
-    st.json(
-        [
-            {
-                "title": it.get("title"),
-                "url": it.get("url"),
-                "state": get_state(it),
-                "county": get_county(it),
-                "raw_state": it.get("state") or it.get("derived_state") or it.get("state_raw"),
-                "raw_county": it.get("county") or it.get("derived_county") or it.get("county_raw"),
-            }
-            for it in items[:12]
-        ]
-    )
+loc_items = [it for it in items if passes_location(it)]
 
 
 # ============================================================
@@ -675,23 +651,6 @@ with st.expander("Details", expanded=False):
     st.markdown("**Sources**")
     for src, n in sorted(source_counts.items(), key=lambda x: x[1], reverse=True):
         st.caption(f"{src}: {n}")
-
-    if show_debug:
-        st.write("")
-        st.markdown("**Debug (first 12)**")
-        st.json(
-            [
-                {
-                    "title": it.get("title"),
-                    "state": get_state(it),
-                    "county": get_county(it),
-                    "raw_state": it.get("state") or it.get("derived_state"),
-                    "raw_county": it.get("county") or it.get("derived_county"),
-                    "url": it.get("url"),
-                }
-                for it in loc_items[:12]
-            ]
-        )
 
 st.divider()
 
@@ -769,7 +728,8 @@ def listing_card(it: Dict[str, Any]):
     thumb = it.get("thumbnail")
 
     st_ = get_state(it)
-    co_ = get_county(it)
+    county = get_county(it)          # only real counties
+    place = get_place_for_card(it)   # city/place fallback
 
     status = get_status(it)
     top = is_top_match(it, min_acres, max_acres, max_price)
@@ -787,7 +747,9 @@ def listing_card(it: Dict[str, Any]):
     status_variant = status if status in {"available", "under_contract", "pending", "sold", "off_market"} else "unknown"
     pills.append(pill(STATUS_LABEL.get(status, "STATUS UNKNOWN"), status_variant))
 
-    loc_line = " • ".join([x for x in [co_, st_] if x])
+    # Card location line: prefer County if we have it, else show place/city
+    loc_primary = county or place
+    loc_line = " • ".join([x for x in [loc_primary, st_] if x])
 
     with st.container(border=True):
         if thumb:
