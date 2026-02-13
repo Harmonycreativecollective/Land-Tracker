@@ -437,43 +437,43 @@ else:
                 st.link_button("Open listing ↗", url, use_container_width=True)
 
 # ============================================================
-# Overview (System State)
+# Overview (System State) — dropdown
 # ============================================================
 
 st.divider()
-st.subheader("Overview")
 
-# Derived counts
-total_count = len(items)
-top_count = len(top_matches)
-possible_count = len(possible_matches)
-new_count = len(new_items)
+with st.expander("Overview", expanded=False):
 
-unavailable_count = len([
-    it for it in items
-    if get_status(it) in STATUS_VALUES_UNAVAILABLE
-])
+    # Safe counts (these variables should already exist above)
+    total_count = len(items)
+    top_count = len(top_matches)
+    possible_count = len(possible_matches)
+    new_count = len(new_items)
 
-last_updated_display = format_last_updated_et(last_updated or last_attempted)
+    # Unavailable count (fallback-safe)
+    try:
+        unavailable_count = len([it for it in items if get_status(it) in STATUS_VALUES_UNAVAILABLE])
+    except Exception:
+        unavailable_count = 0
 
-st.write("**Listing Counts**")
-st.caption(f"All found: {total_count}")
-st.caption(f"Top matches: {top_count}")
-st.caption(f"Possible (missing price): {possible_count}")
-st.caption(f"New since last run: {new_count}")
-st.caption(f"Unavailable: {unavailable_count}")
+    last_updated_display = format_last_updated_et(last_updated or last_attempted)
 
-st.write("")
+    st.write("**Listing Counts**")
+    st.caption(f"All found: {total_count}")
+    st.caption(f"Top matches: {top_count}")
+    st.caption(f"Possible (missing price): {possible_count}")
+    st.caption(f"New since last run: {new_count}")
+    st.caption(f"Unavailable: {unavailable_count}")
 
-st.write("**Active Criteria**")
-st.caption(f"Min acres: {default_min_acres:g}")
-st.caption(f"Max acres: {default_max_acres:g}")
-st.caption(f"Max price: ${int(default_max_price):,}")
+    st.write("")
+    st.write("**Active Criteria**")
+    st.caption(f"Min acres: {default_min_acres:g}")
+    st.caption(f"Max acres: {default_max_acres:g}")
+    st.caption(f"Max price: ${int(default_max_price):,}")
 
-st.write("")
-
-st.write("**Last Updated**")
-st.caption(last_updated_display)
-
+    st.write("")
+    st.write("**Last Updated**")
+    st.caption(last_updated_display)
+    
 st.caption("Tip: Use Properties to search, filter, and view all listings.")
 
