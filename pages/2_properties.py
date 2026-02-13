@@ -549,13 +549,46 @@ def get_state(it: Dict[str, Any]) -> str:
 
 
 def get_county(it: Dict[str, Any]) -> str:
-    co_ = (it.get("derived_county") or it.get("county") or it.get("county_raw") or "").strip()
-    if co_ and co_.lower() not in {"unknown", "n/a", "na", "none"}:
-        return co_
+    c = (
+        norm_opt(it.get("derived_county"))
+        or norm_opt(it.get("county"))
+        or norm_opt(it.get("county_raw"))
+    )
 
+    c = (c or "").strip()
+    if not c:
+        return ""
+
+    low = c.lower()
+    if low in {"unknown", "n/a", "na", "none"}:
+        return ""
+
+    # 🚫 kill addressy junk
+    if looks_like_address(c):
+        return ""
+
+    return c
     _, co2 = derive_state_county_from_url((it.get("url") or "").strip())
     return co2
 
+
+ADDRESSY_RE = re.compile(r"\d")  # any digit = very likely an address
+STREET_WORDS_RE = re.compile(
+    r"\b(rd|road|st|street|ave|avenue|ln|lane|dr|drive|ct|court|blvd|boulevard|hwy|highway|way|pkwy|parkway)\b",
+    re.IGNORECASE,
+)
+
+def looks_like_address(s: str) -> bool:
+    s = (s or "").strip()
+    if not s:
+        return True
+    if ADDRESSY_RE.search(s):
+        return True
+    if STREET_WORDS_RE.search(s):
+        return True
+    if len(s) > 40:
+        return True
+    return False
 
 # Build options AFTER helpers exist
 states = sorted({get_state(it) for it in items if get_state(it)})
