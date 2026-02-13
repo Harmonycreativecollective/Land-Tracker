@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-13T14:28:25.151917+00:00",
-  "last_attempted_utc": "2026-02-13T14:28:25.151917+00:00",
+  "last_updated_utc": "2026-02-13T19:54:48.723468+00:00",
+  "last_attempted_utc": "2026-02-13T19:54:48.723468+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -57,19 +57,6 @@
       "derived_state": "VA",
       "derived_county": "Westmoreland County",
       "found_utc": "2026-02-11T20:01:18.968919+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "11.7 Acres of Land with Home for Sale in Ruther Glen, Virginia",
-      "url": "https://www.landsearch.com/properties/17104-rousey-blvd-ruther-glen-va-22546/5039000",
-      "price": 575000,
-      "acres": 11.7,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QZmw/large/ruther-glen-va-160423278.jpg",
-      "status": "available",
-      "derived_state": "VA",
-      "derived_county": "Caroline County",
-      "found_utc": "2026-02-11T15:16:17.643475+00:00",
       "ever_top_match": true
     },
     {
@@ -321,19 +308,6 @@
     },
     {
       "source": "LandSearch",
-      "title": "32.7 Acres of Land for Sale in Taneytown, Maryland",
-      "url": "https://www.landsearch.com/properties/11763-harney-rd-taneytown-md-21787/4531560",
-      "price": 445000,
-      "acres": 32.7,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Kq6R/large/taneytown-md-159349092.jpg",
-      "status": "under_contract",
-      "derived_state": "MD",
-      "derived_county": "Frederick County",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
       "title": "10.2 Acres of Land for Sale in Middletown, Maryland",
       "url": "https://www.landsearch.com/properties/9702-mount-tabor-rd-middletown-md-21769/4980375",
       "price": 450000,
@@ -448,6 +422,32 @@
       "derived_county": "King George County",
       "found_utc": "2026-02-01T03:07:14.432999+00:00",
       "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "97.9 Acres of Land for Sale in Ruther Glen, Virginia",
+      "url": "https://www.landsearch.com/properties/ladysmith-rd-lots-122-and-122a-ruther-glen-va-22546/4507796",
+      "price": 4800000,
+      "acres": 97.9,
+      "thumbnail": "https://cdn.landsearch.com/listings/4KbNM/large/ruther-glen-va-140994513.jpg",
+      "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
+      "found_utc": "2026-02-13T19:54:48.723468+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "15.5 Acres of Land with Home for Sale in Emmitsburg, Maryland",
+      "url": "https://www.landsearch.com/properties/17449-irishtown-rd-emmitsburg-md-21727/4362066",
+      "price": 675000,
+      "acres": 15.5,
+      "thumbnail": "https://cdn.landsearch.com/listings/4HSxJ/large/emmitsburg-md-154648119.jpg",
+      "status": "under_contract",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
+      "found_utc": "2026-02-13T19:54:48.723468+00:00",
+      "ever_top_match": false
     },
     {
       "source": "LandSearch",
@@ -1791,6 +1791,19 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
+      "url": "https://www.landsearch.com/properties/436-thompson-cir-colonial-beach-va-22443/4978163",
+      "price": 645800,
+      "acres": 4.8,
+      "thumbnail": null,
+      "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
+      "found_utc": "2026-02-01T03:20:53.137763+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/scenic-dr-montross-va-22520/4309020",
       "price": 249900,
       "acres": 2.14,
@@ -1807,19 +1820,6 @@
       "url": "https://www.landsearch.com/properties/15268-kings-hwy-montross-va-22520/4976482",
       "price": 899950,
       "acres": 5.7,
-      "thumbnail": null,
-      "status": "unknown",
-      "derived_state": "VA",
-      "derived_county": "Westmoreland County",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/436-thompson-cir-colonial-beach-va-22443/4978163",
-      "price": 649800,
-      "acres": 4.8,
       "thumbnail": null,
       "status": "unknown",
       "derived_state": "VA",
@@ -2533,7 +2533,7 @@
       "source": "LandSearch",
       "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/67-whirlaway-dr-stafford-va-22556/4963521",
-      "price": 975000,
+      "price": 960000,
       "acres": 3.23,
       "thumbnail": null,
       "status": "unknown",
