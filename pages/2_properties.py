@@ -575,10 +575,34 @@ st.markdown("**Location**")
 
 colA, colB = st.columns(2)
 with colA:
-    selected_states = st.multiselect("State", options=states, default=states if states else [])
-with colB:
-    selected_counties = st.multiselect("County", options=counties, default=counties if counties else [])
+    selected_states = st.multiselect("State", options=states, default=states)
 
+# Build a state -> counties map (based on derived fields you now stamp)
+state_to_counties: Dict[str, List[str]] = {}
+for it in items:
+    st_ = get_state(it)
+    co_ = get_county(it)
+    if not st_ or not co_:
+        continue
+    state_to_counties.setdefault(st_, set()).add(co_)
+
+# normalize sets -> sorted lists
+state_to_counties = {k: sorted(list(v)) for k, v in state_to_counties.items()}
+
+# County options depend on state selection
+counties_for_selected_states: List[str] = []
+for st_ in selected_states:
+    counties_for_selected_states.extend(state_to_counties.get(st_, []))
+
+counties_for_selected_states = sorted(set(counties_for_selected_states))
+
+with colB:
+    selected_counties = st.multiselect(
+        "County",
+        options=counties_for_selected_states,
+        default=counties_for_selected_states,
+        disabled=(len(counties_for_selected_states) == 0),
+    )
 show_debug = st.toggle("Show debug", value=False)
 
 def passes_location(it: Dict[str, Any]) -> bool:
