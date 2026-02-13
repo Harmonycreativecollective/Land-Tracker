@@ -426,29 +426,49 @@ def is_property_listing(it: Dict[str, Any]) -> bool:
 # Apply property filter (removes leases too)
 items = [it for it in items if is_property_listing(it)]
 
+# ============================================================
+# Location helpers (normalized + consistent)
+# ============================================================
 
-# ============================================================
-# Location helpers (use derived_* first)
-# ============================================================
+STATE_MAP = {
+    "virginia": "VA",
+    "va": "VA",
+    "maryland": "MD",
+    "md": "MD",
+}
 
 def norm_opt(x: Optional[str]) -> str:
     return (x or "").strip()
 
+def norm_state(x: Optional[str]) -> str:
+    s = norm_opt(x).lower()
+    if not s:
+        return ""
+    s = s.replace(".", "").strip()
+    # convert full names -> abbreviations, keep known abbreviations
+    return STATE_MAP.get(s, s.upper() if len(s) == 2 else s.title())
+
+def norm_county(x: Optional[str]) -> str:
+    c = norm_opt(x)
+    if not c:
+        return ""
+    c_low = c.lower().strip()
+    if c_low in {"unknown", "n/a", "na", "none"}:
+        return ""
+    # remove “County” if present
+    c = re.sub(r"\s+county\b", "", c, flags=re.IGNORECASE).strip()
+    # clean double spaces, normalize casing
+    c = re.sub(r"\s+", " ", c).strip()
+    return c.title()
 
 def get_state(it: Dict[str, Any]) -> str:
-    return norm_opt(it.get("derived_state")) or norm_opt(it.get("state")) or norm_opt(it.get("state_raw"))
-
+    return norm_state(it.get("derived_state")) or norm_state(it.get("state")) or norm_state(it.get("state_raw"))
 
 def get_county(it: Dict[str, Any]) -> str:
-    c = norm_opt(it.get("derived_county")) or norm_opt(it.get("county")) or norm_opt(it.get("county_raw"))
-    if c.lower() in {"", "unknown", "n/a", "na", "none"}:
-        return ""
-    return c
-
+    return norm_county(it.get("derived_county")) or norm_county(it.get("county")) or norm_county(it.get("county_raw"))
 
 states = sorted({get_state(it) for it in items if get_state(it)})
 counties = sorted({get_county(it) for it in items if get_county(it)})
-
 
 # ============================================================
 # Filters UI
@@ -476,6 +496,13 @@ with st.expander("Filters", expanded=False):
 def passes_location(it: Dict[str, Any]) -> bool:
     st_ = get_state(it)
     co_ = get_county(it)
+
+    # If user is filtering, missing values should NOT pass
+    if selected_states and st_ not in selected_states:
+        return False
+    if selected_counties and co_ not in selected_counties:
+        return False
+    return True
 
     if selected_states and st_ and st_ not in selected_states:
         return False
