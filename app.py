@@ -448,7 +448,7 @@ with st.expander("Overview", expanded=False):
     total_count = len(items)
     top_count = len(top_matches)
     possible_count = len(possible_matches)
-    new_count = len(new_items)
+    new_count = len(new_top_matches)
 
     # Unavailable count (fallback-safe)
     try:
@@ -462,7 +462,7 @@ with st.expander("Overview", expanded=False):
     st.caption(f"All found: {total_count}")
     st.caption(f"Top matches: {top_count}")
     st.caption(f"Possible (missing price): {possible_count}")
-    st.caption(f"New since last run: {new_count}")
+    st.caption(f"New Top Matches since last run: {new_count}")
     st.caption(f"Unavailable: {unavailable_count}")
 
     st.write("")
