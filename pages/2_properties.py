@@ -429,7 +429,6 @@ def norm_opt(x: Optional[str]) -> str:
     return (x or "").strip()
 
 
-# --- county cleanup ---
 DIGIT_RE = re.compile(r"\d")
 STREET_WORDS_RE = re.compile(
     r"\b(rd|road|st|street|ave|avenue|ln|lane|dr|drive|ct|court|blvd|boulevard|hwy|highway|way|pkwy|parkway|cir|circle|trl|trail|pl|place)\b",
@@ -466,7 +465,7 @@ def clean_county_label(c: str) -> str:
     # strip trailing ", VA" etc
     c = re.sub(r",\s*(VA|MD)\b", "", c, flags=re.IGNORECASE).strip()
 
-    # remove "Co." / "County"
+    # normalize "X Co." / "X county"
     c = re.sub(r"\bco\.?\b", "", c, flags=re.IGNORECASE).strip()
     c = re.sub(r"\bcounty\b", "", c, flags=re.IGNORECASE).strip()
 
@@ -486,27 +485,46 @@ def _titleize_slug(s: str) -> str:
     return " ".join([w.capitalize() for w in s.split() if w])
 
 
+# NEW: title fallback that catches “... in King George, VA”
+TITLE_LOC_RE = re.compile(r"\bin\s+([^,]+),\s*(VA|MD)\b", re.IGNORECASE)
+
+
+def derive_from_title(it: Dict[str, Any]) -> tuple[str, str]:
+    title = norm_opt(it.get("title"))
+    if not title:
+        return ("", "")
+    m = TITLE_LOC_RE.search(title)
+    if not m:
+        return ("", "")
+    place = m.group(1).strip()
+    st = m.group(2).upper()
+    return (st, clean_county_label(place))
+
+
 def derive_state_county_from_url(url: str) -> tuple[str, str]:
     """
-    Best-effort extraction from URL structure for LandSearch/LandWatch.
-    Returns (state_abbr, county_label) like ('VA', 'King George County')
+    Tries LandSearch + LandWatch URL patterns.
+    Returns (state_abbr, county_label)
     """
     u = norm_opt(url).lower()
     if not u:
         return ("", "")
 
-    # LandSearch property urls typically contain: /properties/<county-slug>-<state>/<id>
-    # e.g. https://www.landsearch.com/properties/king-george-county-va/1234567
+    # LandSearch: /properties/<county-slug>-<state>/<id>  OR sometimes /properties/<county-slug>-<state>
+    # Example: https://www.landsearch.com/properties/king-george-county-va/1234567
     if "landsearch.com" in u and "/properties/" in u:
         try:
-            slug = u.split("/properties/")[1].split("/")[0]  # king-george-county-va
-            parts = [p for p in slug.split("-") if p]
+            after = u.split("/properties/")[1].strip("/")
+            first_seg = after.split("/")[0]  # king-george-county-va  OR 1234567 (rare)
+            if first_seg.isdigit():
+                return ("", "")  # let title fallback handle it
+
+            parts = [p for p in first_seg.split("-") if p]
             st = ""
             if parts and parts[-1] in US_STATE_ABBR:
                 st = US_STATE_ABBR[parts[-1]]
                 parts = parts[:-1]
 
-            # remove trailing 'county' token if present
             if parts and parts[-1] == "county":
                 parts = parts[:-1]
 
@@ -515,7 +533,7 @@ def derive_state_county_from_url(url: str) -> tuple[str, str]:
         except Exception:
             return ("", "")
 
-    # LandWatch urls: /virginia-land-for-sale/king-george (or /westmoreland-county)
+    # LandWatch: /virginia-land-for-sale/king-george  OR /.../westmoreland-county
     if "landwatch.com" in u:
         try:
             st = ""
@@ -524,7 +542,7 @@ def derive_state_county_from_url(url: str) -> tuple[str, str]:
             elif "maryland-land-for-sale" in u:
                 st = "MD"
 
-            slug = u.rstrip("/").split("/")[-1]  # king-george / westmoreland-county
+            slug = u.rstrip("/").split("/")[-1]
             slug = slug.replace("-county", "")
             county_raw = _titleize_slug(slug)
             return (st, clean_county_label(county_raw))
@@ -532,15 +550,6 @@ def derive_state_county_from_url(url: str) -> tuple[str, str]:
             return ("", "")
 
     return ("", "")
-
-
-def title_fallback_state(it: Dict[str, Any]) -> str:
-    txt = " ".join([norm_opt(it.get("title")), norm_opt(it.get("url"))]).lower()
-    if " virginia" in txt or " va" in txt:
-        return "VA"
-    if " maryland" in txt or " md" in txt:
-        return "MD"
-    return ""
 
 
 def get_state(it: Dict[str, Any]) -> str:
@@ -556,11 +565,11 @@ def get_state(it: Dict[str, Any]) -> str:
     if st2:
         return st2
 
-    return title_fallback_state(it)
+    st3, _ = derive_from_title(it)
+    return st3
 
 
 def get_county(it: Dict[str, Any]) -> str:
-    # prefer stored fields
     c = (
         norm_opt(it.get("derived_county"))
         or norm_opt(it.get("county"))
@@ -570,10 +579,13 @@ def get_county(it: Dict[str, Any]) -> str:
     if c:
         return c
 
-    # fallback: URL-derived (THIS is what will fix LandSearch right now)
     _, c2 = derive_state_county_from_url(norm_opt(it.get("url")))
     c2 = clean_county_label(c2)
-    return c2
+    if c2:
+        return c2
+
+    _, c3 = derive_from_title(it)
+    return clean_county_label(c3)
 
 
 # Build options AFTER helpers exist (no blanks)
@@ -585,17 +597,9 @@ st.markdown("**Location**")
 
 colA, colB = st.columns(2)
 with colA:
-    selected_states = st.multiselect(
-        "State",
-        options=states,
-        default=states if states else [],
-    )
+    selected_states = st.multiselect("State", options=states, default=states if states else [])
 with colB:
-    selected_counties = st.multiselect(
-        "County",
-        options=counties,
-        default=counties if counties else [],
-    )
+    selected_counties = st.multiselect("County", options=counties, default=counties if counties else [])
 
 show_debug = st.toggle("Show debug", value=False)
 
@@ -612,6 +616,22 @@ def passes_location(it: Dict[str, Any]) -> bool:
 
 
 loc_items = [it for it in items if passes_location(it)]
+
+if show_debug:
+    st.write("### Debug (first 12 items)")
+    st.json(
+        [
+            {
+                "title": it.get("title"),
+                "url": it.get("url"),
+                "state": get_state(it),
+                "county": get_county(it),
+                "raw_state": it.get("state") or it.get("derived_state") or it.get("state_raw"),
+                "raw_county": it.get("county") or it.get("derived_county") or it.get("county_raw"),
+            }
+            for it in items[:12]
+        ]
+    )
 
 
 # ============================================================
