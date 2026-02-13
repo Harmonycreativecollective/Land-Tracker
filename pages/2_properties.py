@@ -534,7 +534,21 @@ if sort_newest:
 
 filtered = filtered[:show_n]
 
+# ============================================================
+# Results summary (based on current filters)
+# ============================================================
 
+available_count = len([it for it in filtered if get_status(it) == "available"])
+top_count = len([it for it in filtered if is_top_match(it)])
+possible_count = len([it for it in filtered if is_possible_match(it)])
+
+with st.expander("Details", expanded=False):
+    st.caption(
+        f"Showing **{len(filtered)}** listings • "
+        f"**{available_count}** available • "
+        f"**{top_count}** top matches • "
+        f"**{possible_count}** possible"
+    )
 # ============================================================
 # Placeholder renderer
 # ============================================================
