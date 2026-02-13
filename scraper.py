@@ -2,7 +2,7 @@ import json
 import os
 import re
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -330,7 +330,13 @@ def enrich_from_detail_page(url: str) -> Dict[str, Any]:
             if p2 is not None:
                 price = price or p2
 
-            a2 = parse_acres(d.get("acres") or d.get("lotSizeAcres") or d.get("lotSize") or d.get("size") or d.get("area"))
+            a2 = parse_acres(
+                d.get("acres")
+                or d.get("lotSizeAcres")
+                or d.get("lotSize")
+                or d.get("size")
+                or d.get("area")
+            )
             if a2 is not None:
                 acres = acres or a2
 
@@ -431,6 +437,7 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
             if not url:
                 continue
 
+            # If we're on LandSearch, enforce property detail URL shape
             if "landsearch.com" in host:
                 p = urlparse(url)
                 if p.fragment:
@@ -481,6 +488,7 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
         href = a["href"]
         full = normalize_url(base_url, href)
 
+        # If we're on LandSearch, enforce property detail URL shape
         if "landsearch.com" in host:
             p = urlparse(full)
             if p.fragment:
@@ -533,22 +541,38 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
     return out
 
 
+def source_name_from_url(url: str) -> str:
+    host = urlparse(url).netloc.lower()
+    if "landsearch.com" in host:
+        return "LandSearch"
+    if "landwatch.com" in host:
+        return "LandWatch"
+    if "landandfarm.com" in host:
+        return "LandAndFarm"
+    if "land.com" in host:
+        return "Land.com"
+    return "Listing"
+
+
 def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
     host = urlparse(url).netloc.lower()
+    source_name = source_name_from_url(url)
 
     next_data = get_next_data_json(html)
     json_ld_blocks = get_json_ld(html)
 
     items: List[Dict[str, Any]] = []
 
+    # LandSearch can use __NEXT_DATA__ to reliably get property URLs
     if "landsearch.com" in host and next_data:
         items.extend(extract_from_landsearch_next(url, next_data))
 
+    # JSON-LD + fallback for any host
     if json_ld_blocks:
-        items.extend(extract_from_jsonld(url, json_ld_blocks, "LandSearch"))
+        items.extend(extract_from_jsonld(url, json_ld_blocks, source_name))
 
     if not items:
-        items.extend(extract_from_html_fallback(url, html, "LandSearch"))
+        items.extend(extract_from_html_fallback(url, html, source_name))
 
     items = [it for it in items if not is_lease_listing(it)]
 
@@ -590,26 +614,39 @@ def load_existing_file() -> Dict[str, Any]:
             return json.load(f)
     except Exception:
         return {}
-def context_from_start_url(start_url: str) -> tuple[str, str]:
+
+
+# ============================================================
+# NEW: context stamping from START_URL (LandSearch pages)
+# ============================================================
+def context_from_start_url(start_url: str) -> Tuple[str, str]:
+    """
+    Returns (derived_state, derived_county) based on the START_URL that is being scraped.
+    This is intentionally "safe": it ONLY derives location from the *search page URL*,
+    not from the listing URL (because listing URLs can be city/address-based).
+    """
     u = (start_url or "").strip().lower()
 
-    # LandSearch county pages:
-    # https://www.landsearch.com/properties/king-george-county-va
+    # LandSearch search pages:
+    # https://www.landsearch.com/properties/king-george-va
+    # https://www.landsearch.com/properties/westmoreland-county-va
     if "landsearch.com" in u and "/properties/" in u:
         try:
-            slug = u.split("/properties/")[1].split("/")[0]  # king-george-county-va
+            slug = u.split("/properties/")[1].split("/")[0]  # king-george-va OR westmoreland-county-va
             parts = [p for p in slug.split("-") if p]
+            if not parts:
+                return ("", "")
 
             st = ""
             if parts and parts[-1] in {"va", "md"}:
                 st = parts[-1].upper()
                 parts = parts[:-1]
 
-            # remove trailing literal "county"
+            # Remove a trailing literal "county" if present
             if parts and parts[-1] == "county":
                 parts = parts[:-1]
 
-            county_name = " ".join([w.capitalize() for w in parts])
+            county_name = " ".join([w.capitalize() for w in parts]).strip()
             county = f"{county_name} County" if county_name else ""
 
             return (st, county)
@@ -617,6 +654,7 @@ def context_from_start_url(start_url: str) -> tuple[str, str]:
             return ("", "")
 
     return ("", "")
+
 
 def main():
     os.makedirs("data", exist_ok=True)
@@ -626,25 +664,26 @@ def main():
     old_file = load_existing_file()
 
     all_items: List[Dict[str, Any]] = []
-   for url in START_URLS:
-    context_state, context_county = context_from_start_url(url)
 
-    try:
-        html = fetch_html(url)
-    except Exception as e:
-        print(f"Failed to fetch {url}: {e}")
-        continue
+    for url in START_URLS:
+        context_state, context_county = context_from_start_url(url)
 
-    batch = extract_listings(url, html)
+        try:
+            html = fetch_html(url)
+        except Exception as e:
+            print(f"Failed to fetch {url}: {e}")
+            continue
 
-    # stamp context onto every listing from this start page
-    for it in batch:
-        if context_state:
-            it["derived_state"] = context_state
-        if context_county:
-            it["derived_county"] = context_county
+        batch = extract_listings(url, html)
 
-    all_items.extend(batch)
+        # stamp context onto every listing from this start page
+        for it in batch:
+            if context_state:
+                it["derived_state"] = context_state
+            if context_county:
+                it["derived_county"] = context_county
+
+        all_items.extend(batch)
 
     seen = set()
     final: List[Dict[str, Any]] = []
