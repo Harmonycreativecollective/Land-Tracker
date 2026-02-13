@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-12T19:54:39.973201+00:00",
-  "last_attempted_utc": "2026-02-12T19:54:39.973201+00:00",
+  "last_updated_utc": "2026-02-13T02:43:56.541158+00:00",
+  "last_attempted_utc": "2026-02-13T02:43:56.541158+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -15,6 +15,8 @@
       "acres": 41.8,
       "thumbnail": "https://cdn.landsearch.com/listings/4QZBB/large/colonial-beach-va-160441077.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-11T20:01:18.968919+00:00",
       "ever_top_match": true
     },
@@ -26,6 +28,8 @@
       "acres": 11.7,
       "thumbnail": "https://cdn.landsearch.com/listings/4QZmw/large/ruther-glen-va-160423278.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-11T15:16:17.643475+00:00",
       "ever_top_match": true
     },
@@ -37,6 +41,8 @@
       "acres": 10.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QXdt/large/king-george-va-160290124.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-10T20:08:31.906984+00:00",
       "ever_top_match": true
     },
@@ -48,6 +54,8 @@
       "acres": 11.3,
       "thumbnail": "https://cdn.landsearch.com/listings/4QXdx/large/king-george-va-160290143.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-10T20:08:31.906984+00:00",
       "ever_top_match": true
     },
@@ -59,6 +67,8 @@
       "acres": 10.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QXdw/large/king-george-va-160290141.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-10T20:08:31.906984+00:00",
       "ever_top_match": true
     },
@@ -70,6 +80,8 @@
       "acres": 10.5,
       "thumbnail": "https://cdn.landsearch.com/listings/4QXdv/large/king-george-va-160290140.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-10T20:08:31.906984+00:00",
       "ever_top_match": true
     },
@@ -81,6 +93,8 @@
       "acres": 10.4,
       "thumbnail": "https://cdn.landsearch.com/listings/4QNWM/large/stafford-va-160186782.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-06T05:06:56.133658+00:00",
       "ever_top_match": true
     },
@@ -92,6 +106,8 @@
       "acres": 45.6,
       "thumbnail": "https://cdn.landsearch.com/listings/4QSN8/large/kinsale-va-160087382.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-04T19:53:33.685388+00:00",
       "ever_top_match": true
     },
@@ -103,6 +119,8 @@
       "acres": 13.1,
       "thumbnail": "https://cdn.landsearch.com/listings/4FfBX/large/montross-va-151978903.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -114,6 +132,8 @@
       "acres": 18.3,
       "thumbnail": "https://cdn.landsearch.com/listings/4QHHs/large/montross-va-159436878.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -125,6 +145,8 @@
       "acres": 38.7,
       "thumbnail": "https://cdn.landsearch.com/listings/4NW9w/large/hague-va-151583119.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -136,6 +158,8 @@
       "acres": 41.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4M3Cq/large/montross-va-158054696.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -147,6 +171,8 @@
       "acres": 10.4,
       "thumbnail": "https://cdn.landsearch.com/listings/4yFGq/large/montross-va-152064626.jpg",
       "status": "sold",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -158,6 +184,8 @@
       "acres": 17.8,
       "thumbnail": "https://cdn.landsearch.com/listings/4QkzF/small/milford-va-158123478.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -169,6 +197,8 @@
       "acres": 16.1,
       "thumbnail": "https://cdn.landsearch.com/listings/4PsY5/large/woodford-va-159502895.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -180,6 +210,8 @@
       "acres": 25.5,
       "thumbnail": "https://cdn.landsearch.com/listings/4QzBB/large/bowling-green-va-159028924.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -191,6 +223,8 @@
       "acres": 34.3,
       "thumbnail": "https://cdn.landsearch.com/listings/4NV67/large/milford-va-152139105.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -202,6 +236,8 @@
       "acres": 14.2,
       "thumbnail": "https://cdn.landsearch.com/listings/4QrbP/large/ruther-glen-va-158430716.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -213,6 +249,8 @@
       "acres": 15.5,
       "thumbnail": "https://cdn.landsearch.com/listings/4Qt4s/large/ruther-glen-va-158646958.jpg",
       "status": "sold",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -224,17 +262,8 @@
       "acres": 11.7,
       "thumbnail": "https://cdn.landsearch.com/listings/4zpVy/large/ruther-glen-va-152067007.jpg",
       "status": "available",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": true
-    },
-    {
-      "source": "LandSearch",
-      "title": "11.5 Acres of Land with Home for Sale in Woodford, Virginia",
-      "url": "https://www.landsearch.com/properties/6088-fredericksburg-tpke-woodford-va-22580/4990698",
-      "price": 325000,
-      "acres": 11.5,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Qypd/large/woodford-va-158934814.jpg",
-      "status": "under_contract",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -246,6 +275,8 @@
       "acres": 11.5,
       "thumbnail": "https://cdn.landsearch.com/listings/4NxQK/large/bowling-green-va-149829573.jpg",
       "status": "under_contract",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -257,6 +288,8 @@
       "acres": 32.7,
       "thumbnail": "https://cdn.landsearch.com/listings/4Kq6R/large/taneytown-md-159349092.jpg",
       "status": "under_contract",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -268,6 +301,8 @@
       "acres": 10.2,
       "thumbnail": "https://cdn.landsearch.com/listings/4QsV9/large/middletown-md-158640510.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -279,6 +314,8 @@
       "acres": 10.3,
       "thumbnail": "https://cdn.landsearch.com/listings/4QsV8/large/middletown-md-158640507.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": true
     },
@@ -290,6 +327,8 @@
       "acres": 28.8,
       "thumbnail": "https://cdn.landsearch.com/listings/4QJmw/large/king-george-va-159480515.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": true
     },
@@ -301,6 +340,8 @@
       "acres": 10.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QBgm/large/king-george-va-159069097.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": true
     },
@@ -312,6 +353,8 @@
       "acres": 14.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QBgG/large/king-george-va-159069587.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": true
     },
@@ -323,6 +366,8 @@
       "acres": 10.9,
       "thumbnail": "https://cdn.landsearch.com/listings/4jwbj/large/king-george-va-152070533.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": true
     },
@@ -334,6 +379,8 @@
       "acres": 18.5,
       "thumbnail": "https://cdn.landsearch.com/listings/4QBgn/large/king-george-va-159069112.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": true
     },
@@ -345,6 +392,8 @@
       "acres": 30.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4Jpd6/small/rappahannock-academy-va-138822836.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": true
     },
@@ -356,8 +405,88 @@
       "acres": 10.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QBgJ/large/king-george-va-159069617.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:07:14.432999+00:00",
       "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "3.69 Acres of Residential Land for Sale in Fredericksburg, Virginia",
+      "url": "https://www.landsearch.com/properties/694-mountain-view-rd-fredericksburg-va-22406/5039343",
+      "price": 199000,
+      "acres": 3.69,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QZvF/large/fredericksburg-va-160434813.jpg",
+      "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
+      "found_utc": "2026-02-13T02:43:56.541158+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "3 Acres of Residential Land with Home for Sale in Stafford, Virginia",
+      "url": "https://www.landsearch.com/properties/hampstead-farm-ln-stafford-va-22556/4861020",
+      "price": 809900,
+      "acres": 3.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4Pp6B/large/stafford-va-153726843.jpg",
+      "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
+      "found_utc": "2026-02-13T02:43:56.541158+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "3.33 Acres of Residential Land with Home for Sale in Fredericksburg, Virginia",
+      "url": "https://www.landsearch.com/properties/165-edgewater-dr-fredericksburg-va-22406/5016559",
+      "price": 1399000,
+      "acres": 3.33,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QNBZ/large/fredericksburg-va-159665835.jpg",
+      "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
+      "found_utc": "2026-02-13T02:43:56.541158+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "0.48 Acres of Residential Land for Sale in Ruther Glen, Virginia",
+      "url": "https://www.landsearch.com/properties/214-norfolk-dr-ruther-glen-va-22546/4571559",
+      "price": 60000,
+      "acres": 0.48,
+      "thumbnail": "https://cdn.landsearch.com/listings/4KMt9/large/ruther-glen-va-152080420.jpg",
+      "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
+      "found_utc": "2026-02-13T02:43:56.541158+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "2.52 Acres of Residential Land with Home for Sale in Mount Airy, Maryland",
+      "url": "https://www.landsearch.com/properties/mount-airy-md-21771/5043760",
+      "price": 979000,
+      "acres": 2.52,
+      "thumbnail": "https://cdn.landsearch.com/listings/4R3qG/large/mount-airy-md-160568311.jpg",
+      "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
+      "found_utc": "2026-02-13T02:43:56.541158+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "0.11 Acres of Land for Sale in Crownsville, Maryland",
+      "url": "https://www.landsearch.com/properties/redwood-trail-lot-23-and-24-crownsville-md-21032/4730372",
+      "price": 22500,
+      "acres": 0.11,
+      "thumbnail": "https://cdn.landsearch.com/listings/4NcpM/large/crownsville-md-152046838.jpg",
+      "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
+      "found_utc": "2026-02-13T02:43:56.541158+00:00",
+      "ever_top_match": false
     },
     {
       "source": "LandSearch",
@@ -367,6 +496,8 @@
       "acres": 3.25,
       "thumbnail": "https://cdn.landsearch.com/listings/4R2yz/large/stafford-va-160510738.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-12T19:54:39.973201+00:00",
       "ever_top_match": false
     },
@@ -378,6 +509,8 @@
       "acres": 3.75,
       "thumbnail": "https://cdn.landsearch.com/listings/4R2Pw/large/stafford-va-160529659.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-12T19:54:39.973201+00:00",
       "ever_top_match": false
     },
@@ -387,8 +520,10 @@
       "url": "https://www.landsearch.com/properties/13577-countyline-church-rd-woodford-va-22580/5042032",
       "price": 189900,
       "acres": 2.53,
-      "thumbnail": "https://cdn.landsearch.com/listings/4R2FG/large/woodford-va-160519163.jpg",
+      "thumbnail": "https://cdn.landsearch.com/listings/4R2FG/large/woodford-va-160552152.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-12T19:54:39.973201+00:00",
       "ever_top_match": false
     },
@@ -400,6 +535,8 @@
       "acres": 2.12,
       "thumbnail": "https://cdn.landsearch.com/listings/4R2DN/large/millersville-md-160517667.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-12T19:54:39.973201+00:00",
       "ever_top_match": false
     },
@@ -411,6 +548,8 @@
       "acres": 4.75,
       "thumbnail": "https://cdn.landsearch.com/listings/4R24M/large/colonial-beach-va-160477133.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-12T05:18:00.245494+00:00",
       "ever_top_match": false
     },
@@ -422,6 +561,8 @@
       "acres": 0.4,
       "thumbnail": "https://cdn.landsearch.com/listings/4rdxr/large/emmitsburg-md-152057115.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-12T05:18:00.245494+00:00",
       "ever_top_match": false
     },
@@ -433,6 +574,8 @@
       "acres": 1.7,
       "thumbnail": "https://cdn.landsearch.com/listings/4JWCx/large/pasadena-md-140208661.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-12T05:18:00.245494+00:00",
       "ever_top_match": false
     },
@@ -444,17 +587,8 @@
       "acres": 101.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QZBD/large/colonial-beach-va-160441151.jpg",
       "status": "available",
-      "found_utc": "2026-02-11T20:01:18.968919+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "3.29 Acres of Residential Land with Home for Sale in Fredericksburg, Virginia",
-      "url": "https://www.landsearch.com/properties/37-serene-hills-dr-fredericksburg-va-22406/5039400",
-      "price": 925000,
-      "acres": 3.29,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QZwR/large/fredericksburg-va-160436040.jpg",
-      "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-11T20:01:18.968919+00:00",
       "ever_top_match": false
     },
@@ -466,6 +600,21 @@
       "acres": 3.18,
       "thumbnail": "https://cdn.landsearch.com/listings/4QZxD/large/fredericksburg-va-160436980.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
+      "found_utc": "2026-02-11T20:01:18.968919+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
+      "title": "3.29 Acres of Residential Land with Home for Sale in Fredericksburg, Virginia",
+      "url": "https://www.landsearch.com/properties/37-serene-hills-dr-fredericksburg-va-22406/5039400",
+      "price": 925000,
+      "acres": 3.29,
+      "thumbnail": "https://cdn.landsearch.com/listings/4QZwR/large/fredericksburg-va-160436040.jpg",
+      "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-11T20:01:18.968919+00:00",
       "ever_top_match": false
     },
@@ -477,6 +626,8 @@
       "acres": 1.6,
       "thumbnail": "https://cdn.landsearch.com/listings/4QZms/large/monrovia-md-160471450.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-11T20:01:18.968919+00:00",
       "ever_top_match": false
     },
@@ -488,6 +639,8 @@
       "acres": 1.5,
       "thumbnail": "https://cdn.landsearch.com/listings/4QZmy/large/king-george-va-160423334.jpg",
       "status": "sold",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-11T15:16:17.643475+00:00",
       "ever_top_match": false
     },
@@ -499,6 +652,8 @@
       "acres": 3.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QZmB/large/king-george-va-160423354.jpg",
       "status": "sold",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-11T15:16:17.643475+00:00",
       "ever_top_match": false
     },
@@ -508,8 +663,10 @@
       "url": "https://www.landsearch.com/properties/116-waypointe-ct-fredericksburg-va-22406/5039118",
       "price": 779000,
       "acres": 5.33,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QZpY/large/fredericksburg-va-160425914.jpg",
+      "thumbnail": "https://cdn.landsearch.com/listings/4QZpY/large/fredericksburg-va-160553348.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-11T15:16:17.643475+00:00",
       "ever_top_match": false
     },
@@ -521,6 +678,8 @@
       "acres": 4.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QZmD/large/stafford-va-160423373.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-11T15:16:17.643475+00:00",
       "ever_top_match": false
     },
@@ -532,17 +691,8 @@
       "acres": 0.42,
       "thumbnail": "https://cdn.landsearch.com/listings/4QX9B/large/montross-va-160286745.jpg",
       "status": "available",
-      "found_utc": "2026-02-10T20:08:31.906984+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "5.45 Acres of Residential Land with Home for Sale in Stafford, Virginia",
-      "url": "https://www.landsearch.com/properties/36-windsong-way-stafford-va-22556/4995026",
-      "price": 1350000,
-      "acres": 5.45,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QBgp/large/stafford-va-160379047.jpg",
-      "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-10T20:08:31.906984+00:00",
       "ever_top_match": false
     },
@@ -554,6 +704,8 @@
       "acres": 2.15,
       "thumbnail": "https://cdn.landsearch.com/listings/4QWDK/large/mount-airy-md-160274504.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-10T20:08:31.906984+00:00",
       "ever_top_match": false
     },
@@ -565,6 +717,8 @@
       "acres": 8.2,
       "thumbnail": "https://cdn.landsearch.com/listings/4Hrsy/large/middletown-md-152130914.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-10T20:08:31.906984+00:00",
       "ever_top_match": false
     },
@@ -576,6 +730,8 @@
       "acres": 0.11,
       "thumbnail": "https://cdn.landsearch.com/listings/4NcpP/large/crownsville-md-152116298.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-10T20:08:31.906984+00:00",
       "ever_top_match": false
     },
@@ -587,6 +743,8 @@
       "acres": 14.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4Q4Td/small/myersville-md-157103951.jpg",
       "status": "under_contract",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-06T19:50:42.588168+00:00",
       "ever_top_match": false
     },
@@ -598,6 +756,8 @@
       "acres": 7.7,
       "thumbnail": "https://cdn.landsearch.com/listings/4QVB4/small/montross-va-160196316.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-06T14:27:16.720641+00:00",
       "ever_top_match": false
     },
@@ -609,6 +769,8 @@
       "acres": 2.16,
       "thumbnail": "https://cdn.landsearch.com/listings/4QVDT/large/edgewater-md-160199796.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-06T14:27:16.720641+00:00",
       "ever_top_match": false
     },
@@ -620,6 +782,8 @@
       "acres": 2.22,
       "thumbnail": "https://cdn.landsearch.com/listings/4QVDV/large/davidsonville-md-160199898.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-06T14:27:16.720641+00:00",
       "ever_top_match": false
     },
@@ -631,6 +795,8 @@
       "acres": 8.55,
       "thumbnail": "https://cdn.landsearch.com/listings/4QTBy/small/woodford-va-160208240.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-05T14:33:57.569975+00:00",
       "ever_top_match": false
     },
@@ -642,6 +808,8 @@
       "acres": 3.1,
       "thumbnail": "https://cdn.landsearch.com/listings/4QT7N/large/fredericksburg-va-160106852.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-05T05:09:12.359806+00:00",
       "ever_top_match": false
     },
@@ -653,6 +821,8 @@
       "acres": 0.87,
       "thumbnail": "https://cdn.landsearch.com/listings/4QThH/large/monrovia-md-160116928.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-05T05:09:12.359806+00:00",
       "ever_top_match": false
     },
@@ -664,6 +834,8 @@
       "acres": 1.78,
       "thumbnail": "https://cdn.landsearch.com/listings/4QQQQ/large/king-george-va-159966672.jpg",
       "status": "sold",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-03T05:07:05.234377+00:00",
       "ever_top_match": false
     },
@@ -675,6 +847,8 @@
       "acres": 1.84,
       "thumbnail": "https://cdn.landsearch.com/listings/4Qf52/large/bowling-green-va-159984941.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-03T05:07:05.234377+00:00",
       "ever_top_match": false
     },
@@ -686,6 +860,8 @@
       "acres": 0.12,
       "thumbnail": "https://cdn.landsearch.com/listings/4PKz3/large/severn-md-155167625.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-03T05:07:05.234377+00:00",
       "ever_top_match": false
     },
@@ -697,6 +873,8 @@
       "acres": 6.75,
       "thumbnail": "https://cdn.landsearch.com/listings/4QQzk/large/king-george-va-159948640.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-02T05:17:14.446298+00:00",
       "ever_top_match": false
     },
@@ -708,6 +886,8 @@
       "acres": 2.34,
       "thumbnail": "https://cdn.landsearch.com/listings/4PZSH/large/montross-va-160311253.jpg",
       "status": "under_contract",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-02T05:17:14.446298+00:00",
       "ever_top_match": false
     },
@@ -719,6 +899,8 @@
       "acres": 8.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4MBtP/large/ijamsville-md-151904640.jpg",
       "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T07:50:51.850812+00:00",
       "ever_top_match": false
     },
@@ -730,6 +912,8 @@
       "acres": 2.24,
       "thumbnail": "https://cdn.landsearch.com/listings/4Qdhx/small/king-george-va-157734256.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -741,6 +925,8 @@
       "acres": 5.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4Qdjg/small/king-george-va-157723087.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -752,6 +938,8 @@
       "acres": 2.5,
       "thumbnail": "https://cdn.landsearch.com/listings/4Qdjb/small/king-george-va-157733357.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -763,50 +951,60 @@
       "acres": 5.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4CZcn/large/king-george-va-151904991.jpg",
       "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "2.6 Acres of Residential Land with Home for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/17397-rosiers-creek-ln-king-george-va-22485/4482677",
       "price": 855000,
       "acres": 2.6,
-      "thumbnail": "https://cdn.landsearch.com/listings/4JXTs/large/king-george-va-152036762.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "6.5 Acres of Residential Land for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/5-seagrass-ct-king-george-va-22485/4953643",
       "price": 439900,
       "acres": 6.5,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Qdjf/large/king-george-va-157723078.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "5 Acres of Land for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/35-81a-old-parsons-rd-king-george-va-22485/3932736",
       "price": 100000,
       "acres": 5.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4CZcm/large/king-george-va-152055231.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
     {
       "source": "LandSearch",
-      "title": "5 Acres of Commercial Land for Sale in King George, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/12302-james-madison-pkwy-king-george-va-22485/4766207",
       "price": 999000,
       "acres": 5.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4NwXk/large/king-george-va-151924030.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -818,6 +1016,8 @@
       "acres": 2.28,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -829,6 +1029,8 @@
       "acres": 6.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -840,6 +1042,8 @@
       "acres": 6.2,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -851,6 +1055,8 @@
       "acres": 2.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -862,6 +1068,8 @@
       "acres": 9.56,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -873,6 +1081,8 @@
       "acres": 2.6,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -884,6 +1094,8 @@
       "acres": 8.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -895,6 +1107,8 @@
       "acres": 2.64,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -906,6 +1120,8 @@
       "acres": 2.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -917,6 +1133,8 @@
       "acres": 2.3,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -928,6 +1146,8 @@
       "acres": 2.83,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -939,6 +1159,8 @@
       "acres": 0.85,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -950,6 +1172,8 @@
       "acres": 4.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -961,6 +1185,8 @@
       "acres": 3.56,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -972,6 +1198,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -983,6 +1211,8 @@
       "acres": 6.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4P9zK/small/colonial-beach-va-152964974.jpg",
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -994,6 +1224,8 @@
       "acres": 426.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4tPSX/small/hague-va-143721067.jpg",
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1005,6 +1237,8 @@
       "acres": 0.92,
       "thumbnail": "https://cdn.landsearch.com/listings/4NcpX/small/montross-va-152026855.jpg",
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1016,6 +1250,8 @@
       "acres": 0.37,
       "thumbnail": "https://cdn.landsearch.com/listings/4KW9M/small/montross-va-143475774.jpg",
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1027,6 +1263,8 @@
       "acres": 18.2,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1038,6 +1276,8 @@
       "acres": 5.7,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1049,6 +1289,8 @@
       "acres": 2.14,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1060,6 +1302,8 @@
       "acres": 4.8,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1071,6 +1315,8 @@
       "acres": 0.29,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1082,6 +1328,8 @@
       "acres": 0.94,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1093,6 +1341,8 @@
       "acres": 132.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1104,6 +1354,8 @@
       "acres": 1.47,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1115,6 +1367,8 @@
       "acres": 0.06,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1126,6 +1380,8 @@
       "acres": 1.4,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1137,6 +1393,8 @@
       "acres": 135.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1148,6 +1406,8 @@
       "acres": 46.3,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1159,6 +1419,8 @@
       "acres": 2.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1170,6 +1432,8 @@
       "acres": 0.48,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1181,6 +1445,8 @@
       "acres": 0.06,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1192,6 +1458,8 @@
       "acres": 0.34,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1203,6 +1471,8 @@
       "acres": 0.21,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1214,6 +1484,8 @@
       "acres": 0.06,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1225,6 +1497,8 @@
       "acres": 0.06,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1236,6 +1510,8 @@
       "acres": 2.3,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1247,6 +1523,8 @@
       "acres": 0.87,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1258,6 +1536,8 @@
       "acres": 1.1,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1269,6 +1549,8 @@
       "acres": 0.07,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1280,6 +1562,8 @@
       "acres": 1.3,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1291,6 +1575,8 @@
       "acres": 0.67,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1302,6 +1588,8 @@
       "acres": 1.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1313,6 +1601,8 @@
       "acres": 0.9,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1324,6 +1614,8 @@
       "acres": 4.62,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1335,6 +1627,8 @@
       "acres": 0.23,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1346,6 +1640,8 @@
       "acres": 0.34,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1357,6 +1653,8 @@
       "acres": 3.5,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1368,6 +1666,8 @@
       "acres": 1.5,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1379,6 +1679,8 @@
       "acres": 0.71,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Westmoreland County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1390,17 +1692,8 @@
       "acres": 3.43,
       "thumbnail": "https://cdn.landsearch.com/listings/4QNkj/small/stafford-va-159648915.jpg",
       "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/531-kellogg-mill-rd-fredericksburg-va-22406/4656968",
-      "price": 900000,
-      "acres": 6.7,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Mxxw/small/fredericksburg-va-152006034.jpg",
-      "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1412,6 +1705,8 @@
       "acres": 3.85,
       "thumbnail": "https://cdn.landsearch.com/listings/4Kg2V/small/stafford-va-152034090.jpg",
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1423,6 +1718,8 @@
       "acres": 10.2,
       "thumbnail": "https://cdn.landsearch.com/listings/4DXrY/small/fredericksburg-va-152070887.jpg",
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1434,6 +1731,8 @@
       "acres": 6.66,
       "thumbnail": "https://cdn.landsearch.com/listings/4Q6Dt/small/stafford-va-157159959.jpg",
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1443,19 +1742,10 @@
       "url": "https://www.landsearch.com/properties/66-estate-row-stafford-va-22554/4732396",
       "price": 765000,
       "acres": 7.49,
-      "thumbnail": null,
+      "thumbnail": "https://cdn.landsearch.com/listings/4NdgW/small/stafford-va-152051036.jpg",
       "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/201-doe-way-fredericksburg-va-22406/4984477",
-      "price": 239990,
-      "acres": 5.0,
-      "thumbnail": null,
-      "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1467,6 +1757,8 @@
       "acres": 2.4,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1478,6 +1770,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1489,6 +1783,8 @@
       "acres": 6.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1500,6 +1796,8 @@
       "acres": 6.66,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1511,6 +1809,8 @@
       "acres": 4.43,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1522,6 +1822,8 @@
       "acres": 0.55,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1533,6 +1835,8 @@
       "acres": 5.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1544,6 +1848,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1555,6 +1861,8 @@
       "acres": 3.55,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1566,6 +1874,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1577,6 +1887,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1588,6 +1900,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1599,6 +1913,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1610,6 +1926,8 @@
       "acres": 4.5,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1621,6 +1939,8 @@
       "acres": 3.17,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1632,6 +1952,8 @@
       "acres": 2.52,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1643,6 +1965,8 @@
       "acres": 3.52,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1654,6 +1978,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1665,6 +1991,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1676,6 +2004,8 @@
       "acres": 3.82,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1687,6 +2017,8 @@
       "acres": 3.23,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1698,6 +2030,8 @@
       "acres": 3.65,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1709,6 +2043,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1720,6 +2056,8 @@
       "acres": 3.16,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1731,6 +2069,8 @@
       "acres": 19.1,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1742,6 +2082,8 @@
       "acres": 4.14,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1753,6 +2095,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1764,6 +2108,8 @@
       "acres": 10.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1775,6 +2121,8 @@
       "acres": 3.72,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1786,6 +2134,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1797,6 +2147,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1808,6 +2160,8 @@
       "acres": 0.58,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1819,6 +2173,8 @@
       "acres": 0.33,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1830,6 +2186,8 @@
       "acres": 11.8,
       "thumbnail": "https://cdn.landsearch.com/listings/4QCBP/small/milford-va-159155650.jpg",
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1841,6 +2199,8 @@
       "acres": 2.17,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1852,6 +2212,8 @@
       "acres": 1.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1863,6 +2225,8 @@
       "acres": 314.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1874,6 +2238,8 @@
       "acres": 12.2,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1885,6 +2251,8 @@
       "acres": 2.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1896,6 +2264,8 @@
       "acres": 1.5,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1907,6 +2277,8 @@
       "acres": 4.34,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1918,6 +2290,8 @@
       "acres": 6.25,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1929,6 +2303,8 @@
       "acres": 3.3,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1940,6 +2316,8 @@
       "acres": 1.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1951,6 +2329,8 @@
       "acres": 1.5,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1962,6 +2342,8 @@
       "acres": 52.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1973,6 +2355,8 @@
       "acres": 94.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1984,6 +2368,8 @@
       "acres": 94.2,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -1995,6 +2381,8 @@
       "acres": 55.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2006,6 +2394,8 @@
       "acres": 0.38,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2017,6 +2407,8 @@
       "acres": 2.29,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2028,6 +2420,8 @@
       "acres": 12.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2039,6 +2433,8 @@
       "acres": 3.18,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2050,6 +2446,8 @@
       "acres": 2.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2061,6 +2459,8 @@
       "acres": 0.28,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2072,6 +2472,8 @@
       "acres": 6.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2083,6 +2485,8 @@
       "acres": 0.97,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2094,6 +2498,8 @@
       "acres": 25.5,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2105,6 +2511,8 @@
       "acres": 36.5,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2116,6 +2524,8 @@
       "acres": 7.16,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2127,6 +2537,8 @@
       "acres": 1.1,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2138,6 +2550,8 @@
       "acres": 2.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2149,6 +2563,8 @@
       "acres": 9.17,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2160,6 +2576,8 @@
       "acres": 2.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2171,6 +2589,8 @@
       "acres": 27.3,
       "thumbnail": "https://cdn.landsearch.com/listings/4KnRg/small/myersville-md-141627527.jpg",
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2182,6 +2602,8 @@
       "acres": 71.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4H2zB/small/ijamsville-md-152061993.jpg",
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2193,6 +2615,8 @@
       "acres": 5.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4PR5W/small/frederick-md-158415173.jpg",
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2204,17 +2628,8 @@
       "acres": 7.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4QxhT/small/myersville-md-158869398.jpg",
       "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/7230-edgemont-rd-frederick-md-21702/4632728",
-      "price": 720000,
-      "acres": 9.44,
-      "thumbnail": null,
-      "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2226,6 +2641,8 @@
       "acres": 5.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2237,6 +2654,8 @@
       "acres": 11.1,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2248,6 +2667,8 @@
       "acres": 12.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2259,6 +2680,8 @@
       "acres": 6.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2270,6 +2693,8 @@
       "acres": 14.6,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2281,6 +2706,8 @@
       "acres": 37.2,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2292,6 +2719,8 @@
       "acres": 5.8,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2303,6 +2732,8 @@
       "acres": 12.4,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2314,6 +2745,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2325,6 +2758,8 @@
       "acres": 10.7,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2336,6 +2771,8 @@
       "acres": 2.46,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2347,6 +2784,8 @@
       "acres": 2.7,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2358,6 +2797,8 @@
       "acres": 5.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2369,6 +2810,8 @@
       "acres": 3.5,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2380,6 +2823,8 @@
       "acres": 1.56,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2391,6 +2836,8 @@
       "acres": 1.72,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2402,6 +2849,8 @@
       "acres": 0.2,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2413,6 +2862,8 @@
       "acres": 7.32,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2424,6 +2875,8 @@
       "acres": 1.72,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2435,6 +2888,8 @@
       "acres": 0.24,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2446,6 +2901,8 @@
       "acres": 9.4,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2457,6 +2914,8 @@
       "acres": 1.54,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2468,6 +2927,8 @@
       "acres": 3.87,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2479,6 +2940,8 @@
       "acres": 2.32,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2490,6 +2953,8 @@
       "acres": 6.64,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2501,6 +2966,8 @@
       "acres": 1.7,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2512,6 +2979,8 @@
       "acres": 1.59,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2523,6 +2992,8 @@
       "acres": 5.25,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2534,6 +3005,8 @@
       "acres": 2.48,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2545,6 +3018,8 @@
       "acres": 3.87,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2556,6 +3031,8 @@
       "acres": 4.59,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2567,6 +3044,8 @@
       "acres": 3.75,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2578,6 +3057,8 @@
       "acres": 30.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2589,6 +3070,8 @@
       "acres": 4.75,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2600,6 +3083,8 @@
       "acres": 2.57,
       "thumbnail": "https://cdn.landsearch.com/listings/4NcPh/small/pasadena-md-152185024.jpg",
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2611,6 +3096,8 @@
       "acres": 10.4,
       "thumbnail": "https://cdn.landsearch.com/listings/4M38d/small/crownsville-md-159356968.jpg",
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2622,6 +3109,8 @@
       "acres": 4.89,
       "thumbnail": "https://cdn.landsearch.com/listings/4zwTD/small/harwood-md-152071423.jpg",
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2633,6 +3122,8 @@
       "acres": 0.11,
       "thumbnail": "https://cdn.landsearch.com/listings/4N95J/small/baltimore-md-152043031.jpg",
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2644,6 +3135,8 @@
       "acres": 8.1,
       "thumbnail": "https://cdn.landsearch.com/listings/4MDTC/small/davidsonville-md-151921664.jpg",
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2655,6 +3148,8 @@
       "acres": 6.66,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2666,6 +3161,8 @@
       "acres": 14.8,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2677,6 +3174,8 @@
       "acres": 0.65,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2688,6 +3187,8 @@
       "acres": 0.34,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2699,6 +3200,8 @@
       "acres": 0.61,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2710,6 +3213,8 @@
       "acres": 3.35,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2721,6 +3226,8 @@
       "acres": 1.53,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2732,6 +3239,8 @@
       "acres": 8.36,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2743,6 +3252,8 @@
       "acres": 19.3,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2754,6 +3265,8 @@
       "acres": 0.12,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2765,6 +3278,8 @@
       "acres": 0.44,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2776,6 +3291,8 @@
       "acres": 8.75,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2787,6 +3304,8 @@
       "acres": 0.11,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2798,6 +3317,8 @@
       "acres": 20.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2809,6 +3330,8 @@
       "acres": 0.08,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2820,6 +3343,8 @@
       "acres": 0.15,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2831,6 +3356,8 @@
       "acres": 2.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2842,6 +3369,8 @@
       "acres": 0.69,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2853,6 +3382,8 @@
       "acres": 4.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2864,6 +3395,8 @@
       "acres": 3.27,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2875,6 +3408,8 @@
       "acres": 2.18,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2886,6 +3421,8 @@
       "acres": 4.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2897,17 +3434,8 @@
       "acres": 2.88,
       "thumbnail": null,
       "status": "unknown",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/5108-mountain-rd-pasadena-md-21122/4862421",
-      "price": 1224500,
-      "acres": 2.5,
-      "thumbnail": null,
-      "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2919,6 +3447,8 @@
       "acres": 3.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2930,6 +3460,8 @@
       "acres": 0.25,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2941,6 +3473,8 @@
       "acres": 0.95,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2952,6 +3486,8 @@
       "acres": 0.48,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2963,6 +3499,8 @@
       "acres": 0.12,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2974,6 +3512,8 @@
       "acres": 0.26,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2985,6 +3525,8 @@
       "acres": 8.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -2996,6 +3538,8 @@
       "acres": 0.04,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -3007,6 +3551,8 @@
       "acres": 0.39,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -3018,6 +3564,8 @@
       "acres": 0.34,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -3029,6 +3577,8 @@
       "acres": 8.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -3040,6 +3590,8 @@
       "acres": 2.24,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -3051,6 +3603,8 @@
       "acres": 4.33,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -3062,6 +3616,8 @@
       "acres": 4.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -3073,6 +3629,8 @@
       "acres": 3.87,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-01T03:20:53.137763+00:00",
       "ever_top_match": false
     },
@@ -3084,6 +3642,8 @@
       "acres": 10.8,
       "thumbnail": "https://cdn.landsearch.com/listings/4Pr7Q/small/king-george-va-153864222.jpg",
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3095,6 +3655,8 @@
       "acres": 10.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4PkC7/small/king-george-va-157081388.jpg",
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3106,6 +3668,8 @@
       "acres": 228.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3117,6 +3681,8 @@
       "acres": 10.3,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3128,6 +3694,8 @@
       "acres": 52.2,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3139,6 +3707,8 @@
       "acres": 19.4,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3150,6 +3720,8 @@
       "acres": 162.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3161,6 +3733,8 @@
       "acres": 70.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3172,6 +3746,8 @@
       "acres": 10.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3183,6 +3759,8 @@
       "acres": 10.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "King George County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3194,6 +3772,8 @@
       "acres": 35.0,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Stafford County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3205,6 +3785,8 @@
       "acres": 352.0,
       "thumbnail": "https://cdn.landsearch.com/listings/4N4Nc/small/rappahannock-academy-va-152009314.jpg",
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     },
@@ -3216,6 +3798,8 @@
       "acres": 19.3,
       "thumbnail": null,
       "status": "unknown",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": false
     }
