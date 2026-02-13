@@ -534,20 +534,46 @@ if sort_newest:
 
 filtered = filtered[:show_n]
 
-# ============================================================
+## ============================================================
 # Results summary (based on current filters)
 # ============================================================
 
+def _is_missing_price_local(it: Dict[str, Any]) -> bool:
+    p = it.get("price")
+    if p is None:
+        return True
+    s = str(p).strip().lower()
+    return s in {"", "n/a", "na", "none", "unknown", "call", "call for price", "contact"} or s == "0"
+
+
 available_count = len([it for it in filtered if get_status(it) == "available"])
-top_count = len([it for it in filtered if is_top_match(it)])
-possible_count = len([it for it in filtered if is_possible_match(it)])
+
+top_count = len([
+    it for it in filtered
+    if get_status(it) == "available"
+    and meets_acres(it, default_min_acres, default_max_acres)
+    and meets_price(it, default_max_price)
+])
+
+possible_count = len([
+    it for it in filtered
+    if get_status(it) == "available"
+    and meets_acres(it, default_min_acres, default_max_acres)
+    and _is_missing_price_local(it)
+])
+
+inactive_count = len([it for it in filtered if get_status(it) != "available"])
+total_loaded_count = len(items)
+filtered_count = len(filtered)
 
 with st.expander("Details", expanded=False):
     st.caption(
-        f"Showing **{len(filtered)}** listings • "
+        f"Showing **{filtered_count}** listings • "
         f"**{available_count}** available • "
+        f"**{inactive_count}** inactive • "
         f"**{top_count}** top matches • "
-        f"**{possible_count}** possible"
+        f"**{possible_count}** possible (missing price) • "
+        f"Total loaded: **{total_loaded_count}**"
     )
 # ============================================================
 # Placeholder renderer
