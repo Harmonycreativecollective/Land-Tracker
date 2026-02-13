@@ -383,7 +383,7 @@ c1, c2 = st.columns(2, gap="small")
 c3, c4 = st.columns(2, gap="small")
 
 with c1:
-    render_tile("Top Matches", f"{len(top_matches)}", "Meets Criteria (Available only)")
+    render_tile("Top Matches", f"{len(top_matches)}", "Meets Criteria")
 
 with c2:
     render_tile("New", f"{len(new_top_matches)}", "New Top Matches since last run")
