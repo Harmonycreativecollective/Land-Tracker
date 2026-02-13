@@ -17,6 +17,7 @@ START_URLS = [
     "https://www.landsearch.com/properties/caroline-county-va",
     "https://www.landsearch.com/properties/frederick-county-md",
     "https://www.landsearch.com/properties/anne-arundel-county-md",
+    "https://www.landsearch.com/properties/king-william-county-va",
 ]
 
 MIN_ACRES = 10.0
