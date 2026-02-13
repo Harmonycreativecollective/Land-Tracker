@@ -428,165 +428,143 @@ with st.expander("Filters", expanded=False):
 def norm_opt(x: Optional[str]) -> str:
     return (x or "").strip()
 
+# Words that usually indicate we're in "street name" territory
+STREET_STOPWORDS = {
+    "rd","road","st","street","ave","avenue","ln","lane","dr","drive","ct","court",
+    "blvd","boulevard","hwy","highway","way","pkwy","parkway","cir","circle",
+    "trl","trail","pl","place","ter","terrace","sq","square","loop","pike",
+    "unit","apt","suite"
+}
 
-DIGIT_RE = re.compile(r"\d")
-STREET_WORDS_RE = re.compile(
-    r"\b(rd|road|st|street|ave|avenue|ln|lane|dr|drive|ct|court|blvd|boulevard|hwy|highway|way|pkwy|parkway|cir|circle|trl|trail|pl|place)\b",
-    re.IGNORECASE,
-)
+STATE_ABBR = {"va": "VA", "md": "MD"}
+STATE_WORDS = {"virginia": "VA", "maryland": "MD"}
+
 ZIP_RE = re.compile(r"\b\d{5}(?:-\d{4})?\b")
+DIGIT_RE = re.compile(r"\d")
 
+def titleize_words(words: List[str]) -> str:
+    return " ".join(w.capitalize() for w in words if w)
 
-def looks_like_address_text(s: str) -> bool:
-    s = norm_opt(s)
-    if not s:
-        return False
-    if ZIP_RE.search(s):
-        return True
-    if DIGIT_RE.search(s):
-        return True
-    if STREET_WORDS_RE.search(s):
-        return True
-    if len(s) > 45:
-        return True
-    return False
+def get_state_from_text(text: str) -> str:
+    t = (text or "").lower()
+    # look for full state words
+    for k, v in STATE_WORDS.items():
+        if k in t:
+            return v
+    # look for VA/MD as tokens
+    m = re.search(r"\b(va|md)\b", t)
+    return STATE_ABBR.get(m.group(1).lower(), "") if m else ""
 
-
-def clean_county_label(c: str) -> str:
-    c = norm_opt(c)
-    if not c:
-        return ""
-    low = c.lower()
-    if low in {"unknown", "n/a", "na", "none"}:
-        return ""
-    if looks_like_address_text(c):
-        return ""
-
-    # strip trailing ", VA" etc
-    c = re.sub(r",\s*(VA|MD)\b", "", c, flags=re.IGNORECASE).strip()
-
-    # normalize "X Co." / "X county"
-    c = re.sub(r"\bco\.?\b", "", c, flags=re.IGNORECASE).strip()
-    c = re.sub(r"\bcounty\b", "", c, flags=re.IGNORECASE).strip()
-
-    c = re.sub(r"\s+", " ", c).strip()
-    if not c:
-        return ""
-
-    c = " ".join([w.capitalize() for w in c.split()])
-    return f"{c} County"
-
-
-US_STATE_ABBR = {"va": "VA", "md": "MD"}
-
-
-def _titleize_slug(s: str) -> str:
-    s = (s or "").replace("-", " ").strip()
-    return " ".join([w.capitalize() for w in s.split() if w])
-
-
-# NEW: title fallback that catches “... in King George, VA”
-TITLE_LOC_RE = re.compile(r"\bin\s+([^,]+),\s*(VA|MD)\b", re.IGNORECASE)
-
-
-def derive_from_title(it: Dict[str, Any]) -> tuple[str, str]:
-    title = norm_opt(it.get("title"))
-    if not title:
-        return ("", "")
-    m = TITLE_LOC_RE.search(title)
-    if not m:
-        return ("", "")
-    place = m.group(1).strip()
-    st = m.group(2).upper()
-    return (st, clean_county_label(place))
-
-
-def derive_state_county_from_url(url: str) -> tuple[str, str]:
+def derive_state_and_place_from_landsearch_url(url: str) -> tuple[str, str]:
     """
-    Tries LandSearch + LandWatch URL patterns.
-    Returns (state_abbr, county_label)
+    LandSearch property URLs often look like:
+      /properties/<slug>/<id>
+    Where <slug> might be:
+      1-ridge-rd-colonial-beach-va-22443
+      potomac-landing-dr-king-george-va-22485
+    We'll:
+      - find the 'va'/'md' token anywhere in the slug
+      - take a "place-ish" phrase by walking backwards from the state token
+        until we hit numbers or street-ish words
+    Returns: (state, place_phrase)
     """
     u = norm_opt(url).lower()
-    if not u:
+    if "landsearch.com" not in u or "/properties/" not in u:
         return ("", "")
 
-    # LandSearch: /properties/<county-slug>-<state>/<id>  OR sometimes /properties/<county-slug>-<state>
-    # Example: https://www.landsearch.com/properties/king-george-county-va/1234567
-    if "landsearch.com" in u and "/properties/" in u:
-        try:
-            after = u.split("/properties/")[1].strip("/")
-            first_seg = after.split("/")[0]  # king-george-county-va  OR 1234567 (rare)
-            if first_seg.isdigit():
-                return ("", "")  # let title fallback handle it
+    try:
+        after = u.split("/properties/")[1].strip("/")
+        slug = after.split("/")[0]  # first path segment after /properties/
+        parts = [p for p in slug.split("-") if p]
 
-            parts = [p for p in first_seg.split("-") if p]
-            st = ""
-            if parts and parts[-1] in US_STATE_ABBR:
-                st = US_STATE_ABBR[parts[-1]]
-                parts = parts[:-1]
-
-            if parts and parts[-1] == "county":
-                parts = parts[:-1]
-
-            county_raw = _titleize_slug("-".join(parts))
-            return (st, clean_county_label(county_raw))
-        except Exception:
+        # Find state token anywhere (va/md)
+        st_idx = None
+        for i in range(len(parts) - 1, -1, -1):
+            if parts[i] in STATE_ABBR:
+                st_idx = i
+                break
+        if st_idx is None:
             return ("", "")
 
-    # LandWatch: /virginia-land-for-sale/king-george  OR /.../westmoreland-county
-    if "landwatch.com" in u:
-        try:
-            st = ""
-            if "virginia-land-for-sale" in u:
-                st = "VA"
-            elif "maryland-land-for-sale" in u:
-                st = "MD"
+        st = STATE_ABBR[parts[st_idx]]
 
-            slug = u.rstrip("/").split("/")[-1]
-            slug = slug.replace("-county", "")
-            county_raw = _titleize_slug(slug)
-            return (st, clean_county_label(county_raw))
-        except Exception:
-            return ("", "")
+        # Walk backwards from just before state token to get "place"
+        place_tokens: List[str] = []
+        for j in range(st_idx - 1, -1, -1):
+            tok = parts[j]
 
-    return ("", "")
+            # stop if we hit zip / numbers
+            if tok.isdigit() or DIGIT_RE.search(tok):
+                break
 
+            # stop if we hit obvious street words
+            if tok in STREET_STOPWORDS:
+                break
+
+            place_tokens.append(tok)
+
+            # cap place length (avoid swallowing too much)
+            if len(place_tokens) >= 3:
+                break
+
+        place_tokens = list(reversed(place_tokens))
+        place = titleize_words(place_tokens)
+        return (st, place)
+    except Exception:
+        return ("", "")
+
+def clean_county_label(place: str) -> str:
+    p = norm_opt(place)
+    if not p:
+        return ""
+    # don't accept obvious address blocks
+    if ZIP_RE.search(p):
+        return ""
+    if len(p) > 45:
+        return ""
+    # normalize
+    p = re.sub(r"\bcounty\b", "", p, flags=re.IGNORECASE).strip()
+    p = re.sub(r"\bco\.?\b", "", p, flags=re.IGNORECASE).strip()
+    p = re.sub(r"\s+", " ", p).strip()
+    if not p:
+        return ""
+    return f"{p} County"
 
 def get_state(it: Dict[str, Any]) -> str:
-    st_ = (
-        norm_opt(it.get("derived_state"))
-        or norm_opt(it.get("state"))
-        or norm_opt(it.get("state_raw"))
-    )
+    # prefer stored fields
+    st_ = norm_opt(it.get("derived_state")) or norm_opt(it.get("state")) or norm_opt(it.get("state_raw"))
     if st_:
         return st_.upper()
 
-    st2, _ = derive_state_county_from_url(norm_opt(it.get("url")))
+    # try LandSearch URL
+    st2, _ = derive_state_and_place_from_landsearch_url(norm_opt(it.get("url")))
     if st2:
         return st2
 
-    st3, _ = derive_from_title(it)
-    return st3
-
+    # fallback to title/url text for “Virginia/Maryland”
+    blob = " ".join([norm_opt(it.get("title")), norm_opt(it.get("url"))])
+    return get_state_from_text(blob)
 
 def get_county(it: Dict[str, Any]) -> str:
-    c = (
-        norm_opt(it.get("derived_county"))
-        or norm_opt(it.get("county"))
-        or norm_opt(it.get("county_raw"))
-    )
+    # prefer stored fields
+    c = norm_opt(it.get("derived_county")) or norm_opt(it.get("county")) or norm_opt(it.get("county_raw"))
     c = clean_county_label(c)
     if c:
         return c
 
-    _, c2 = derive_state_county_from_url(norm_opt(it.get("url")))
-    c2 = clean_county_label(c2)
+    # Try LandSearch URL “place” near the state token
+    _, place = derive_state_and_place_from_landsearch_url(norm_opt(it.get("url")))
+    c2 = clean_county_label(place)
     if c2:
         return c2
 
-    _, c3 = derive_from_title(it)
-    return clean_county_label(c3)
+    # LAST fallback: attempt "in X, Virginia" style from title
+    title = norm_opt(it.get("title")).lower()
+    m = re.search(r"\bin\s+([^,]+),\s*(virginia|maryland)\b", title, re.IGNORECASE)
+    if m:
+        return clean_county_label(m.group(1))
 
+    return ""
 
 # Build options AFTER helpers exist (no blanks)
 states = sorted({s for s in (get_state(it) for it in items) if s})
@@ -603,7 +581,6 @@ with colB:
 
 show_debug = st.toggle("Show debug", value=False)
 
-
 def passes_location(it: Dict[str, Any]) -> bool:
     st_ = get_state(it)
     co_ = get_county(it)
@@ -614,9 +591,23 @@ def passes_location(it: Dict[str, Any]) -> bool:
         return False
     return True
 
-
 loc_items = [it for it in items if passes_location(it)]
 
+if show_debug:
+    st.write("### Debug (first 12 items)")
+    st.json(
+        [
+            {
+                "title": it.get("title"),
+                "url": it.get("url"),
+                "state": get_state(it),
+                "county": get_county(it),
+                "raw_state": it.get("state") or it.get("derived_state") or it.get("state_raw"),
+                "raw_county": it.get("county") or it.get("derived_county") or it.get("county_raw"),
+            }
+            for it in items[:12]
+        ]
+    )
 if show_debug:
     st.write("### Debug (first 12 items)")
     st.json(
