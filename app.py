@@ -460,14 +460,49 @@ for it in items:
 # Overview (System State) — dropdown
 # ============================================================
 
+from collections import Counter
+
 st.divider()
+
+# ---- Counts (Total / Active / Inactive / Unknown) ----
+total_count = len(items)
+
+available_count = len([it for it in items if get_status(it) == "available"])
+
+# Treat ONLY true unavailable statuses as inactive (do NOT count "unknown" here)
+INACTIVE_STATUSES = {
+    "unavailable",
+    "sold",
+    "pending",
+    "off market",
+    "removed",
+    "under contract",
+    "contingent",
+}
+
+inactive_count = len([it for it in items if get_status(it) in INACTIVE_STATUSES])
+
+unknown_count = len([it for it in items if get_status(it) == "unknown"])
+
+# ---- Match counts ----
+top_count = len(top_matches)
+possible_count = len(possible_matches)
+new_top_count = len(new_top_matches)
+
+# ---- Sources ----
+source_counts = Counter((it.get("source") or "Unknown").strip() or "Unknown" for it in items)
+
+# ---- System display ----
+last_updated_display = format_last_updated_et(last_updated or last_attempted)
+last_attempted_display = format_last_updated_et(last_attempted) if last_attempted else "—"
 
 with st.expander("Overview", expanded=False):
 
     st.write("### Listing Health")
     st.caption(f"Total listings: {total_count}")
-    st.caption(f"Active (available): {active_count}")
-    st.caption(f"Inactive: {inactive_count}")
+    st.caption(f"Active (available): {available_count}")
+    st.caption(f"Inactive (not available): {inactive_count}")
+    st.caption(f"Unknown status: {unknown_count}")
 
     st.write("")
     st.write("### Match Breakdown")
@@ -478,7 +513,7 @@ with st.expander("Overview", expanded=False):
     st.write("")
     st.write("### Sources")
     if source_counts:
-        for src, count in sorted(source_counts.items()):
+        for src, count in sorted(source_counts.items(), key=lambda x: (-x[1], x[0].lower())):
             st.caption(f"{src}: {count}")
     else:
         st.caption("No source data available.")
@@ -491,7 +526,10 @@ with st.expander("Overview", expanded=False):
 
     st.write("")
     st.write("### System")
-    st.caption(f"Last updated: {format_last_updated_et(last_updated or last_attempted)}")
-    
+    st.caption(f"Last updated: {last_updated_display}")
+
+    # If attempted != updated, show both (helps detect scrape failures)
+    if last_attempted and (last_attempted != last_updated):
+        st.caption(f"Last attempted: {last_attempted_display}")
 st.caption("Tip: Use Properties to search, filter, and view all listings.")
 
