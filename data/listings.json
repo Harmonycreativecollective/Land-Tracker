@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-14T05:00:10.872064+00:00",
-  "last_attempted_utc": "2026-02-14T05:00:10.872064+00:00",
+  "last_updated_utc": "2026-02-14T07:48:31.123850+00:00",
+  "last_attempted_utc": "2026-02-14T07:48:31.123850+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -1921,9 +1921,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/kings-ct-montross-va-22520/5007350",
-      "price": 22520,
-      "acres": 1.4,
+      "url": "https://www.landsearch.com/properties/585-white-hall-rd-montross-va-22520/4567905",
+      "price": 3499999,
+      "acres": 135.0,
       "thumbnail": null,
       "status": "unknown",
       "derived_state": "VA",
@@ -1934,9 +1934,9 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/585-white-hall-rd-montross-va-22520/4567905",
-      "price": 3499999,
-      "acres": 135.0,
+      "url": "https://www.landsearch.com/properties/kings-ct-montross-va-22520/5007350",
+      "price": 22520,
+      "acres": 1.4,
       "thumbnail": null,
       "status": "unknown",
       "derived_state": "VA",
