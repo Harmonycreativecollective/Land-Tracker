@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-15T05:12:17.636662+00:00",
-  "last_attempted_utc": "2026-02-15T05:12:17.636662+00:00",
+  "last_updated_utc": "2026-02-15T07:51:31.504810+00:00",
+  "last_attempted_utc": "2026-02-15T07:51:31.504810+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -271,7 +271,7 @@
       "source": "LandSearch",
       "title": "15.5 Acres of Land with Home for Sale in Ruther Glen, Virginia",
       "url": "https://www.landsearch.com/properties/13499-wingfield-ln-ruther-glen-va-22546/4980725",
-      "price": 199990,
+      "price": 199900,
       "acres": 15.5,
       "thumbnail": "https://cdn.landsearch.com/listings/4Qt4s/large/ruther-glen-va-158646958.jpg",
       "status": "sold",
@@ -455,7 +455,7 @@
       "url": "https://www.landsearch.com/properties/165-edgewater-dr-fredericksburg-va-22406/5016559",
       "price": 1399000,
       "acres": 3.33,
-      "thumbnail": "https://cdn.landsearch.com/listings/4QNBZ/large/fredericksburg-va-159665835.jpg",
+      "thumbnail": "https://cdn.landsearch.com/listings/4QNBZ/large/fredericksburg-va-160685170.jpg",
       "status": "available",
       "derived_state": "VA",
       "derived_county": "Stafford County",
