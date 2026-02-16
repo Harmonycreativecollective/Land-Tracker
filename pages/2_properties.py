@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urlparse
 
 import streamlit as st
-from data_access import load_data
+from data_access import get_listings
 from scraper import run_update
 
 
@@ -27,10 +27,10 @@ CAPTION = "What's meant for you is already in motion."
 
 
 # ---------- Load data ----------
-data = load_data() or {}
-items: List[Dict[str, Any]] = data.get("items", []) or []
-criteria = data.get("criteria", {}) or {}
-last_updated = data.get("last_updated_utc")
+items: List[Dict[str, Any]] = get_listings() or []
+criteria = {}
+last_updated = None
+last_attempted = None
 
 
 # ---------- Time formatting (Eastern) ----------

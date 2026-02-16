@@ -8,6 +8,18 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
+from supabase import create_client
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 # ====== YOUR SETTINGS ======
 START_URLS = [
     # ---- LandSearch (county pages, NO filters) ----
@@ -196,6 +208,27 @@ def detect_status(text: str) -> str:
 
 
 # ------------------- Helpers -------------------
+def to_row(it: Dict[str, Any], run_utc: str) -> Dict[str, Any]:
+    # pick a stable unique id
+    listing_id = it.get("listing_id") or it.get("url")
+
+    return {
+        "listing_id": listing_id,
+        "title": it.get("title"),
+        "url": it.get("url"),
+        "source": it.get("source"),
+        "price": it.get("price"),
+        "acres": it.get("acres"),
+        "status": it.get("status") or "unknown",
+        "thumbnail": it.get("thumbnail"),
+        "found_utc": it.get("found_utc") or run_utc,
+        "derived_state": it.get("derived_state"),
+        "derived_county": it.get("derived_county"),
+        "last_seen_utc": run_utc,
+        "is_active": True,
+        # do NOT touch is_favorite here
+    }
+
 def get_next_data_json(html: str) -> Optional[dict]:
     soup = BeautifulSoup(html, "html.parser")
     tag = soup.find("script", id="__NEXT_DATA__", type="application/json")

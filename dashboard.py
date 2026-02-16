@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import streamlit as st
-from data_access import load_data
+from data_access import get_items
 from scraper import run_update
 
 
@@ -25,11 +25,10 @@ DESCRIPTION = "Quietly tracks land listings so you don’t have to."
 CAPTION = "What's mean for you is already in motion."
 
 # ---------- Load data ----------
-data = load_data() or {}
-items: List[Dict[str, Any]] = data.get("items", []) or []
-criteria = data.get("criteria", {}) or {}
-last_updated = data.get("last_updated_utc")
-last_attempted = data.get("last_attempted_utc")
+items: List[Dict[str, Any]] = get_items()
+criteria = {}
+last_updated = None
+last_attempted = None
 
 # ============================================================
 # Helpers 
