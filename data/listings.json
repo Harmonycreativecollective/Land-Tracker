@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-16T14:31:15.824846+00:00",
-  "last_attempted_utc": "2026-02-16T14:31:15.824846+00:00",
+  "last_updated_utc": "2026-02-16T19:46:09.597075+00:00",
+  "last_attempted_utc": "2026-02-16T19:46:09.597075+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -429,7 +429,7 @@
       "url": "https://www.landsearch.com/properties/2710-a-monument-rd-myersville-md-21773/4784878",
       "price": 698500,
       "acres": 5.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4NH4j/large/myersville-md-152104841.jpg",
+      "thumbnail": "https://cdn.landsearch.com/listings/4NH4j/small/myersville-md-152104841.jpg",
       "status": "available",
       "derived_state": "MD",
       "derived_county": "Frederick County",
@@ -3198,7 +3198,7 @@
       "url": "https://www.landsearch.com/properties/6739-d-s-clifton-rd-frederick-md-21703/4911676",
       "price": 925000,
       "acres": 5.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4PR5W/small/frederick-md-158415173.jpg",
+      "thumbnail": null,
       "status": "unknown",
       "derived_state": "MD",
       "derived_county": "Frederick County",
