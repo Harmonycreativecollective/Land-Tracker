@@ -22,13 +22,19 @@ st.set_page_config(
 # ---------- Header text ----------
 #
 DESCRIPTION = "Quietly tracks land listings so you don’t have to."
-CAPTION = "What's mean for you is already in motion."
+CAPTION = "What's meant for you is already in motion."
 
 # ---------- Load data ----------
-items: List[Dict[str, Any]] = get_items()
-criteria = {}
-last_updated = None
-last_attempted = None
+from data_access import load_data  # make sure this import exists near the top
+
+data = load_data()
+
+items = data.get("items", [])
+criteria = data.get("criteria", {})
+last_updated = data.get("last_updated_utc")
+last_attempted = data.get("last_attempted_utc")
+
+st.write("Items from Supabase:", len(items))
 
 # ============================================================
 # Helpers 
@@ -182,6 +188,11 @@ def is_top_match(it: Dict[str, Any]) -> bool:
     # ✅ HARD RULE: only AVAILABLE can be a top match
     if get_status(it) != "available":
         return False
+
+    # ✅ HARD RULE: top match MUST have a real price
+    if is_missing_price(it):
+        return False
+
     return meets_acres(it, default_min_acres, default_max_acres) and meets_price(it, default_max_price)
 
 

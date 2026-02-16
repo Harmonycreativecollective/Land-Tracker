@@ -690,18 +690,19 @@ def context_from_start_url(start_url: str) -> Tuple[str, str]:
     return ("", "")
 
 
+def _chunks(lst, size=500):
+    for i in range(0, len(lst), size):
+        yield lst[i : i + size]
+
+
 def main():
-    os.makedirs("data", exist_ok=True)
     run_utc = datetime.now(timezone.utc).isoformat()
 
-    old_map = load_existing_maps()
-    old_file = load_existing_file()
-
+    # ------------------- SCRAPE (unchanged) -------------------
     all_items: List[Dict[str, Any]] = []
 
     for url in START_URLS:
         context_state, context_county = context_from_start_url(url)
-
         try:
             html = fetch_html(url)
         except Exception as e:
@@ -719,6 +720,7 @@ def main():
 
         all_items.extend(batch)
 
+    # de-dupe + basic cleanup
     seen = set()
     final: List[Dict[str, Any]] = []
     for x in all_items:
@@ -727,23 +729,18 @@ def main():
             continue
         seen.add(u)
 
-        prev = old_map.get(u, {})
-        x["found_utc"] = prev.get("found_utc") or run_utc
-        x["ever_top_match"] = bool(prev.get("ever_top_match", False))
-
         if is_bad_title(x.get("title")):
             x["title"] = f"{x.get('source','Listing')} listing"
 
         x["status"] = "unknown"
 
-        # drop leases early
         if is_lease_listing(x):
             continue
 
         final.append(x)
 
-    # ------------------- Enrich (limited) -------------------
-    final.sort(key=lambda it: it.get("found_utc") or "", reverse=True)
+    # ------------------- ENRICH (unchanged) -------------------
+    final.sort(key=lambda it: it.get("url") or "")
     final.sort(
         key=lambda it: (
             0 if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE) else 1,
@@ -776,39 +773,57 @@ def main():
 
             enriched += 1
 
+    # final cleanup
     final = [it for it in final if not is_lease_listing(it)]
-
     for it in final:
         s = (it.get("status") or "unknown").lower()
         if s not in STATUS_VALUES:
             it["status"] = "unknown"
 
-    for it in final:
-        if not it.get("ever_top_match"):
-            if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE):
-                it["ever_top_match"] = True
-
-    # If scrape returns 0, keep old items but record attempt time
-    if len(final) == 0 and os.path.exists(DATA_FILE):
-        print("⚠️ Scrape returned 0 listings. Keeping existing items, updating last_attempted_utc.")
-        if not isinstance(old_file, dict):
-            old_file = {}
-        old_file["last_attempted_utc"] = run_utc
-        with open(DATA_FILE, "w", encoding="utf-8") as f:
-            json.dump(old_file, f, indent=2)
+    # If scrape returns 0, DO NOTHING (don’t deactivate the DB)
+    if len(final) == 0:
+        print("⚠️ Scrape returned 0 listings. Skipping DB update (leaving existing rows as-is).")
         return
 
-    out = {
-        "last_updated_utc": run_utc,
-        "last_attempted_utc": run_utc,
-        "criteria": {"min_acres": MIN_ACRES, "max_acres": MAX_ACRES, "max_price": MAX_PRICE},
-        "items": final,
-    }
+    # ------------------- SUPABASE SYNC -------------------
 
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(out, f, indent=2)
+    # Pull existing found_utc + ever_top_match for URLs we’re about to upsert
+    urls = [it["url"] for it in final if it.get("url")]
+    existing_by_url: Dict[str, Dict[str, Any]] = {}
 
-    print(f"Saved {len(final)} listings. Enriched: {enriched}.")
+    # Supabase "in" needs batching if you have lots of urls
+    for url_batch in _chunks(urls, size=200):
+        resp = (
+            supabase.table("listings")
+            .select("url, found_utc, ever_top_match")
+            .in_("url", url_batch)
+            .execute()
+        )
+        for row in (resp.data or []):
+            existing_by_url[row["url"]] = row
+
+    # Compute ever_top_match + preserve found_utc
+    for it in final:
+        u = it.get("url")
+        prev = existing_by_url.get(u, {})
+        it["found_utc"] = prev.get("found_utc") or run_utc
+
+        was_ever = bool(prev.get("ever_top_match", False))
+        now_top = is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE)
+        it["ever_top_match"] = (was_ever or now_top)
+
+    # Build DB rows
+    rows = [to_row(it, run_utc) | {"ever_top_match": it["ever_top_match"]} for it in final]
+
+    # 1) Deactivate everything currently active
+    supabase.table("listings").update({"is_active": False}).eq("is_active", True).execute()
+
+    # 2) Upsert the new batch as active + seen this run
+    # Use ONE conflict key. Since url is already unique in your DB, use url.
+    for batch in _chunks(rows, size=500):
+        supabase.table("listings").upsert(batch, on_conflict="url").execute()
+
+    print(f"✅ Upserted {len(rows)} listings. Enriched: {enriched}. run_utc={run_utc}")
 
 
 def run_update():
