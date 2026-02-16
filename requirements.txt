@@ -3,4 +3,4 @@ pandas
 requests
 beautifulsoup4
 lxml
-supabase
+supabase>=2.0.0pip
