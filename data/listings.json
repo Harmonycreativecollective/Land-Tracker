@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-16T08:04:12.800318+00:00",
-  "last_attempted_utc": "2026-02-16T08:04:12.800318+00:00",
+  "last_updated_utc": "2026-02-16T14:31:15.824846+00:00",
+  "last_attempted_utc": "2026-02-16T14:31:15.824846+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -422,6 +422,19 @@
       "derived_county": "King George County",
       "found_utc": "2026-02-01T03:07:14.432999+00:00",
       "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "5 Acres of Land with Home for Sale in Myersville, Maryland",
+      "url": "https://www.landsearch.com/properties/2710-a-monument-rd-myersville-md-21773/4784878",
+      "price": 698500,
+      "acres": 5.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4NH4j/large/myersville-md-152104841.jpg",
+      "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Frederick County",
+      "found_utc": "2026-02-16T14:31:15.824846+00:00",
+      "ever_top_match": false
     },
     {
       "source": "LandSearch",
@@ -932,12 +945,12 @@
     },
     {
       "source": "LandSearch",
-      "title": "0.18 Acres of Mixed-Use Land for Sale in West Point, Virginia",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/king-william-ave-west-point-va-23181/3665761",
       "price": 47430,
       "acres": 0.18,
-      "thumbnail": "https://cdn.landsearch.com/listings/4zzkn/large/west-point-va-119580990.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "derived_state": "VA",
       "derived_county": "King William County",
       "found_utc": "2026-02-13T02:59:57.878748+00:00",
@@ -3588,19 +3601,6 @@
       "url": "https://www.landsearch.com/properties/13405-john-cline-rd-frederick-md-21783/3558470",
       "price": 1399000,
       "acres": 30.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "derived_state": "MD",
-      "derived_county": "Frederick County",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/winchester-blvd-frederick-md-21703/4669967",
-      "price": 630000,
-      "acres": 4.75,
       "thumbnail": null,
       "status": "unknown",
       "derived_state": "MD",
