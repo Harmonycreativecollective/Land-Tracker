@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-17T08:03:42.473254+00:00",
-  "last_attempted_utc": "2026-02-17T08:03:42.473254+00:00",
+  "last_updated_utc": "2026-02-17T14:36:48.890288+00:00",
+  "last_attempted_utc": "2026-02-17T14:36:48.890288+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -412,6 +412,19 @@
     },
     {
       "source": "LandSearch",
+      "title": "2 Acres of Residential Land with Home for Sale in Friendship, Maryland",
+      "url": "https://www.landsearch.com/properties/94-friendship-rd-friendship-md-20758/5050648",
+      "price": 850000,
+      "acres": 2.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4R6qb/large/friendship-md-160758735.jpg",
+      "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
+      "found_utc": "2026-02-17T14:36:48.890288+00:00",
+      "ever_top_match": false
+    },
+    {
+      "source": "LandSearch",
       "title": "Residential Land for Sale in King George, Virginia",
       "url": "https://www.landsearch.com/properties/kennedy-dr-king-george-va-22485/4949266",
       "price": 45000,
@@ -560,7 +573,7 @@
       "price": 1399000,
       "acres": 3.33,
       "thumbnail": "https://cdn.landsearch.com/listings/4QNBZ/large/fredericksburg-va-160685170.jpg",
-      "status": "available",
+      "status": "under_contract",
       "derived_state": "VA",
       "derived_county": "Stafford County",
       "found_utc": "2026-02-15T05:12:17.636662+00:00",
@@ -638,19 +651,6 @@
       "price": 325000,
       "acres": 0.98,
       "thumbnail": "https://cdn.landsearch.com/listings/4yhTp/large/lothian-md-151930930.jpg",
-      "status": "available",
-      "derived_state": "MD",
-      "derived_county": "Anne Arundel County",
-      "found_utc": "2026-02-15T05:12:17.636662+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "2.19 Acres of Residential Land with Home for Sale in Deale, Maryland",
-      "url": "https://www.landsearch.com/properties/5534-nutwell-sudley-rd-deale-md-20751/4932080",
-      "price": 975000,
-      "acres": 2.19,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Q2X2/large/deale-md-156777773.jpg",
       "status": "available",
       "derived_state": "MD",
       "derived_county": "Anne Arundel County",
