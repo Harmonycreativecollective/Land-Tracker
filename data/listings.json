@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-20T14:24:43.218052+00:00",
-  "last_attempted_utc": "2026-02-20T14:24:43.218052+00:00",
+  "last_updated_utc": "2026-02-20T19:49:05.681946+00:00",
+  "last_attempted_utc": "2026-02-20T19:49:05.681946+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -399,15 +399,15 @@
     },
     {
       "source": "LandSearch",
-      "title": "5 Acres of Residential Land for Sale in Doswell, Virginia",
-      "url": "https://www.landsearch.com/properties/107-a-39-meadow-farm-rd-doswell-va-23047/2717571",
-      "price": 56000,
-      "acres": 5.0,
-      "thumbnail": "https://cdn.landsearch.com/listings/4pZNq/large/doswell-va-145269412.jpg",
-      "status": "under_contract",
+      "title": "1.5 Acres of Improved Residential Land for Sale in Ruther Glen, Virginia",
+      "url": "https://www.landsearch.com/properties/20-greenvale-ct-ruther-glen-va-22546/4857221",
+      "price": 999999,
+      "acres": 1.5,
+      "thumbnail": "https://cdn.landsearch.com/listings/4Pmss/large/ruther-glen-va-153713936.jpg",
+      "status": "available",
       "derived_state": "VA",
       "derived_county": "Caroline County",
-      "found_utc": "2026-02-20T14:24:43.218052+00:00",
+      "found_utc": "2026-02-20T19:49:05.681946+00:00",
       "ever_top_match": false
     },
     {
@@ -438,7 +438,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "3.13 Acres of Residential Land with Home for Sale in Stafford, Virginia",
+      "title": "3.13 Acres of Land with Home for Sale in Stafford, Virginia",
       "url": "https://www.landsearch.com/properties/770-poplar-rd-stafford-va-22556/5057523",
       "price": 649999,
       "acres": 3.13,
@@ -529,7 +529,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "4 Acres of Residential Land with Home for Sale in Fredericksburg, Virginia",
+      "title": "4 Acres of Land with Home for Sale in Fredericksburg, Virginia",
       "url": "https://www.landsearch.com/properties/75-regal-ln-fredericksburg-va-22406/5055519",
       "price": 825000,
       "acres": 4.0,
@@ -594,7 +594,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "3.25 Acres of Residential Land with Home for Sale in Stafford, Virginia",
+      "title": "3.25 Acres of Land with Home for Sale in Stafford, Virginia",
       "url": "https://www.landsearch.com/properties/2816-mountain-view-rd-stafford-va-22556/5055023",
       "price": 800000,
       "acres": 3.25,
@@ -633,7 +633,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "5.29 Acres of Residential Land with Home for Sale in Mount Airy, Maryland",
+      "title": "5.29 Acres of Land with Home for Sale in Mount Airy, Maryland",
       "url": "https://www.landsearch.com/properties/mount-airy-md-21771/5055017",
       "price": 780000,
       "acres": 5.29,
@@ -867,7 +867,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "1.55 Acres of Residential Land with Home for Sale in Davidsonville, Maryland",
+      "title": "1.55 Acres of Land with Home for Sale in Davidsonville, Maryland",
       "url": "https://www.landsearch.com/properties/2545-lavall-ct-davidsonville-md-21035/4887075",
       "price": 940000,
       "acres": 1.55,
@@ -906,7 +906,7 @@
     },
     {
       "source": "LandSearch",
-      "title": "3 Acres of Residential Land with Home for Sale in Fredericksburg, Virginia",
+      "title": "3 Acres of Land with Home for Sale in Fredericksburg, Virginia",
       "url": "https://www.landsearch.com/properties/40-edgewater-dr-fredericksburg-va-22406/5046900",
       "price": 1350000,
       "acres": 3.0,
