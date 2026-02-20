@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-20T08:00:14.933572+00:00",
-  "last_attempted_utc": "2026-02-20T08:00:14.933572+00:00",
+  "last_updated_utc": "2026-02-20T14:24:43.218052+00:00",
+  "last_attempted_utc": "2026-02-20T14:24:43.218052+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -396,6 +396,19 @@
       "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "5 Acres of Residential Land for Sale in Doswell, Virginia",
+      "url": "https://www.landsearch.com/properties/107-a-39-meadow-farm-rd-doswell-va-23047/2717571",
+      "price": 56000,
+      "acres": 5.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4pZNq/large/doswell-va-145269412.jpg",
+      "status": "under_contract",
+      "derived_state": "VA",
+      "derived_county": "Caroline County",
+      "found_utc": "2026-02-20T14:24:43.218052+00:00",
+      "ever_top_match": false
     },
     {
       "source": "LandSearch",
@@ -932,12 +945,12 @@
     },
     {
       "source": "LandSearch",
-      "title": "2.33 Acres of Residential Land with Home for Sale in Davidsonville, Maryland",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/3520-castle-way-davidsonville-md-21035/4945935",
       "price": 1749900,
       "acres": 2.33,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Q8XF/large/davidsonville-md-157993391.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "derived_state": "MD",
       "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-14T05:00:10.872064+00:00",
@@ -2886,19 +2899,6 @@
       "url": "https://www.landsearch.com/properties/portobago-trl-port-royal-va-22535/5007312",
       "price": 79900,
       "acres": 2.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "derived_state": "VA",
-      "derived_county": "Caroline County",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/20-greenvale-ct-ruther-glen-va-22546/4857221",
-      "price": 1050000,
-      "acres": 1.5,
       "thumbnail": null,
       "status": "unknown",
       "derived_state": "VA",
