@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-21T13:54:02.835269+00:00",
-  "last_attempted_utc": "2026-02-21T13:54:02.835269+00:00",
+  "last_updated_utc": "2026-02-21T19:04:21.953705+00:00",
+  "last_attempted_utc": "2026-02-21T19:04:21.953705+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -79,7 +79,7 @@
       "price": 174900,
       "acres": 41.8,
       "thumbnail": "https://cdn.landsearch.com/listings/4QZBB/large/colonial-beach-va-160441077.jpg",
-      "status": "available",
+      "status": "under_contract",
       "derived_state": "VA",
       "derived_county": "Westmoreland County",
       "found_utc": "2026-02-11T20:01:18.968919+00:00",
@@ -409,6 +409,19 @@
       "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "2 Acres of Land with Home for Sale in King George, Virginia",
+      "url": "https://www.landsearch.com/properties/15072-dahlgren-rd-king-george-va-22485/5062544",
+      "price": 449900,
+      "acres": 2.0,
+      "thumbnail": "https://cdn.landsearch.com/listings/4Rcz2/large/king-george-va-161071858.jpg",
+      "status": "available",
+      "derived_state": "VA",
+      "derived_county": "King George County",
+      "found_utc": "2026-02-21T19:04:21.953705+00:00",
+      "ever_top_match": false
     },
     {
       "source": "LandSearch",
@@ -850,19 +863,6 @@
       "derived_state": "MD",
       "derived_county": "Anne Arundel County",
       "found_utc": "2026-02-17T14:36:48.890288+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "Residential Land for Sale in King George, Virginia",
-      "url": "https://www.landsearch.com/properties/kennedy-dr-king-george-va-22485/4949266",
-      "price": 45000,
-      "acres": null,
-      "thumbnail": "https://cdn.landsearch.com/listings/4Qbq4/large/king-george-va-157440796.jpg",
-      "status": "under_contract",
-      "derived_state": "VA",
-      "derived_county": "King George County",
-      "found_utc": "2026-02-17T05:14:02.109731+00:00",
       "ever_top_match": false
     },
     {
