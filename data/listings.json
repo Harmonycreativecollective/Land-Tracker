@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-21T07:44:52.977818+00:00",
-  "last_attempted_utc": "2026-02-21T07:44:52.977818+00:00",
+  "last_updated_utc": "2026-02-21T13:54:02.835269+00:00",
+  "last_attempted_utc": "2026-02-21T13:54:02.835269+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -1365,19 +1365,6 @@
       "url": "https://www.landsearch.com/properties/2700-nelsons-bridge-rd-king-william-va-23069/4972303",
       "price": 40000,
       "acres": 3.0,
-      "thumbnail": null,
-      "status": "unknown",
-      "derived_state": "VA",
-      "derived_county": "King William County",
-      "found_utc": "2026-02-13T02:59:57.878748+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/398-horse-landing-rd-king-william-va-23086/4929833",
-      "price": 352000,
-      "acres": 5.0,
       "thumbnail": null,
       "status": "unknown",
       "derived_state": "VA",
