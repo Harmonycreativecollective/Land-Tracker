@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": "2026-02-22T13:54:58.858725+00:00",
-  "last_attempted_utc": "2026-02-22T13:54:58.858725+00:00",
+  "last_updated_utc": "2026-02-22T19:04:23.884844+00:00",
+  "last_attempted_utc": "2026-02-22T19:04:23.884844+00:00",
   "criteria": {
     "min_acres": 10.0,
     "max_acres": 50.0,
@@ -383,6 +383,19 @@
       "derived_county": "Caroline County",
       "found_utc": "2026-02-01T03:12:53.367171+00:00",
       "ever_top_match": true
+    },
+    {
+      "source": "LandSearch",
+      "title": "2.9 Acres of Land with Home for Sale in Friendship, Maryland",
+      "url": "https://www.landsearch.com/properties/175-tucker-ct-friendship-md-20758/4330405",
+      "price": 1295000,
+      "acres": 2.9,
+      "thumbnail": "https://cdn.landsearch.com/listings/4HzP7/large/friendship-md-157941297.jpg",
+      "status": "available",
+      "derived_state": "MD",
+      "derived_county": "Anne Arundel County",
+      "found_utc": "2026-02-22T19:04:23.884844+00:00",
+      "ever_top_match": false
     },
     {
       "source": "LandSearch",
@@ -932,12 +945,12 @@
     },
     {
       "source": "LandSearch",
-      "title": "1.6 Acres of Land with Home for Sale in Monrovia, Maryland",
+      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/12304-hungerford-manor-ct-monrovia-md-21770/5050100",
       "price": 875000,
       "acres": 1.6,
-      "thumbnail": "https://cdn.landsearch.com/listings/4R69M/large/monrovia-md-160744639.jpg",
-      "status": "available",
+      "thumbnail": null,
+      "status": "unknown",
       "derived_state": "MD",
       "derived_county": "Frederick County",
       "found_utc": "2026-02-17T05:14:02.109731+00:00",
@@ -3676,19 +3689,6 @@
     {
       "source": "LandSearch",
       "title": "LandSearch listing",
-      "url": "https://www.landsearch.com/properties/301-sturtons-ln-pasadena-md-21122/4383618",
-      "price": 1250000,
-      "acres": 6.66,
-      "thumbnail": "https://cdn.landsearch.com/listings/4J4TJ/small/pasadena-md-152084693.jpg",
-      "status": "unknown",
-      "derived_state": "MD",
-      "derived_county": "Anne Arundel County",
-      "found_utc": "2026-02-01T03:20:53.137763+00:00",
-      "ever_top_match": false
-    },
-    {
-      "source": "LandSearch",
-      "title": "LandSearch listing",
       "url": "https://www.landsearch.com/properties/maryland-ave-pasadena-md-21122/4731309",
       "price": 213000,
       "acres": 2.57,
@@ -3705,7 +3705,7 @@
       "url": "https://www.landsearch.com/properties/13-jessie-rd-harwood-md-20776/3660158",
       "price": 1300000,
       "acres": 4.89,
-      "thumbnail": null,
+      "thumbnail": "https://cdn.landsearch.com/listings/4zwTD/small/harwood-md-152071423.jpg",
       "status": "unknown",
       "derived_state": "MD",
       "derived_county": "Anne Arundel County",
