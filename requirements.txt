@@ -4,3 +4,4 @@ requests
 beautifulsoup4
 lxml
 supabase>=2.0.0pip
+python-dotenv

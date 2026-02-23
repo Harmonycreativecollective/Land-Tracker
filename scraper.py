@@ -10,8 +10,25 @@ from bs4 import BeautifulSoup
 
 from supabase import create_client
 
+import streamlit as st
+from supabase import create_client
 
 
+def get_secret(name: str) -> str:
+    # 1) Try Streamlit Cloud secrets
+    if name in st.secrets:
+        return st.secrets[name]
+
+    # 2) Fallback to environment variables (local dev)
+    value = os.getenv(name)
+    if value:
+        return value
+
+    raise KeyError(f"Missing required secret: {name}")
+
+
+SUPABASE_URL = get_secret("SUPABASE_URL")
+SUPABASE_KEY = get_secret("SUPABASE_ANON_KEY")  # or SERVICE_ROLE_KEY if needed
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 # ====== YOUR SETTINGS ======
