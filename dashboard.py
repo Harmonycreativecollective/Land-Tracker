@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 import streamlit as st
 from data_access import get_items
-from scraper import run_update
+
 
 
 # ---------- Paths ----------
@@ -372,23 +372,11 @@ st.write("")
 
 # ---------- Refresh control ----------
 # Initialize session state flag
-if "is_refreshing" not in st.session_state:
-    st.session_state.is_refreshing = False
-
-# Refresh button
 if st.button(
     "🔄 Check for new listings",
     use_container_width=True,
-    disabled=st.session_state.is_refreshing,
 ):
-    st.session_state.is_refreshing = True
-
-    with st.spinner("Checking for new listings…"):
-        st.cache_data.clear()
-        run_update()
-
-    st.session_state.is_refreshing = False
-    st.rerun()
+    st.info("Updates run automatically. Manual scraping is disabled in the public app.")
         
 # ---------- Tiles ----------
 c1, c2 = st.columns(2, gap="small")
