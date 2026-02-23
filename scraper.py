@@ -10,14 +10,8 @@ from bs4 import BeautifulSoup
 
 from supabase import create_client
 
-import os
-from dotenv import load_dotenv
-load_dotenv()
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
+
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 # ====== YOUR SETTINGS ======
@@ -690,6 +684,11 @@ def context_from_start_url(start_url: str) -> Tuple[str, str]:
     return ("", "")
 
 
+def _chunks(lst, size=500):
+    for i in range(0, len(lst), size):
+        yield lst[i : i + size]
+
+
 def main():
     os.makedirs("data", exist_ok=True)
     run_utc = datetime.now(timezone.utc).isoformat()
@@ -719,6 +718,7 @@ def main():
 
         all_items.extend(batch)
 
+    # de-dupe + basic cleanup
     seen = set()
     final: List[Dict[str, Any]] = []
     for x in all_items:
@@ -776,6 +776,7 @@ def main():
 
             enriched += 1
 
+    # final cleanup
     final = [it for it in final if not is_lease_listing(it)]
 
     for it in final:
