@@ -375,7 +375,7 @@ st.write("")
 
 # ---------- Refresh control ----------
 
-    st.info("Updates run automatically. Manual scraping is disabled in the public app.")
+st.info("Updates run automatically every 3 hours")
         
 # ---------- Tiles ----------
 c1, c2 = st.columns(2, gap="small")
