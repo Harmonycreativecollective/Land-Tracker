@@ -7,6 +7,26 @@ from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+from supabase import create_client
+
+from dotenv import load_dotenv
+load_dotenv()
+
+# =========================
+# Supabase client (WRITER)
+# =========================
+
+
+def get_env(name: str) -> str:
+    v = os.getenv(name)
+    if v:
+        return v
+    raise RuntimeError(f"Missing required environment variable: {name}")
+
+
+SUPABASE_URL = get_env("SUPABASE_URL")
+SUPABASE_SERVICE_ROLE_KEY = get_env("SUPABASE_SERVICE_ROLE_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 # ====== YOUR SETTINGS ======
 START_URLS = [
@@ -35,7 +55,7 @@ HEADERS = {
 }
 
 TIMEOUT = 40
-DATA_FILE = "data/listings.json"
+DATA_FILE = "data/listings.json"  # optional debug snapshot
 
 session = requests.Session()
 session.headers.update(HEADERS)
@@ -142,7 +162,8 @@ def parse_acres(value: Any) -> Optional[float]:
                     return v
 
         val = value.get("value") or value.get("amount") or value.get("number")
-        unit = (value.get("unit") or value.get("unitText") or value.get("unitCode") or "").lower()
+        unit = (value.get("unit") or value.get("unitText")
+                or value.get("unitCode") or "").lower()
 
         try:
             vnum = float(str(val).replace(",", "").strip())
@@ -196,6 +217,51 @@ def detect_status(text: str) -> str:
 
 
 # ------------------- Helpers -------------------
+def to_row(it: Dict[str, Any], run_utc: str) -> Dict[str, Any]:
+    listing_id = it.get("listing_id") or it.get("url")
+    return {
+        "listing_id": listing_id,
+        "title": it.get("title"),
+        "url": it.get("url"),
+        "source": it.get("source"),
+        "price": it.get("price"),
+        "acres": it.get("acres"),
+        "status": it.get("status") or "unknown",
+        "thumbnail": it.get("thumbnail"),
+        "found_utc": it.get("found_utc") or run_utc,
+        "derived_state": it.get("derived_state"),
+        "derived_county": it.get("derived_county"),
+        "last_seen_utc": run_utc,
+        "is_active": True,
+        # do NOT touch is_favorite here
+    }
+
+
+def _chunks(lst, size=500):
+    for i in range(0, len(lst), size):
+        yield lst[i: i + size]
+
+
+def upsert_to_supabase(items: List[Dict[str, Any]], run_utc: str) -> int:
+    rows = [to_row(it, run_utc) for it in items if it.get("url")]
+    if not rows:
+        return 0
+
+    total = 0
+    for batch in _chunks(rows, size=500):
+        supabase.table("listings").upsert(
+            batch, on_conflict="listing_id").execute()
+        total += len(batch)
+    return total
+
+
+def record_scrape_run(run_utc: str, written: int, enriched: int) -> None:
+    supabase.table("scrape_runs").insert(
+        {"run_utc": run_utc, "written": int(
+            written), "enriched": int(enriched)}
+    ).execute()
+
+
 def get_next_data_json(html: str) -> Optional[dict]:
     soup = BeautifulSoup(html, "html.parser")
     tag = soup.find("script", id="__NEXT_DATA__", type="application/json")
@@ -265,7 +331,6 @@ def should_enrich(it: Dict[str, Any]) -> bool:
     )
 
 
-# ------------------- Matching logic (for ever_top_match) -------------------
 def is_top_match_now(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
     try:
         acres = it.get("acres")
@@ -280,7 +345,6 @@ def is_top_match_now(it: Dict[str, Any], min_a: float, max_a: float, max_p: int)
         return False
 
 
-# ------------------- Detail enrichment -------------------
 def enrich_from_detail_page(url: str) -> Dict[str, Any]:
     try:
         html = fetch_html(url)
@@ -349,7 +413,6 @@ def enrich_from_detail_page(url: str) -> Dict[str, Any]:
     return {"title": title, "thumbnail": thumb or None, "status": status or None, "price": price, "acres": acres}
 
 
-# ------------------- Extractors -------------------
 def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
 
@@ -430,7 +493,8 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
             if not isinstance(d, dict):
                 continue
 
-            raw_url = d.get("url") or d.get("mainEntityOfPage") or d.get("sameAs") or ""
+            raw_url = d.get("url") or d.get(
+                "mainEntityOfPage") or d.get("sameAs") or ""
             if not raw_url:
                 continue
 
@@ -438,7 +502,6 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
             if not url:
                 continue
 
-            # If we're on LandSearch, enforce property detail URL shape
             if "landsearch.com" in host:
                 p = urlparse(url)
                 if p.fragment:
@@ -453,7 +516,8 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
                 or ((d.get("offers") or {}).get("price") if isinstance(d.get("offers"), dict) else None)
             )
 
-            acres = parse_acres(d.get("acres") or d.get("lotSize") or d.get("lotSizeAcres") or d.get("size") or d.get("area"))
+            acres = parse_acres(d.get("acres") or d.get("lotSize") or d.get(
+                "lotSizeAcres") or d.get("size") or d.get("area"))
             thumb = try_thumbnail_from_dict(d)
 
             items.append(
@@ -489,7 +553,6 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
         href = a["href"]
         full = normalize_url(base_url, href)
 
-        # If we're on LandSearch, enforce property detail URL shape
         if "landsearch.com" in host:
             p = urlparse(full)
             if p.fragment:
@@ -518,7 +581,8 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
             thumb = img.get("src")
 
         raw_title = a.get_text(" ", strip=True)
-        title = raw_title if not is_bad_title(raw_title) else f"{source_name} listing"
+        title = raw_title if not is_bad_title(
+            raw_title) else f"{source_name} listing"
 
         items.append(
             {
@@ -564,11 +628,9 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
 
     items: List[Dict[str, Any]] = []
 
-    # LandSearch can use __NEXT_DATA__ to reliably get property URLs
     if "landsearch.com" in host and next_data:
         items.extend(extract_from_landsearch_next(url, next_data))
 
-    # JSON-LD + fallback for any host
     if json_ld_blocks:
         items.extend(extract_from_jsonld(url, json_ld_blocks, source_name))
 
@@ -617,23 +679,12 @@ def load_existing_file() -> Dict[str, Any]:
         return {}
 
 
-# ============================================================
-# NEW: context stamping from START_URL (LandSearch pages)
-# ============================================================
 def context_from_start_url(start_url: str) -> Tuple[str, str]:
-    """
-    Returns (derived_state, derived_county) based on the START_URL that is being scraped.
-    This is intentionally "safe": it ONLY derives location from the *search page URL*,
-    not from the listing URL (because listing URLs can be city/address-based).
-    """
     u = (start_url or "").strip().lower()
 
-    # LandSearch search pages:
-    # https://www.landsearch.com/properties/king-george-va
-    # https://www.landsearch.com/properties/westmoreland-county-va
     if "landsearch.com" in u and "/properties/" in u:
         try:
-            slug = u.split("/properties/")[1].split("/")[0]  # king-george-va OR westmoreland-county-va
+            slug = u.split("/properties/")[1].split("/")[0]
             parts = [p for p in slug.split("-") if p]
             if not parts:
                 return ("", "")
@@ -643,7 +694,6 @@ def context_from_start_url(start_url: str) -> Tuple[str, str]:
                 st = parts[-1].upper()
                 parts = parts[:-1]
 
-            # Remove a trailing literal "county" if present
             if parts and parts[-1] == "county":
                 parts = parts[:-1]
 
@@ -662,6 +712,7 @@ def main():
     run_utc = datetime.now(timezone.utc).isoformat()
 
     old_map = load_existing_maps()
+    # kept for compatibility; not used beyond zero-result case
     old_file = load_existing_file()
 
     all_items: List[Dict[str, Any]] = []
@@ -677,7 +728,6 @@ def main():
 
         batch = extract_listings(url, html)
 
-        # stamp context onto every listing from this start page
         for it in batch:
             if context_state:
                 it["derived_state"] = context_state
@@ -703,13 +753,11 @@ def main():
 
         x["status"] = "unknown"
 
-        # drop leases early
         if is_lease_listing(x):
             continue
 
         final.append(x)
 
-    # ------------------- Enrich (limited) -------------------
     final.sort(key=lambda it: it.get("found_utc") or "", reverse=True)
     final.sort(
         key=lambda it: (
@@ -755,7 +803,6 @@ def main():
             if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE):
                 it["ever_top_match"] = True
 
-    # If scrape returns 0, keep old items but record attempt time
     if len(final) == 0 and os.path.exists(DATA_FILE):
         print("⚠️ Scrape returned 0 listings. Keeping existing items, updating last_attempted_utc.")
         if not isinstance(old_file, dict):
@@ -765,18 +812,19 @@ def main():
             json.dump(old_file, f, indent=2)
         return
 
+    written = upsert_to_supabase(final, run_utc)
+    record_scrape_run(run_utc, written, enriched)
+    print(f"Upserted {written} listings to Supabase. Enriched: {enriched}.")
+
+    # Optional debug snapshot
     out = {
         "last_updated_utc": run_utc,
         "last_attempted_utc": run_utc,
         "criteria": {"min_acres": MIN_ACRES, "max_acres": MAX_ACRES, "max_price": MAX_PRICE},
         "items": final,
     }
-
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
-
-    print(f"Saved {len(final)} listings. Enriched: {enriched}.")
-
 
 def run_update():
     main()

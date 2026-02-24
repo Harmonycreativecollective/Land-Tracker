@@ -15,7 +15,7 @@ A lightweight land listings tracker powered by a Python scraper + Streamlit dash
 ---
 
 ### v0.2 — Dashboard MVP (Streamlit)
-- [x] Built initial Streamlit dashboard (`app.py`)  
+- [x] Built initial Streamlit dashboard (`dashboard.py`)  
 - [x] Loads listings from `data/listings.json`  
 - [x] Displays listing title, acreage, price (when available), source, and link  
 - [x] Added basic search + filter logic  

@@ -3,22 +3,14 @@ name: Run land scraper
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *"   # every 6 hours
-
-permissions:
-  contents: write
+    - cron: "0 */3 * * *"   # every 3 hours (UTC)
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: true
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -30,22 +22,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run scraper
+      - name: Run scraper (Supabase)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           python scraper.py
-
-      - name: Commit updates (only if changed)
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-          git add data/listings.json
-
-          # If nothing changed, do not commit
-          if git diff --cached --quiet; then
-            echo "No changes detected. Skipping commit."
-            exit 0
-          fi
-
-          git commit -m "Update listings"
-          git push
