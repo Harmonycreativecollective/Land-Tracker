@@ -6,8 +6,8 @@ from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urlparse
 
 import streamlit as st
-from data_access import get_listings
-from scraper import run_update
+from data_access import get_listings, get_system_state
+
 
 
 # ---------- Paths ----------
@@ -29,8 +29,9 @@ CAPTION = "What's meant for you is already in motion."
 # ---------- Load data ----------
 items: List[Dict[str, Any]] = get_listings() or []
 criteria = {}
-last_updated = None
-last_attempted = None
+state = get_system_state()
+last_updated = state.get("last_updated_utc")
+last_attempted = state.get("last_attempted_utc")
 
 
 # ---------- Time formatting (Eastern) ----------
@@ -234,30 +235,7 @@ render_tile("Last updated", format_last_updated_et(last_updated))
 st.write("")
 
 
-# ============================================================
-# Manual Refresh (disabled while running)
-# ============================================================
-
-if "is_updating" not in st.session_state:
-    st.session_state.is_updating = False
-
-btn_clicked = st.button(
-    "🔄 Check for new listings",
-    use_container_width=True,
-    disabled=st.session_state.is_updating,
-)
-
-if btn_clicked:
-    st.session_state.is_updating = True
-    try:
-        with st.spinner("Updating listings…"):
-            st.cache_data.clear()
-            run_update()
-            st.success("Updated just now ✨")
-    finally:
-        st.session_state.is_updating = False
-    st.rerun()
-
+st.info("Updates run automatically every 3 hours. ")
 
 # ✅ Search stays top-of-page
 search_query = st.text_input(
