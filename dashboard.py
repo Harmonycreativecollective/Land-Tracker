@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import streamlit as st
-from data_access import get_items
+from data_access import get_items, get_system_state
 
 
 
@@ -26,9 +26,12 @@ CAPTION = "What's mean for you is already in motion."
 
 # ---------- Load data ----------
 items: List[Dict[str, Any]] = get_items()
+
+state = get_system_state()
+last_updated = state.get("last_updated_utc")
+last_attempted = state.get("last_attempted_utc")
+
 criteria = {}
-last_updated = None
-last_attempted = None
 
 # ============================================================
 # Helpers 
@@ -538,4 +541,3 @@ with st.expander("Overview", expanded=False):
     for src, count in sorted(source_counts.items(), key=lambda x: (-x[1], x[0].lower())):
         st.caption(f"{src}: {count}")
 st.caption("Tip: Use Properties to search, filter, and view all listings.")
-
