@@ -9,9 +9,14 @@ import requests
 from bs4 import BeautifulSoup
 from supabase import create_client
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # =========================
 # Supabase client (WRITER)
 # =========================
+
+
 def get_env(name: str) -> str:
     v = os.getenv(name)
     if v:
@@ -157,7 +162,8 @@ def parse_acres(value: Any) -> Optional[float]:
                     return v
 
         val = value.get("value") or value.get("amount") or value.get("number")
-        unit = (value.get("unit") or value.get("unitText") or value.get("unitCode") or "").lower()
+        unit = (value.get("unit") or value.get("unitText")
+                or value.get("unitCode") or "").lower()
 
         try:
             vnum = float(str(val).replace(",", "").strip())
@@ -233,7 +239,7 @@ def to_row(it: Dict[str, Any], run_utc: str) -> Dict[str, Any]:
 
 def _chunks(lst, size=500):
     for i in range(0, len(lst), size):
-        yield lst[i : i + size]
+        yield lst[i: i + size]
 
 
 def upsert_to_supabase(items: List[Dict[str, Any]], run_utc: str) -> int:
@@ -243,9 +249,17 @@ def upsert_to_supabase(items: List[Dict[str, Any]], run_utc: str) -> int:
 
     total = 0
     for batch in _chunks(rows, size=500):
-        supabase.table("listings").upsert(batch, on_conflict="listing_id").execute()
+        supabase.table("listings").upsert(
+            batch, on_conflict="listing_id").execute()
         total += len(batch)
     return total
+
+
+def record_scrape_run(run_utc: str, written: int, enriched: int) -> None:
+    supabase.table("scrape_runs").insert(
+        {"run_utc": run_utc, "written": int(
+            written), "enriched": int(enriched)}
+    ).execute()
 
 
 def get_next_data_json(html: str) -> Optional[dict]:
@@ -479,7 +493,8 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
             if not isinstance(d, dict):
                 continue
 
-            raw_url = d.get("url") or d.get("mainEntityOfPage") or d.get("sameAs") or ""
+            raw_url = d.get("url") or d.get(
+                "mainEntityOfPage") or d.get("sameAs") or ""
             if not raw_url:
                 continue
 
@@ -501,7 +516,8 @@ def extract_from_jsonld(base_url: str, blocks: List[dict], source_name: str) -> 
                 or ((d.get("offers") or {}).get("price") if isinstance(d.get("offers"), dict) else None)
             )
 
-            acres = parse_acres(d.get("acres") or d.get("lotSize") or d.get("lotSizeAcres") or d.get("size") or d.get("area"))
+            acres = parse_acres(d.get("acres") or d.get("lotSize") or d.get(
+                "lotSizeAcres") or d.get("size") or d.get("area"))
             thumb = try_thumbnail_from_dict(d)
 
             items.append(
@@ -565,7 +581,8 @@ def extract_from_html_fallback(base_url: str, html: str, source_name: str) -> Li
             thumb = img.get("src")
 
         raw_title = a.get_text(" ", strip=True)
-        title = raw_title if not is_bad_title(raw_title) else f"{source_name} listing"
+        title = raw_title if not is_bad_title(
+            raw_title) else f"{source_name} listing"
 
         items.append(
             {
@@ -695,7 +712,8 @@ def main():
     run_utc = datetime.now(timezone.utc).isoformat()
 
     old_map = load_existing_maps()
-    old_file = load_existing_file()  # kept for compatibility; not used beyond zero-result case
+    # kept for compatibility; not used beyond zero-result case
+    old_file = load_existing_file()
 
     all_items: List[Dict[str, Any]] = []
 
@@ -795,6 +813,7 @@ def main():
         return
 
     written = upsert_to_supabase(final, run_utc)
+    record_scrape_run(run_utc, written, enriched)
     print(f"Upserted {written} listings to Supabase. Enriched: {enriched}.")
 
     # Optional debug snapshot
@@ -806,7 +825,6 @@ def main():
     }
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
-
 
 def run_update():
     main()
