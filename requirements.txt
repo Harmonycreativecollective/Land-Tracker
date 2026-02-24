@@ -3,5 +3,5 @@ pandas
 requests
 beautifulsoup4
 lxml
-supabase>=2.0.0pip
+supabase>=2.0.0
 python-dotenv
