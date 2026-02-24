@@ -374,11 +374,7 @@ else:
 st.write("")
 
 # ---------- Refresh control ----------
-# Initialize session state flag
-if st.button(
-    "🔄 Check for new listings",
-    use_container_width=True,
-):
+
     st.info("Updates run automatically. Manual scraping is disabled in the public app.")
         
 # ---------- Tiles ----------
