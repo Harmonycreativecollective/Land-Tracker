@@ -8,7 +8,7 @@ A lightweight land listings tracker powered by a Python scraper + Streamlit dash
 
 ### v0.1 — Initial Build (Scraper MVP)
 - [x] Created initial Python scraper to pull land listings from configured URLs  
-- [x] Output saved to `data/listings.json`  
+- [x] Output saved to Output initially saved to data/listings.json (deprecated in v2.0.0; replaced with Supabase storage)  
 - [x] Repo set up on GitHub  
 - [x] GitHub Actions workflow created to automate runs on a schedule  
 
@@ -115,26 +115,50 @@ A lightweight land listings tracker powered by a Python scraper + Streamlit dash
 - [x] Implemented automated scraping via GitHub Actions
 - [x] Added deduplication safeguards across:
   - Counties
-  - Platforms
 - [x] Normalized acreage and price parsing across sources
 - [x] Preserved:
-  - First-seen timestamps (`found_utc`)
-  - Listing status across runs
-  - Historical Top Match state
+- [x] First-seen timestamps (`found_utc`)
+- [x] Listing status across runs
+- [x] Historical Top Match state
 
----
-
-### ✅ Current Status
-- Streamlit app deployed and publicly accessible
-- Listings refresh automatically via scraper workflow
-- App accurately displays:
+- [x]  Streamlit app deployed and publicly accessible
+- [x]  Listings refresh automatically via scraper workflow 
+- [x]  App accurately displays:
   - Active Top Matches
   - Possible Matches
   - Former Top Matches
-- Ready for:
-  - Additional land platforms
-  - Favorites / saved listings
-  - Notifications for new Top Matches
-  - Optional custom domain mapping
+
 
 ---
+
+### v2.0.0 — Supabase Backend & Production Architecture
+
+- Migrated listings storage from `data/listings.json` to Supabase database
+- Introduced `scrape_runs` table to track:
+  - `last_updated_utc`
+  - `last_attempted_utc`
+  - listings written per run
+- Refactored app to use shared `data_access.py` for centralized DB reads
+- Removed manual scraping from public app (read-only frontend)
+- Separated environments:
+  - Streamlit uses Supabase ANON key (read-only)
+  - GitHub Actions uses Service Role key (write access)
+- Updated GitHub Actions workflow to write directly to Supabase
+- Eliminated JSON commit conflicts and snapshot-based data model
+- Established stable production pipeline:
+
+  GitHub Actions (Scraper) → Supabase (Database) → Streamlit (Public UI)
+
+  ### ✅ Current Status
+
+- Supabase-backed production architecture
+- Scraper runs automatically every 3 hours via GitHub Actions
+- Public Streamlit app reads from database (no manual scraping)
+- Branching workflow established (`main` stable, feature branches for development)
+
+System is production-stable and ready for:
+
+- Favorites / saved listings
+- URL paste / add listing feature
+- Cross-site canonical deduplication (LandSearch + LandWatch)
+- Optional custom domain mapping
