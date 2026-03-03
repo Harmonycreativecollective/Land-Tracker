@@ -5,7 +5,14 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import streamlit as st
-from data_access import get_items, get_system_state
+from data_access import (
+    add_favorite,
+    get_app_settings,
+    get_favorite_listing_ids,
+    get_items,
+    get_system_state,
+    remove_favorite,
+)
 
 
 
@@ -41,12 +48,14 @@ CAPTION = "What's mean for you is already in motion."
 
 # ---------- Load data ----------
 items: List[Dict[str, Any]] = get_items()
+favorite_ids = get_favorite_listing_ids()
 
 state = get_system_state()
 last_updated = state.get("last_updated_utc")
 last_attempted = state.get("last_attempted_utc")
 
-criteria = {}
+app_settings = get_app_settings() or {}
+criteria = (app_settings.get("criteria") if isinstance(app_settings, dict) else {}) or {}
 
 # ============================================================
 # Helpers 
@@ -142,10 +151,9 @@ STATUS_VALUES_UNAVAILABLE = {
     "unavailable",
     "sold",
     "pending",
-    "off market",
+    "off_market",
     "removed",
-    "under contract",
-    "contingent",
+    "under_contract",
     "unknown",
 }
 
@@ -162,20 +170,23 @@ def get_status(it: Dict[str, Any]) -> str:
     if "pending" in s:
         return "pending"
     if "under contract" in s or "active under contract" in s or s == "contract" or " contract" in s:
-        return "under contract"
+        return "under_contract"
     if "contingent" in s:
-        return "contingent"
-    if "off market" in s or "removed" in s or "unavailable" in s:
-        return "off market"
-    if "available" in s or "active" in s:
+        return "under_contract"
+    if "off market" in s or "removed" in s or "unavailable" in s or re.search(r"\binactive\b", s):
+        return "off_market"
+    if re.search(r"\bavailable\b", s) or re.search(r"\bactive\b", s):
         return "available"
 
     return "unknown"
 
 # ---------- Defaults from criteria ----------
-default_min_acres = float(criteria.get("min_acres", 0) or 0)
-default_max_acres = float(criteria.get("max_acres", 10**9) or 10**9)
-default_max_price = float(criteria.get("max_price", 10**12) or 10**12)
+MIN_ACRES = 10.0
+MAX_ACRES = 50.0
+MAX_PRICE = 600_000
+default_min_acres = float(criteria.get("min_acres", MIN_ACRES) or MIN_ACRES)
+default_max_acres = float(criteria.get("max_acres", MAX_ACRES) or MAX_ACRES)
+default_max_price = float(criteria.get("max_price", MAX_PRICE) or MAX_PRICE)
 
 # ============================================================
 # Match logic
@@ -225,8 +236,7 @@ top_matches = [it for it in items if is_top_match(it)]
 possible_matches = [it for it in items if is_possible_match(it)]  # keeping for now (used in badges)
 new_top_matches = [it for it in top_matches if is_new(it)]        # ✅ New tile = new TOP matches only
 
-# Favorites placeholder until Supabase is wired
-favorites_count = 0
+favorites_count = len(favorite_ids)
 
 median_top_price = median_price_top_matches(top_matches)
 median_top_acres = median_acres_top_matches(top_matches)
@@ -321,9 +331,7 @@ def render_badges_dashboard(it: Dict[str, Any]) -> None:
     else:
         pills.append(pill("FOUND", "found"))
 
-    status_label = get_status(it).upper()
-    if status_label == "OFF MARKET":
-        status_label = "OFF MARKET"
+    status_label = get_status(it).replace("_", " ").upper()
     pills.append(pill(status_label if status_label else "STATUS UNKNOWN", "status"))
 
     st.markdown(f"<div class='kb-badges'>{''.join(pills)}</div>", unsafe_allow_html=True)
@@ -425,6 +433,8 @@ else:
     top_sorted = sorted(top_matches, key=key_dt, reverse=True)[:5]
 
     for it in top_sorted:
+        listing_id = str(it.get("listing_id") or it.get("url") or "")
+        is_fav = listing_id in favorite_ids
         title = it.get("title") or f"{it.get('source', 'Land')} listing"
         url = it.get("url") or ""
         price = it.get("price")
@@ -452,6 +462,13 @@ else:
 
             if bits:
                 st.caption(" • ".join(bits))
+            fav_label = "★ Saved" if is_fav else "☆ Save"
+            if st.button(fav_label, key=f"dash_fav_{listing_id}", use_container_width=True):
+                if is_fav:
+                    remove_favorite(listing_id)
+                else:
+                    add_favorite(listing_id)
+                st.rerun()
             if url:
                 st.link_button("Open listing ↗", url, use_container_width=True)
 # ============================================================
@@ -493,10 +510,9 @@ INACTIVE_STATUSES = {
     "unavailable",
     "sold",
     "pending",
-    "off market",
+    "off_market",
     "removed",
-    "under contract",
-    "contingent",
+    "under_contract",
 }
 
 inactive_count = len([it for it in items if get_status(it) in INACTIVE_STATUSES])

@@ -6,7 +6,14 @@ from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urlparse
 
 import streamlit as st
-from data_access import get_listings, get_system_state
+from data_access import (
+    add_favorite,
+    get_app_settings,
+    get_favorite_listing_ids,
+    get_listings,
+    get_system_state,
+    remove_favorite,
+)
 
 
 
@@ -28,7 +35,9 @@ CAPTION = "What's meant for you is already in motion."
 
 # ---------- Load data ----------
 items: List[Dict[str, Any]] = get_listings() or []
-criteria = {}
+favorite_ids = get_favorite_listing_ids()
+app_settings = get_app_settings() or {}
+criteria = (app_settings.get("criteria") if isinstance(app_settings, dict) else {}) or {}
 state = get_system_state()
 last_updated = state.get("last_updated_utc")
 last_attempted = state.get("last_attempted_utc")
@@ -246,9 +255,12 @@ search_query = st.text_input(
 
 
 # ---------- Defaults ----------
-default_max_price = int(criteria.get("max_price", 600000) or 600000)
-default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
-default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
+MIN_ACRES = 10.0
+MAX_ACRES = 50.0
+MAX_PRICE = 600_000
+default_max_price = int(criteria.get("max_price", MAX_PRICE) or MAX_PRICE)
+default_min_acres = float(criteria.get("min_acres", MIN_ACRES) or MIN_ACRES)
+default_max_acres = float(criteria.get("max_acres", MAX_ACRES) or MAX_ACRES)
 
 
 # ============================================================
@@ -260,7 +272,6 @@ STATUS_LABEL = {
     "under_contract": "UNDER CONTRACT",
     "pending": "PENDING",
     "sold": "SOLD",
-    "contingent": "CONTINGENT",
     "off_market": "OFF MARKET",
     "unknown": "STATUS UNKNOWN",
 }
@@ -278,12 +289,12 @@ def get_status(it: Dict[str, Any]) -> str:
     if "pending" in s:
         return "pending"
     if "contingent" in s:
-        return "contingent"
+        return "under_contract"
     if "under contract" in s or "active under contract" in s or s == "contract" or " contract" in s:
         return "under_contract"
-    if "off market" in s or "removed" in s or "unavailable" in s:
+    if "off market" in s or "removed" in s or "unavailable" in s or re.search(r"\binactive\b", s):
         return "off_market"
-    if "available" in s or "active" in s:
+    if re.search(r"\bavailable\b", s) or re.search(r"\bactive\b", s):
         return "available"
 
     return "unknown"
@@ -535,6 +546,7 @@ state_to_counties_sorted: Dict[str, List[str]] = {k: sorted(list(v)) for k, v in
 with st.expander("Filters", expanded=False):
     show_top_only = st.toggle("Show top matches", value=True)
     show_new_only = st.toggle("New only", value=False)
+    show_favorites_only = st.toggle("Favorites only", value=False)
     sort_newest = st.toggle("Newest first", value=True)
     show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
 
@@ -621,11 +633,12 @@ for it in loc_items:
 with st.expander("Details", expanded=False):
     st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("All listings", f"{len(loc_items)}")
     c2.metric("Available", f"{len(available_loc)}")
     c3.metric("Top matches", f"{len(top_matches_all)}")
     c4.metric("New top matches", f"{len(new_top_matches_all)}")
+    c5.metric("Favorites", f"{len(favorite_ids)}")
 
     st.write("")
     st.markdown("**Sources**")
@@ -653,6 +666,10 @@ if show_new_only:
 # Top only
 if show_top_only:
     filtered = [it for it in filtered if is_top_match(it, min_acres, max_acres, max_price)]
+
+# Favorites only
+if show_favorites_only:
+    filtered = [it for it in filtered if str(it.get("listing_id") or it.get("url") or "") in favorite_ids]
 
 
 def sort_key(it: Dict[str, Any]):
@@ -700,6 +717,8 @@ def render_placeholder():
 # ============================================================
 
 def listing_card(it: Dict[str, Any]):
+    listing_id = str(it.get("listing_id") or it.get("url") or "")
+    is_fav = listing_id in favorite_ids
     title = it.get("title") or f"{it.get('source', 'Land')} listing"
     url = it.get("url") or ""
     source = it.get("source") or ""
@@ -766,6 +785,13 @@ def listing_card(it: Dict[str, Any]):
 
         if url:
             st.link_button("Open listing ↗", url, use_container_width=True)
+        fav_label = "★ Saved" if is_fav else "☆ Save"
+        if st.button(fav_label, key=f"props_fav_{listing_id}", use_container_width=True):
+            if is_fav:
+                remove_favorite(listing_id)
+            else:
+                add_favorite(listing_id)
+            st.rerun()
 
 
 # Grid (2 columns)

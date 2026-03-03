@@ -72,10 +72,9 @@ BAD_TITLE_SET = {
 
 STATUS_VALUES = {
     "available",
-    "pending",
     "under_contract",
+    "pending",
     "sold",
-    "contingent",
     "off_market",
     "unknown",
 }
@@ -223,10 +222,8 @@ def normalize_status(value: Any) -> str:
         return "pending"
     if re.search(r"\b(under contract|in contract|under agreement)\b", t):
         return "under_contract"
-    if re.search(r"\bcontingent\b", t):
-        return "contingent"
     if re.search(
-        r"\b(off market|offmarket|withdrawn|canceled|cancelled|expired|no longer available|not available)\b",
+        r"\b(off market|offmarket|withdrawn|removed|inactive|canceled|cancelled|expired|no longer available|not available)\b",
         t,
     ):
         return "off_market"
@@ -247,57 +244,41 @@ def detect_status(text: str) -> str:
     if not t:
         return "unknown"
 
-    # Keep strongest statuses first.
-    if re.search(r"\bsold\b", t, flags=re.IGNORECASE):
+    # Strict priority: sold -> under_contract -> pending -> off_market/removed.
+    if re.search(r"\b(sold|closed|sale completed)\b", t, flags=re.IGNORECASE):
         return "sold"
-    if re.search(r"\bunder\s+contract\b", t, flags=re.IGNORECASE):
+    if re.search(r"\b(under\s+contract|in\s+contract|under\s+agreement)\b", t, flags=re.IGNORECASE):
         return "under_contract"
-    if re.search(r"\bpending\b", t, flags=re.IGNORECASE):
+    if re.search(r"\b(pending|sale pending)\b", t, flags=re.IGNORECASE):
         return "pending"
-
-    # Prefer explicit status labels in page text.
-    explicit_labels = re.findall(
-        r"(?:listing\s+status|status)\s*[:\-]\s*([a-zA-Z \-_/]{3,40})",
+    if re.search(
+        r"\b(off[\s\-]?market|removed|withdrawn|inactive|canceled|cancelled|expired|no longer available|not available)\b",
         t,
         flags=re.IGNORECASE,
-    )
-    for label in explicit_labels:
-        s = normalize_status(label)
-        if s != "unknown":
-            return s
+    ):
+        return "off_market"
 
-    # Then check for high-confidence phrases only.
-    high_confidence_patterns = [
-        r"\bunder\s+contract\b",
-        r"\bsale\s+pending\b",
-        r"\bpending\b",
-        r"\bcontingent\b",
-        r"\bsold\b",
-        r"\boff[\s\-]?market\b",
-        r"\bwithdrawn\b",
-        r"\bexpired\b",
-    ]
-    for pattern in high_confidence_patterns:
-        m = re.search(pattern, t, flags=re.IGNORECASE)
-        if m:
-            return normalize_status(m.group(0))
-
-    # "Available" requires stronger signal than generic "for sale" copy.
-    if re.search(r"(?:listing\s+status|status)\s*[:\-]\s*(?:active|available)\b", t, flags=re.IGNORECASE):
+    # Only trust available/active when shown as a status label.
+    if re.search(
+        r"(?:listing\s*status|property\s*status|sale\s*status|transaction\s*status|availability|status)\s*[:\-]\s*(?:\bactive\b|\bavailable\b)",
+        t,
+        flags=re.IGNORECASE,
+    ):
         return "available"
-    if re.fullmatch(r"\s*(?:active|available)\s*", t, flags=re.IGNORECASE):
+    if re.fullmatch(r"\s*(?:\bactive\b|\bavailable\b)\s*", t, flags=re.IGNORECASE):
         return "available"
 
     return "unknown"
 
 
-def detect_status_from_next_data(next_data: dict) -> str:
+def extract_status_from_next_data(next_data: dict) -> Optional[str]:
     status_keys = {
         "status",
         "listingstatus",
         "propertystatus",
         "salestatus",
         "transactionstatus",
+        "availability",
     }
 
     for d in walk(next_data):
@@ -313,15 +294,6 @@ def detect_status_from_next_data(next_data: dict) -> str:
                 s = detect_status(v)
                 if s != "unknown":
                     return s
-                lowered = v.lower()
-                if "pending" in lowered:
-                    return "pending"
-                if "under contract" in lowered:
-                    return "under_contract"
-                if "sold" in lowered:
-                    return "sold"
-                if "active" in lowered:
-                    return "available"
 
             if isinstance(v, (dict, list)):
                 for nested in walk(v):
@@ -333,17 +305,8 @@ def detect_status_from_next_data(next_data: dict) -> str:
                         s = detect_status(nv)
                         if s != "unknown":
                             return s
-                        lowered = nv.lower()
-                        if "pending" in lowered:
-                            return "pending"
-                        if "under contract" in lowered:
-                            return "under_contract"
-                        if "sold" in lowered:
-                            return "sold"
-                        if "active" in lowered:
-                            return "available"
 
-    return "unknown"
+    return None
 
 
 def extract_status_from_dict(d: dict) -> str:
@@ -358,7 +321,7 @@ def extract_status_from_dict(d: dict) -> str:
         "badge",
         "badges",
     }
-    allowed = {"available", "under_contract", "pending", "sold", "unknown"}
+    allowed = {"available", "under_contract", "pending", "sold", "off_market", "unknown"}
 
     def _normalize_result(raw: str) -> str:
         s = (raw or "unknown").strip().lower()
@@ -400,6 +363,9 @@ def extract_status_from_dict(d: dict) -> str:
 # ------------------- Helpers -------------------
 def to_row(it: Dict[str, Any], run_utc: str) -> Dict[str, Any]:
     listing_id = it.get("listing_id") or it.get("url")
+    status = detect_status(str(it.get("status") or ""))
+    if status not in STATUS_VALUES:
+        status = "unknown"
     return {
         "listing_id": listing_id,
         "title": it.get("title"),
@@ -407,7 +373,7 @@ def to_row(it: Dict[str, Any], run_utc: str) -> Dict[str, Any]:
         "source": it.get("source"),
         "price": it.get("price"),
         "acres": it.get("acres"),
-        "status": it.get("status") or "unknown",
+        "status": status,
         "thumbnail": it.get("thumbnail"),
         "found_utc": it.get("found_utc") or run_utc,
         "derived_state": it.get("derived_state"),
@@ -572,13 +538,79 @@ def is_top_match_now(it: Dict[str, Any], min_a: float, max_a: float, max_p: int)
         acres = it.get("acres")
         price = it.get("price")
         status = (it.get("status") or "unknown").lower()
-        if status in {"under_contract", "pending", "sold"}:
+        if status != "available":
             return False
         if acres is None or price is None:
             return False
         return (min_a <= float(acres) <= max_a) and (int(price) <= int(max_p))
     except Exception:
         return False
+
+
+def _collect_status_like_dom_text(soup: BeautifulSoup) -> List[str]:
+    out: List[str] = []
+    seen = set()
+    key_re = re.compile(r"(status|badge|pill|label|availability)", flags=re.IGNORECASE)
+    for el in soup.find_all(True):
+        classes = " ".join(el.get("class") or [])
+        ident = str(el.get("id") or "")
+        attrs_blob = f"{classes} {ident}"
+        if not key_re.search(attrs_blob):
+            continue
+        txt = el.get_text(" ", strip=True)
+        txt = re.sub(r"\s+", " ", txt).strip()
+        if not txt or len(txt) > 120:
+            continue
+        key = txt.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(txt)
+    return out
+
+
+def _collect_status_like_jsonld_values(blocks: List[dict]) -> List[str]:
+    out: List[str] = []
+    seen = set()
+    status_keys = {
+        "status",
+        "listingstatus",
+        "propertystatus",
+        "salestatus",
+        "transactionstatus",
+        "availability",
+        "availabilitystarts",
+        "availabilityends",
+    }
+    for block in blocks:
+        for d in walk(block):
+            if not isinstance(d, dict):
+                continue
+            for k, v in d.items():
+                key = str(k).strip().lower().replace("_", "").replace("-", "")
+                if key not in status_keys:
+                    continue
+                if isinstance(v, str):
+                    txt = re.sub(r"\s+", " ", v).strip()
+                    if not txt:
+                        continue
+                    lk = txt.lower()
+                    if lk in seen:
+                        continue
+                    seen.add(lk)
+                    out.append(txt)
+                elif isinstance(v, dict):
+                    for sub_v in v.values():
+                        if isinstance(sub_v, str):
+                            txt = re.sub(r"\s+", " ", sub_v).strip()
+                            if not txt:
+                                continue
+                            lk = txt.lower()
+                            if lk in seen:
+                                continue
+                            seen.add(lk)
+                            out.append(txt)
+    return out
 
 
 def enrich_from_detail_page(url: str) -> Dict[str, Any]:
@@ -605,23 +637,32 @@ def enrich_from_detail_page(url: str) -> Dict[str, Any]:
 
     thumb = meta("og:image", "property") or meta("twitter:image", "name")
 
+    blocks = get_json_ld(html)
     status = "unknown"
     next_data = get_next_data_json(html)
-    if next_data:
-        status = detect_status_from_next_data(next_data)
+    if next_data and "landsearch.com" in urlparse(url).netloc.lower():
+        next_status = extract_status_from_next_data(next_data)
+        if next_status:
+            status = next_status
     if status == "unknown":
-        status_text = " ".join(
+        status_candidates: List[str] = []
+        status_candidates.extend(_collect_status_like_dom_text(soup))
+        status_candidates.extend(
             [
                 meta("og:description", "property"),
                 meta("twitter:description", "name"),
-                soup.get_text(" ", strip=True)[:20000],
             ]
         )
-        status = detect_status(status_text)
+        status_candidates.extend(_collect_status_like_jsonld_values(blocks))
+        for candidate in status_candidates:
+            s = detect_status(candidate)
+            if s != "unknown":
+                status = s
+                break
 
     price = None
     acres = None
-    for block in get_json_ld(html):
+    for block in blocks:
         for d in walk(block):
             if not isinstance(d, dict):
                 continue
@@ -993,7 +1034,8 @@ def main():
         if is_bad_title(x.get("title")):
             x["title"] = f"{x.get('source','Listing')} listing"
 
-        x["status"] = "unknown"
+        s = detect_status(str(x.get("status") or ""))
+        x["status"] = s if s in STATUS_VALUES else "unknown"
 
         if is_lease_listing(x):
             continue

@@ -1,7 +1,10 @@
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
+from dotenv import load_dotenv
 from supabase import create_client
+
+load_dotenv()
 
 
 def _get_env(name: str) -> str:
@@ -18,6 +21,17 @@ def get_supabase_client():
     return create_client(url, key)
 
 
+def get_supabase_writer_client():
+    # Server-side Streamlit can safely use service role if present.
+    url = _get_env("SUPABASE_URL")
+    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or _get_env("SUPABASE_ANON_KEY")
+    return create_client(url, key)
+
+
+def get_favorites_user_key() -> str:
+    return os.getenv("FAVORITES_USER_KEY", "kb_owner")
+
+
 def get_items(limit: int = 2000) -> List[Dict[str, Any]]:
     sb = get_supabase_client()
     res = (
@@ -25,6 +39,7 @@ def get_items(limit: int = 2000) -> List[Dict[str, Any]]:
         .select(
             "listing_id,title,url,source,price,acres,status,thumbnail,found_utc,derived_state,derived_county,last_seen_utc,is_active,is_favorite"
         )
+        .eq("is_active", True)
         .order("found_utc", desc=True)
         .limit(limit)
         .execute()
@@ -92,5 +107,53 @@ def get_app_settings() -> Dict[str, Any]:
         return {}
 
 
-def get_listings():
-    return get_items()
+def get_listings(limit: int = 2000):
+    return get_items(limit=limit)
+
+
+def get_favorite_listing_ids(user_key: Optional[str] = None) -> Set[str]:
+    sb = get_supabase_client()
+    key = user_key or get_favorites_user_key()
+    try:
+        res = (
+            sb.table("favorites")
+            .select("listing_id")
+            .eq("user_key", key)
+            .limit(5000)
+            .execute()
+        )
+        rows = res.data or []
+        return {str(r.get("listing_id")) for r in rows if r.get("listing_id")}
+    except Exception:
+        return set()
+
+
+def add_favorite(listing_id: str, user_key: Optional[str] = None) -> None:
+    if not listing_id:
+        return
+    sb = get_supabase_writer_client()
+    key = user_key or get_favorites_user_key()
+    try:
+        sb.table("favorites").upsert(
+            {"user_key": key, "listing_id": listing_id},
+            on_conflict="user_key,listing_id",
+        ).execute()
+    except Exception:
+        return
+
+
+def remove_favorite(listing_id: str, user_key: Optional[str] = None) -> None:
+    if not listing_id:
+        return
+    sb = get_supabase_writer_client()
+    key = user_key or get_favorites_user_key()
+    try:
+        (
+            sb.table("favorites")
+            .delete()
+            .eq("user_key", key)
+            .eq("listing_id", listing_id)
+            .execute()
+        )
+    except Exception:
+        return

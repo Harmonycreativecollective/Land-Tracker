@@ -148,3 +148,32 @@ If the app name/icon does not update:
 - Delete the existing home screen shortcut/app for the site.
 - In Chrome, clear cached site data for that URL.
 - Re-open the site and install again.
+
+## Local Status Verification
+
+Run one scrape, then verify a known listing status in Supabase:
+
+```bash
+python scraper.py
+python - <<'PY'
+import os
+from dotenv import load_dotenv
+from supabase import create_client
+
+load_dotenv()
+supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"])
+
+url = "https://www.landsearch.com/properties/1-ridge-rd-colonial-beach-va-22443/5039580"
+res = (
+    supabase.table("listings")
+    .select("url,status,last_seen_utc")
+    .eq("url", url)
+    .limit(1)
+    .execute()
+)
+row = (res.data or [{}])[0]
+print({"url": row.get("url"), "status": row.get("status"), "last_seen_utc": row.get("last_seen_utc")})
+PY
+```
+
+Expected result after scrape: `status` should be `pending` (or `under_contract` if page status changed).
