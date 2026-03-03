@@ -138,3 +138,13 @@ A lightweight land listings tracker powered by a Python scraper + Streamlit dash
   - Optional custom domain mapping
 
 ---
+
+## Android Install (PWA)
+- Open the deployed KB Land site in Chrome on Android.
+- In Chrome menu, tap **Install app** (or **Add to Home screen**, depending on version).
+- Confirm install and launch from your home screen.
+
+If the app name/icon does not update:
+- Delete the existing home screen shortcut/app for the site.
+- In Chrome, clear cached site data for that URL.
+- Re-open the site and install again.

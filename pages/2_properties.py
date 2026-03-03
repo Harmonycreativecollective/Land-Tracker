@@ -318,6 +318,8 @@ def is_new(it: Dict[str, Any]) -> bool:
 
 # ✅ MATCH RULES: only AVAILABLE can be Top
 def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
+    if it.get("is_active") is not True:
+        return False
     if get_status(it) != "available":
         return False
     return meets_acres(it, min_a, max_a) and meets_price(it, max_p)

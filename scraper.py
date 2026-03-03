@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
@@ -70,7 +70,15 @@ BAD_TITLE_SET = {
     "landwatch listing",
 }
 
-STATUS_VALUES = {"available", "under_contract", "pending", "sold", "unknown"}
+STATUS_VALUES = {
+    "available",
+    "pending",
+    "under_contract",
+    "sold",
+    "contingent",
+    "off_market",
+    "unknown",
+}
 
 LEASE_KEYWORDS = {
     "lease",
@@ -201,17 +209,190 @@ def parse_acres(value: Any) -> Optional[float]:
 
 
 # ------------------- Status detection (STRICT) -------------------
-def detect_status(text: str) -> str:
-    t = (text or "").lower()
+def normalize_status(value: Any) -> str:
+    t = str(value or "").strip().lower()
+    if not t:
+        return "unknown"
 
-    if re.search(r"\bsold\b", t):
+    t = re.sub(r"[_\-]+", " ", t)
+    t = re.sub(r"\s+", " ", t).strip()
+
+    if re.search(r"\b(sold|closed|sale completed)\b", t):
         return "sold"
-    if re.search(r"\bunder\s+contract\b", t):
-        return "under_contract"
-    if re.search(r"\bpending\b", t):
+    if re.search(r"\b(pending|sale pending)\b", t):
         return "pending"
-    if re.search(r"\bavailable\b", t) or re.search(r"\bfor\s+sale\b", t) or re.search(r"\bactive\b", t):
+    if re.search(r"\b(under contract|in contract|under agreement)\b", t):
+        return "under_contract"
+    if re.search(r"\bcontingent\b", t):
+        return "contingent"
+    if re.search(
+        r"\b(off market|offmarket|withdrawn|canceled|cancelled|expired|no longer available|not available)\b",
+        t,
+    ):
+        return "off_market"
+
+    if re.search(r"(schema\.org/instock|\bin stock\b)", t):
         return "available"
+    if re.search(r"(schema\.org/soldout|\bsold out\b|\bout of stock\b|schema\.org/discontinued)", t):
+        return "off_market"
+
+    if re.search(r"\b(available|active)\b", t):
+        return "available"
+
+    return "unknown"
+
+
+def detect_status(text: str) -> str:
+    t = (text or "").strip()
+    if not t:
+        return "unknown"
+
+    # Keep strongest statuses first.
+    if re.search(r"\bsold\b", t, flags=re.IGNORECASE):
+        return "sold"
+    if re.search(r"\bunder\s+contract\b", t, flags=re.IGNORECASE):
+        return "under_contract"
+    if re.search(r"\bpending\b", t, flags=re.IGNORECASE):
+        return "pending"
+
+    # Prefer explicit status labels in page text.
+    explicit_labels = re.findall(
+        r"(?:listing\s+status|status)\s*[:\-]\s*([a-zA-Z \-_/]{3,40})",
+        t,
+        flags=re.IGNORECASE,
+    )
+    for label in explicit_labels:
+        s = normalize_status(label)
+        if s != "unknown":
+            return s
+
+    # Then check for high-confidence phrases only.
+    high_confidence_patterns = [
+        r"\bunder\s+contract\b",
+        r"\bsale\s+pending\b",
+        r"\bpending\b",
+        r"\bcontingent\b",
+        r"\bsold\b",
+        r"\boff[\s\-]?market\b",
+        r"\bwithdrawn\b",
+        r"\bexpired\b",
+    ]
+    for pattern in high_confidence_patterns:
+        m = re.search(pattern, t, flags=re.IGNORECASE)
+        if m:
+            return normalize_status(m.group(0))
+
+    # "Available" requires stronger signal than generic "for sale" copy.
+    if re.search(r"(?:listing\s+status|status)\s*[:\-]\s*(?:active|available)\b", t, flags=re.IGNORECASE):
+        return "available"
+    if re.fullmatch(r"\s*(?:active|available)\s*", t, flags=re.IGNORECASE):
+        return "available"
+
+    return "unknown"
+
+
+def detect_status_from_next_data(next_data: dict) -> str:
+    status_keys = {
+        "status",
+        "listingstatus",
+        "propertystatus",
+        "salestatus",
+        "transactionstatus",
+    }
+
+    for d in walk(next_data):
+        if not isinstance(d, dict):
+            continue
+
+        for k, v in d.items():
+            key = str(k).strip().lower().replace("_", "").replace("-", "")
+            if key not in status_keys:
+                continue
+
+            if isinstance(v, str):
+                s = detect_status(v)
+                if s != "unknown":
+                    return s
+                lowered = v.lower()
+                if "pending" in lowered:
+                    return "pending"
+                if "under contract" in lowered:
+                    return "under_contract"
+                if "sold" in lowered:
+                    return "sold"
+                if "active" in lowered:
+                    return "available"
+
+            if isinstance(v, (dict, list)):
+                for nested in walk(v):
+                    if not isinstance(nested, dict):
+                        continue
+                    for nv in nested.values():
+                        if not isinstance(nv, str):
+                            continue
+                        s = detect_status(nv)
+                        if s != "unknown":
+                            return s
+                        lowered = nv.lower()
+                        if "pending" in lowered:
+                            return "pending"
+                        if "under contract" in lowered:
+                            return "under_contract"
+                        if "sold" in lowered:
+                            return "sold"
+                        if "active" in lowered:
+                            return "available"
+
+    return "unknown"
+
+
+def extract_status_from_dict(d: dict) -> str:
+    status_keys = {
+        "status",
+        "listingstatus",
+        "salestatus",
+        "transactionstatus",
+        "state",
+        "availability",
+        "label",
+        "badge",
+        "badges",
+    }
+    allowed = {"available", "under_contract", "pending", "sold", "unknown"}
+
+    def _normalize_result(raw: str) -> str:
+        s = (raw or "unknown").strip().lower()
+        return s if s in allowed else "unknown"
+
+    for k, v in d.items():
+        key = str(k).strip().lower().replace("_", "").replace("-", "")
+        if key not in status_keys:
+            continue
+
+        if isinstance(v, str):
+            s = _normalize_result(detect_status(v))
+            if s != "unknown":
+                return s
+
+        elif isinstance(v, list):
+            for part in v:
+                if isinstance(part, str):
+                    s = _normalize_result(detect_status(part))
+                    if s != "unknown":
+                        return s
+                elif isinstance(part, dict):
+                    for sub_v in part.values():
+                        if isinstance(sub_v, str):
+                            s = _normalize_result(detect_status(sub_v))
+                            if s != "unknown":
+                                return s
+
+        elif isinstance(v, dict):
+            for sub_v in v.values():
+                if isinstance(sub_v, str):
+                    s = _normalize_result(detect_status(sub_v))
+                    if s != "unknown":
+                        return s
 
     return "unknown"
 
@@ -260,6 +441,61 @@ def record_scrape_run(run_utc: str, written: int, enriched: int) -> None:
         {"run_utc": run_utc, "written": int(
             written), "enriched": int(enriched)}
     ).execute()
+
+
+def mark_stale_listings_inactive(run_utc: str, stale_days: int = 14) -> int:
+    try:
+        run_dt = datetime.fromisoformat(run_utc)
+    except Exception:
+        run_dt = datetime.now(timezone.utc)
+
+    stale_cutoff_utc = (run_dt - timedelta(days=stale_days)).isoformat()
+
+    stale_rows: List[Dict[str, Any]] = []
+    page_size = 1000
+    start = 0
+    while True:
+        resp = (
+            supabase.table("listings")
+            .select("listing_id,status")
+            .eq("is_active", True)
+            .lt("last_seen_utc", stale_cutoff_utc)
+            .range(start, start + page_size - 1)
+            .execute()
+        )
+        batch = resp.data or []
+        if not batch:
+            break
+        stale_rows.extend(batch)
+        if len(batch) < page_size:
+            break
+        start += page_size
+
+    stale_ids = [str(r.get("listing_id")) for r in stale_rows if r.get("listing_id")]
+    if not stale_ids:
+        return 0
+
+    for chunk in _chunks(stale_ids, size=500):
+        supabase.table("listings").update({"is_active": False}).eq("is_active", True).in_(
+            "listing_id", chunk
+        ).execute()
+
+    # Only mark off_market when status is null/empty/unknown/available.
+    for chunk in _chunks(stale_ids, size=500):
+        supabase.table("listings").update({"status": "off_market"}).eq("is_active", False).eq(
+            "status", "unknown"
+        ).in_("listing_id", chunk).execute()
+        supabase.table("listings").update({"status": "off_market"}).eq("is_active", False).eq(
+            "status", "available"
+        ).in_("listing_id", chunk).execute()
+        supabase.table("listings").update({"status": "off_market"}).eq("is_active", False).eq(
+            "status", ""
+        ).in_("listing_id", chunk).execute()
+        supabase.table("listings").update({"status": "off_market"}).eq("is_active", False).is_(
+            "status", "null"
+        ).in_("listing_id", chunk).execute()
+
+    return len(stale_ids)
 
 
 def get_next_data_json(html: str) -> Optional[dict]:
@@ -369,14 +605,19 @@ def enrich_from_detail_page(url: str) -> Dict[str, Any]:
 
     thumb = meta("og:image", "property") or meta("twitter:image", "name")
 
-    status_text = " ".join(
-        [
-            meta("og:description", "property"),
-            meta("twitter:description", "name"),
-            soup.get_text(" ", strip=True)[:20000],
-        ]
-    )
-    status = detect_status(status_text)
+    status = "unknown"
+    next_data = get_next_data_json(html)
+    if next_data:
+        status = detect_status_from_next_data(next_data)
+    if status == "unknown":
+        status_text = " ".join(
+            [
+                meta("og:description", "property"),
+                meta("twitter:description", "name"),
+                soup.get_text(" ", strip=True)[:20000],
+            ]
+        )
+        status = detect_status(status_text)
 
     price = None
     acres = None
@@ -461,6 +702,7 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
         )
 
         thumb = try_thumbnail_from_dict(d)
+        status = extract_status_from_dict(d)
 
         items.append(
             {
@@ -470,7 +712,7 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
                 "price": price,
                 "acres": acres,
                 "thumbnail": thumb,
-                "status": "unknown",
+                "status": status,
             }
         )
 
@@ -813,8 +1055,10 @@ def main():
         return
 
     written = upsert_to_supabase(final, run_utc)
+    stale_marked = mark_stale_listings_inactive(run_utc, stale_days=14)
     record_scrape_run(run_utc, written, enriched)
     print(f"Upserted {written} listings to Supabase. Enriched: {enriched}.")
+    print(f"Marked {stale_marked} stale listings inactive.")
 
     # Optional debug snapshot
     out = {

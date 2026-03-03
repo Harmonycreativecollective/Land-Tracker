@@ -18,6 +18,21 @@ st.set_page_config(
     page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🗺️",
     layout="wide",
 )
+st.markdown(
+    """
+    <link rel="manifest" href="./static/manifest.json">
+    <meta name="theme-color" content="#121212">
+    <link rel="icon" type="image/png" href="./static/icons/icon-192.png">
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function() {
+          navigator.serviceWorker.register("./static/sw.js", { scope: "./" });
+        });
+      }
+    </script>
+    """,
+    unsafe_allow_html=True,
+)
 
 # ---------- Header text ----------
 #
@@ -182,7 +197,9 @@ def is_missing_price(it: Dict[str, Any]) -> bool:
 
 
 def is_top_match(it: Dict[str, Any]) -> bool:
-    # ✅ HARD RULE: only AVAILABLE can be a top match
+    if it.get("is_active") is not True:
+        return False
+    # ✅ HARD RULE: only ACTIVE + AVAILABLE can be a top match
     if get_status(it) != "available":
         return False
     return meets_acres(it, default_min_acres, default_max_acres) and meets_price(it, default_max_price)
