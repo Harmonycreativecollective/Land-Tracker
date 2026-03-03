@@ -151,6 +151,7 @@ st.markdown(
 .kb-pill--sold           { background: rgba(239, 68, 68, 0.14);  border-color: rgba(239, 68, 68, 0.32); }
 .kb-pill--off_market     { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
 .kb-pill--unknown        { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
+.kb-pill--favorite       { background: rgba(244, 63, 94, 0.16); border-color: rgba(244, 63, 94, 0.35); }
 
 /* Placeholder */
 .kb-ph {
@@ -245,6 +246,10 @@ st.write("")
 
 
 st.info("Updates run automatically every 3 hours. ")
+if st.button("Return to Dashboard", width="stretch"):
+    st.switch_page("dashboard.py")
+if st.button("Return to Favorites", width="stretch"):
+    st.switch_page("pages/3_favorites.py")
 
 # ✅ Search stays top-of-page
 search_query = st.text_input(
@@ -673,8 +678,10 @@ if show_favorites_only:
 
 
 def sort_key(it: Dict[str, Any]):
-    tier = 2 if is_top_match(it, min_acres, max_acres, max_price) else 1
-    return (tier, parse_dt(it))
+    listing_id = str(it.get("listing_id") or it.get("url") or "")
+    fav_tier = 2 if listing_id in favorite_ids else 1
+    top_tier = 2 if is_top_match(it, min_acres, max_acres, max_price) else 1
+    return (fav_tier, top_tier, parse_dt(it))
 
 
 if sort_newest:
@@ -743,6 +750,9 @@ def listing_card(it: Dict[str, Any]):
     else:
         pills.append(pill("FOUND", "found"))
 
+    if is_fav:
+        pills.append(pill("FAVORITE", "favorite"))
+
     status_variant = status if status in {"available", "under_contract", "pending", "sold", "off_market"} else "unknown"
     pills.append(pill(STATUS_LABEL.get(status, "STATUS UNKNOWN"), status_variant))
 
@@ -752,7 +762,7 @@ def listing_card(it: Dict[str, Any]):
 
     with st.container(border=True):
         if thumb:
-            st.image(thumb, use_container_width=True)
+            st.image(thumb, width="stretch")
         else:
             render_placeholder()
 
@@ -784,13 +794,19 @@ def listing_card(it: Dict[str, Any]):
                 st.write(f"**Acres:** {acres}")
 
         if url:
-            st.link_button("Open listing ↗", url, use_container_width=True)
-        fav_label = "★ Saved" if is_fav else "☆ Save"
-        if st.button(fav_label, key=f"props_fav_{listing_id}", use_container_width=True):
+            st.link_button("Open listing ↗", url, width="stretch")
+        fav_label = "♥ Saved" if is_fav else "♡ Save"
+        if st.button(fav_label, key=f"props_fav_{listing_id}", width="stretch"):
             if is_fav:
-                remove_favorite(listing_id)
+                ok, err = remove_favorite(listing_id)
+                if not ok:
+                    st.error(err)
+                    return
             else:
-                add_favorite(listing_id)
+                ok, err = add_favorite(listing_id)
+                if not ok:
+                    st.error(err)
+                    return
             st.rerun()
 
 

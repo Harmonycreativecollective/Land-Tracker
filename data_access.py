@@ -3,14 +3,23 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from dotenv import load_dotenv
 from supabase import create_client
+import streamlit as st
 
 load_dotenv()
 
 
 def _get_env(name: str) -> str:
-    v = os.getenv(name)
+    # Prefer Streamlit Cloud secrets when available, then env/.env fallback.
+    v = None
+    try:
+        if name in st.secrets:
+            v = str(st.secrets[name])
+    except Exception:
+        v = None
+    if not v:
+        v = os.getenv(name)
     if v:
-        return v
+        return str(v).strip()
     raise RuntimeError(f"Missing required environment variable: {name}")
 
 
@@ -22,14 +31,17 @@ def get_supabase_client():
 
 
 def get_supabase_writer_client():
-    # Server-side Streamlit can safely use service role if present.
-    url = _get_env("SUPABASE_URL")
-    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or _get_env("SUPABASE_ANON_KEY")
-    return create_client(url, key)
+    # Favorites writes use anon key + explicit table grants.
+    return get_supabase_client()
 
 
 def get_favorites_user_key() -> str:
-    return os.getenv("FAVORITES_USER_KEY", "kb_owner")
+    try:
+        if "FAVORITES_USER_KEY" in st.secrets:
+            return str(st.secrets["FAVORITES_USER_KEY"]).strip() or "kb_owner"
+    except Exception:
+        pass
+    return (os.getenv("FAVORITES_USER_KEY", "kb_owner") or "kb_owner").strip()
 
 
 def get_items(limit: int = 2000) -> List[Dict[str, Any]]:
@@ -128,9 +140,9 @@ def get_favorite_listing_ids(user_key: Optional[str] = None) -> Set[str]:
         return set()
 
 
-def add_favorite(listing_id: str, user_key: Optional[str] = None) -> None:
+def add_favorite(listing_id: str, user_key: Optional[str] = None) -> Tuple[bool, str]:
     if not listing_id:
-        return
+        return (False, "missing listing_id")
     sb = get_supabase_writer_client()
     key = user_key or get_favorites_user_key()
     try:
@@ -138,13 +150,14 @@ def add_favorite(listing_id: str, user_key: Optional[str] = None) -> None:
             {"user_key": key, "listing_id": listing_id},
             on_conflict="user_key,listing_id",
         ).execute()
-    except Exception:
-        return
+        return (True, "")
+    except Exception as e:
+        return (False, f"failed to save favorite: {e}")
 
 
-def remove_favorite(listing_id: str, user_key: Optional[str] = None) -> None:
+def remove_favorite(listing_id: str, user_key: Optional[str] = None) -> Tuple[bool, str]:
     if not listing_id:
-        return
+        return (False, "missing listing_id")
     sb = get_supabase_writer_client()
     key = user_key or get_favorites_user_key()
     try:
@@ -155,5 +168,6 @@ def remove_favorite(listing_id: str, user_key: Optional[str] = None) -> None:
             .eq("listing_id", listing_id)
             .execute()
         )
-    except Exception:
-        return
+        return (True, "")
+    except Exception as e:
+        return (False, f"failed to remove favorite: {e}")

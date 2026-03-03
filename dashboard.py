@@ -298,6 +298,7 @@ st.markdown(
 .kb-pill--possible  { background: rgba(245, 158, 11, 0.16); border-color: rgba(245, 158, 11, 0.35); }
 .kb-pill--found     { background: rgba(148, 163, 184, 0.22); border-color: rgba(148, 163, 184, 0.40); }
 .kb-pill--status    { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
+.kb-pill--favorite  { background: rgba(244, 63, 94, 0.16); border-color: rgba(244, 63, 94, 0.35); }
 </style>
 """,
     unsafe_allow_html=True,
@@ -320,6 +321,8 @@ def pill(text: str, variant: str) -> str:
 
 def render_badges_dashboard(it: Dict[str, Any]) -> None:
     pills: List[str] = []
+    listing_id = str(it.get("listing_id") or it.get("url") or "")
+    is_fav = listing_id in favorite_ids
 
     if is_new(it):
         pills.append(pill("NEW", "new"))
@@ -330,6 +333,9 @@ def render_badges_dashboard(it: Dict[str, Any]) -> None:
         pills.append(pill("POSSIBLE", "possible"))
     else:
         pills.append(pill("FOUND", "found"))
+
+    if is_fav:
+        pills.append(pill("FAVORITE", "favorite"))
 
     status_label = get_status(it).replace("_", " ").upper()
     pills.append(pill(status_label if status_label else "STATUS UNKNOWN", "status"))
@@ -413,13 +419,15 @@ with c2:
     render_tile("New", f"{len(new_top_matches)}", "New Top Matches since last run")
 
 with c3:
-    render_tile("Favorites ❤️", f"{favorites_count}", "Saved listings ")
+    render_tile("Favorites", f"{favorites_count}", "Saved listings ")
 
 with c4:
-    render_tile("Median Top Matches", format_median_tile(median_top_acres, median_top_price), "Acreage | Price (Top Matches only)")
+    render_tile("Median Top Matches", format_median_tile(median_top_acres, median_top_price), "Acreage | Price")
 
-if st.button("View all properties →", use_container_width=True):
+if st.button("View All Properties", width="stretch"):
     st.switch_page("pages/2_properties.py")
+if st.button("View Favorites", width="stretch"):
+    st.switch_page("pages/3_favorites.py")
     
 # ---------- Quick Top Matches ----------
 st.subheader("Top matches (quick view)")
@@ -443,7 +451,7 @@ else:
 
         with st.container(border=True):
             if thumb:
-                st.image(thumb, use_container_width=True)
+                st.image(thumb, width="stretch")
 
             bits = []
             if acres is not None:
@@ -462,15 +470,21 @@ else:
 
             if bits:
                 st.caption(" • ".join(bits))
-            fav_label = "★ Saved" if is_fav else "☆ Save"
-            if st.button(fav_label, key=f"dash_fav_{listing_id}", use_container_width=True):
+            fav_label = "♥ Saved" if is_fav else "♡ Save"
+            if st.button(fav_label, key=f"dash_fav_{listing_id}", width="stretch"):
                 if is_fav:
-                    remove_favorite(listing_id)
+                    ok, err = remove_favorite(listing_id)
+                    if not ok:
+                        st.error(err)
+                        continue
                 else:
-                    add_favorite(listing_id)
+                    ok, err = add_favorite(listing_id)
+                    if not ok:
+                        st.error(err)
+                        continue
                 st.rerun()
             if url:
-                st.link_button("Open listing ↗", url, use_container_width=True)
+                st.link_button("Open listing ↗", url, width="stretch")
 # ============================================================
 # Overview Calculations (Safe)
 # ============================================================
