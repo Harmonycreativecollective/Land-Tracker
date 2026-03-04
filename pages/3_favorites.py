@@ -9,6 +9,7 @@ from data_access import (
     add_favorite,
     get_app_settings,
     get_favorite_listing_ids,
+    get_favorite_records,
     get_listings,
     get_system_state,
     remove_favorite,
@@ -25,6 +26,7 @@ st.set_page_config(
 
 items: List[Dict[str, Any]] = get_listings() or []
 favorite_ids = get_favorite_listing_ids()
+favorite_records = get_favorite_records()
 app_settings = get_app_settings() or {}
 criteria = (app_settings.get("criteria") if isinstance(app_settings, dict) else {}) or {}
 state = get_system_state()
@@ -76,6 +78,49 @@ def is_new(it: Dict[str, Any]) -> bool:
         return False
 
 
+def duplicate_fingerprint(it: Dict[str, Any]) -> tuple:
+    t = re.sub(r"[^a-z0-9 ]+", " ", str(it.get("title") or "").lower())
+    t = re.sub(r"\s+", " ", t).strip()[:90]
+    try:
+        p = int(float(it.get("price"))) if it.get("price") not in (None, "") else None
+    except Exception:
+        p = None
+    try:
+        a = round(float(it.get("acres")), 2) if it.get("acres") not in (None, "") else None
+    except Exception:
+        a = None
+    return (
+        t,
+        p,
+        a,
+        str(it.get("derived_county") or "").lower(),
+        str(it.get("derived_state") or "").lower(),
+    )
+
+
+def group_duplicate_items(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    grouped: Dict[tuple, Dict[str, Any]] = {}
+    for it in rows:
+        key = duplicate_fingerprint(it)
+        src = str(it.get("source") or "Unknown").strip() or "Unknown"
+        if key not in grouped:
+            cp = dict(it)
+            cp["_group_sources"] = {src}
+            grouped[key] = cp
+            continue
+        existing = grouped[key]
+        existing["_group_sources"].add(src)
+        if not existing.get("thumbnail") and it.get("thumbnail"):
+            for k, v in it.items():
+                existing[k] = v
+            existing["_group_sources"].add(src)
+    out: List[Dict[str, Any]] = []
+    for it in grouped.values():
+        it["_group_sources"] = sorted(list(it.get("_group_sources", [])))
+        out.append(it)
+    return out
+
+
 def format_last_updated_et(ts: Any) -> str:
     if not ts:
         return "—"
@@ -117,6 +162,13 @@ def pill(text: str, variant: str) -> str:
     return f"<span class='kb-pill kb-pill--{variant}'>{text}</span>"
 
 
+def render_active_chips(chips: List[str]) -> None:
+    if not chips:
+        return
+    html = "".join([pill(c, "status") for c in chips])
+    st.markdown(f"<div class='kb-badges'>{html}</div>", unsafe_allow_html=True)
+
+
 st.markdown(
     """
 <style>
@@ -134,9 +186,38 @@ st.markdown(
 st.title("Favorites")
 st.caption(f"Last updated: {format_last_updated_et(last_updated)}")
 
-search_query = st.text_input("Search favorites", value="", placeholder="Search title/source/url...")
-show_top_only = st.toggle("Show top matches only", value=False)
-sort_newest = st.toggle("Newest first", value=True)
+STATUS_FILTER_OPTIONS = ["available", "under_contract", "pending", "sold", "off_market", "unknown"]
+if "fav_search_query" not in st.session_state:
+    st.session_state["fav_search_query"] = ""
+if "fav_status_filter" not in st.session_state:
+    st.session_state["fav_status_filter"] = STATUS_FILTER_OPTIONS[:]
+if "fav_sort_mode" not in st.session_state:
+    st.session_state["fav_sort_mode"] = "Newest"
+
+if st.button("Reset Filters", key="fav_reset_filters", width="stretch"):
+    st.session_state["fav_search_query"] = ""
+    st.session_state["fav_show_top_only"] = False
+    st.session_state["fav_hide_unknown"] = False
+    st.session_state["fav_group_duplicates"] = False
+    st.session_state["fav_sort_mode"] = "Newest"
+    st.session_state["fav_status_filter"] = STATUS_FILTER_OPTIONS[:]
+    st.rerun()
+
+search_query = st.text_input("Search favorites", value="", placeholder="Search title/source/url...", key="fav_search_query")
+show_top_only = st.toggle("Show top matches only", value=False, key="fav_show_top_only")
+hide_unknown = st.toggle("Hide unknown status", value=False, key="fav_hide_unknown")
+group_duplicates = st.toggle("Group duplicates", value=False, key="fav_group_duplicates")
+sort_mode = st.selectbox(
+    "Sort",
+    options=["Newest", "Price Low to High", "Acres High to Low", "Top Matches First"],
+    key="fav_sort_mode",
+)
+status_filter = st.multiselect(
+    "Statuses",
+    options=STATUS_FILTER_OPTIONS,
+    default=STATUS_FILTER_OPTIONS,
+    key="fav_status_filter",
+)
 
 favorite_items = [it for it in items if str(it.get("listing_id") or it.get("url") or "") in favorite_ids]
 if search_query.strip():
@@ -157,9 +238,57 @@ if search_query.strip():
 
 if show_top_only:
     favorite_items = [it for it in favorite_items if is_top_match(it)]
+if status_filter:
+    favorite_items = [it for it in favorite_items if get_status(it) in set(status_filter)]
+if hide_unknown:
+    favorite_items = [it for it in favorite_items if get_status(it) != "unknown"]
+if group_duplicates:
+    favorite_items = group_duplicate_items(favorite_items)
 
-if sort_newest:
+def _num(val: Any, fallback: float) -> float:
+    try:
+        if val in (None, ""):
+            return fallback
+        return float(val)
+    except Exception:
+        return fallback
+
+if sort_mode == "Newest":
     favorite_items = sorted(favorite_items, key=lambda it: it.get("found_utc") or "", reverse=True)
+elif sort_mode == "Price Low to High":
+    favorite_items = sorted(
+        favorite_items,
+        key=lambda it: _num(it.get("price"), float("inf")),
+    )
+elif sort_mode == "Acres High to Low":
+    favorite_items = sorted(
+        favorite_items,
+        key=lambda it: _num(it.get("acres"), float("-inf")),
+        reverse=True,
+    )
+else:
+    favorite_items = sorted(
+        favorite_items,
+        key=lambda it: (1 if is_top_match(it) else 0, it.get("found_utc") or ""),
+        reverse=True,
+    )
+
+chips: List[str] = [f"Saved: {len(favorite_items)}", f"Sort: {sort_mode}"]
+if show_top_only:
+    chips.append("Top Matches")
+if hide_unknown:
+    chips.append("Hide Unknown")
+if group_duplicates:
+    chips.append("Grouped")
+if search_query.strip():
+    chips.append(f"Search: {search_query.strip()}")
+if status_filter and len(status_filter) < len(STATUS_FILTER_OPTIONS):
+    chips.append("Status Filter")
+render_active_chips(chips)
+st.caption(
+    f"Summary: {len([it for it in favorite_items if get_status(it) == 'available'])} available, "
+    f"{len([it for it in favorite_items if is_top_match(it)])} top matches"
+)
 
 st.metric("Saved listings", len(favorite_items))
 if st.button("Return to Dashboard", width="stretch"):
@@ -167,13 +296,15 @@ if st.button("Return to Dashboard", width="stretch"):
 if st.button("Return to Properties", width="stretch"):
     st.switch_page("pages/2_properties.py")
 
-cols = st.columns(2)
+cols = st.columns(1)
 for idx, it in enumerate(favorite_items):
     listing_id = str(it.get("listing_id") or it.get("url") or "")
     is_fav = listing_id in favorite_ids
+    favorite_created_at = favorite_records.get(listing_id)
     title = it.get("title") or f"{it.get('source', 'Land')} listing"
     url = it.get("url") or ""
     source = it.get("source") or ""
+    grouped_sources = it.get("_group_sources") if isinstance(it.get("_group_sources"), list) else None
     status = get_status(it)
     top = is_top_match(it)
     new_flag = is_new(it)
@@ -185,6 +316,8 @@ for idx, it in enumerate(favorite_items):
             else:
                 render_placeholder()
             st.subheader(title)
+            if is_fav:
+                st.caption("♥ Saved")
             pills: List[str] = []
             if top:
                 pills.append(pill("TOP MATCH", "top"))
@@ -194,7 +327,10 @@ for idx, it in enumerate(favorite_items):
                 pills.append(pill("FAVORITE", "favorite"))
             pills.append(pill(status.replace("_", " ").upper(), "status"))
             st.markdown(f"<div class='kb-badges'>{''.join(pills)}</div>", unsafe_allow_html=True)
-            st.caption(" • ".join([x for x in [str(it.get("derived_county") or ""), str(it.get("derived_state") or ""), source] if x]))
+            src_text = " / ".join(grouped_sources) if grouped_sources else source
+            st.caption(" • ".join([x for x in [str(it.get("derived_county") or ""), str(it.get("derived_state") or ""), src_text] if x]))
+            if favorite_created_at and is_fav:
+                st.caption(f"Saved on {format_last_updated_et(favorite_created_at)}")
             try:
                 st.write(f"**Price:** ${int(float(it.get('price'))):,}" if it.get("price") not in (None, "") else "**Price:** —")
             except Exception:
@@ -214,6 +350,7 @@ for idx, it in enumerate(favorite_items):
                 if not ok:
                     st.error(err)
                 else:
+                    st.toast("Saved to favorites" if not is_fav else "Removed from favorites")
                     st.rerun()
 
 if not favorite_items:

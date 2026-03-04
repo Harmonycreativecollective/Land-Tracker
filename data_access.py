@@ -140,6 +140,23 @@ def get_favorite_listing_ids(user_key: Optional[str] = None) -> Set[str]:
         return set()
 
 
+def get_favorite_records(user_key: Optional[str] = None) -> Dict[str, Any]:
+    sb = get_supabase_client()
+    key = user_key or get_favorites_user_key()
+    try:
+        res = (
+            sb.table("favorites")
+            .select("listing_id,created_at")
+            .eq("user_key", key)
+            .limit(5000)
+            .execute()
+        )
+        rows = res.data or []
+        return {str(r.get("listing_id")): r.get("created_at") for r in rows if r.get("listing_id")}
+    except Exception:
+        return {}
+
+
 def add_favorite(listing_id: str, user_key: Optional[str] = None) -> Tuple[bool, str]:
     if not listing_id:
         return (False, "missing listing_id")
