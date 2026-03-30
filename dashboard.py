@@ -5,18 +5,42 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import streamlit as st
-from data_access import get_items, get_system_state
+from data_access import (
+    add_favorite,
+    get_app_settings,
+    get_favorite_listing_ids,
+    get_favorite_records,
+    get_items,
+    get_system_state,
+    remove_favorite,
+)
 
 
 
 # ---------- Paths ----------
 LOGO_PATH = Path("assets/kblogo.png")
+PREVIEW_PATH = Path("assets/previewkb.png")
 
 # ---------- Page config ----------
 st.set_page_config(
     page_title="Dashboard – KB’s Land Tracker",
     page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🗺️",
     layout="wide",
+)
+st.markdown(
+    """
+    <link rel="manifest" href="./static/manifest.json">
+    <meta name="theme-color" content="#121212">
+    <link rel="icon" type="image/png" href="./static/icons/icon-192.png">
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function() {
+          navigator.serviceWorker.register("./static/sw.js", { scope: "./" });
+        });
+      }
+    </script>
+    """,
+    unsafe_allow_html=True,
 )
 
 # ---------- Header text ----------
@@ -26,12 +50,15 @@ CAPTION = "What's mean for you is already in motion."
 
 # ---------- Load data ----------
 items: List[Dict[str, Any]] = get_items()
+favorite_ids = get_favorite_listing_ids()
+favorite_records = get_favorite_records()
 
 state = get_system_state()
 last_updated = state.get("last_updated_utc")
 last_attempted = state.get("last_attempted_utc")
 
-criteria = {}
+app_settings = get_app_settings() or {}
+criteria = (app_settings.get("criteria") if isinstance(app_settings, dict) else {}) or {}
 
 # ============================================================
 # Helpers 
@@ -127,10 +154,9 @@ STATUS_VALUES_UNAVAILABLE = {
     "unavailable",
     "sold",
     "pending",
-    "off market",
+    "off_market",
     "removed",
-    "under contract",
-    "contingent",
+    "under_contract",
     "unknown",
 }
 
@@ -147,20 +173,23 @@ def get_status(it: Dict[str, Any]) -> str:
     if "pending" in s:
         return "pending"
     if "under contract" in s or "active under contract" in s or s == "contract" or " contract" in s:
-        return "under contract"
+        return "under_contract"
     if "contingent" in s:
-        return "contingent"
-    if "off market" in s or "removed" in s or "unavailable" in s:
-        return "off market"
-    if "available" in s or "active" in s:
+        return "under_contract"
+    if "off market" in s or "removed" in s or "unavailable" in s or re.search(r"\binactive\b", s):
+        return "off_market"
+    if re.search(r"\bavailable\b", s) or re.search(r"\bactive\b", s):
         return "available"
 
     return "unknown"
 
 # ---------- Defaults from criteria ----------
-default_min_acres = float(criteria.get("min_acres", 0) or 0)
-default_max_acres = float(criteria.get("max_acres", 10**9) or 10**9)
-default_max_price = float(criteria.get("max_price", 10**12) or 10**12)
+MIN_ACRES = 10.0
+MAX_ACRES = 50.0
+MAX_PRICE = 600_000
+default_min_acres = float(criteria.get("min_acres", MIN_ACRES) or MIN_ACRES)
+default_max_acres = float(criteria.get("max_acres", MAX_ACRES) or MAX_ACRES)
+default_max_price = float(criteria.get("max_price", MAX_PRICE) or MAX_PRICE)
 
 # ============================================================
 # Match logic
@@ -182,7 +211,9 @@ def is_missing_price(it: Dict[str, Any]) -> bool:
 
 
 def is_top_match(it: Dict[str, Any]) -> bool:
-    # ✅ HARD RULE: only AVAILABLE can be a top match
+    if it.get("is_active") is not True:
+        return False
+    # ✅ HARD RULE: only ACTIVE + AVAILABLE can be a top match
     if get_status(it) != "available":
         return False
     return meets_acres(it, default_min_acres, default_max_acres) and meets_price(it, default_max_price)
@@ -208,8 +239,7 @@ top_matches = [it for it in items if is_top_match(it)]
 possible_matches = [it for it in items if is_possible_match(it)]  # keeping for now (used in badges)
 new_top_matches = [it for it in top_matches if is_new(it)]        # ✅ New tile = new TOP matches only
 
-# Favorites placeholder until Supabase is wired
-favorites_count = 0
+favorites_count = len(favorite_ids)
 
 median_top_price = median_price_top_matches(top_matches)
 median_top_acres = median_acres_top_matches(top_matches)
@@ -271,6 +301,7 @@ st.markdown(
 .kb-pill--possible  { background: rgba(245, 158, 11, 0.16); border-color: rgba(245, 158, 11, 0.35); }
 .kb-pill--found     { background: rgba(148, 163, 184, 0.22); border-color: rgba(148, 163, 184, 0.40); }
 .kb-pill--status    { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
+.kb-pill--favorite  { background: rgba(244, 63, 94, 0.16); border-color: rgba(244, 63, 94, 0.35); }
 </style>
 """,
     unsafe_allow_html=True,
@@ -293,6 +324,8 @@ def pill(text: str, variant: str) -> str:
 
 def render_badges_dashboard(it: Dict[str, Any]) -> None:
     pills: List[str] = []
+    listing_id = str(it.get("listing_id") or it.get("url") or "")
+    is_fav = listing_id in favorite_ids
 
     if is_new(it):
         pills.append(pill("NEW", "new"))
@@ -304,12 +337,47 @@ def render_badges_dashboard(it: Dict[str, Any]) -> None:
     else:
         pills.append(pill("FOUND", "found"))
 
-    status_label = get_status(it).upper()
-    if status_label == "OFF MARKET":
-        status_label = "OFF MARKET"
+    if is_fav:
+        pills.append(pill("FAVORITE", "favorite"))
+
+    status_label = get_status(it).replace("_", " ").upper()
     pills.append(pill(status_label if status_label else "STATUS UNKNOWN", "status"))
 
     st.markdown(f"<div class='kb-badges'>{''.join(pills)}</div>", unsafe_allow_html=True)
+
+
+def render_active_chips(chips: List[str]) -> None:
+    if not chips:
+        return
+    html = "".join([pill(c, "status") for c in chips])
+    st.markdown(f"<div class='kb-badges'>{html}</div>", unsafe_allow_html=True)
+
+
+def render_thumb_or_placeholder(thumb: Any) -> None:
+    if thumb:
+        st.image(thumb, width="stretch")
+        return
+    if PREVIEW_PATH.exists():
+        ph_b64 = base64.b64encode(PREVIEW_PATH.read_bytes()).decode("utf-8")
+        st.markdown(
+            f"""
+            <div style="width:100%;height:220px;border-radius:16px;overflow:hidden;position:relative;">
+              <img src="data:image/png;base64,{ph_b64}" style="width:100%;height:100%;object-fit:cover;display:block;" />
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        return
+    st.markdown(
+        """
+        <div style="width:100%; height:220px; background:#f2f2f2; border-radius:16px;
+                    display:flex; align-items:center; justify-content:center; color:#777;
+                    font-weight:700;">
+            Preview not available
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # ---------- Header ----------
 logo_b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode("utf-8") if LOGO_PATH.exists() else ""
@@ -366,17 +434,17 @@ if last_attempted and (last_attempted != last_updated):
     render_tile(
         "Last updated",
         f"{format_last_updated_et(last_updated)}",
-        f"Refresh attempt: {format_last_updated_et(last_attempted)}",
+        f"Refresh attempt: {format_last_updated_et(last_attempted)} • Updates run automatically every 3 hours.",
     )
 else:
-    render_tile("Last updated", format_last_updated_et(last_updated or last_attempted))
+    render_tile(
+        "Last updated",
+        format_last_updated_et(last_updated or last_attempted),
+        "Updates run automatically every 3 hours.",
+    )
 
 st.write("")
 
-# ---------- Refresh control ----------
-
-st.info("Updates run automatically every 3 hours")
-        
 # ---------- Tiles ----------
 c1, c2 = st.columns(2, gap="small")
 c3, c4 = st.columns(2, gap="small")
@@ -388,55 +456,113 @@ with c2:
     render_tile("New", f"{len(new_top_matches)}", "New Top Matches since last run")
 
 with c3:
-    render_tile("Favorites ❤️", f"{favorites_count}", "Saved listings ")
+    render_tile("Favorites", f"{favorites_count}", "Saved listings ")
 
 with c4:
-    render_tile("Median Top Matches", format_median_tile(median_top_acres, median_top_price), "Acreage | Price (Top Matches only)")
+    render_tile("Median Top Matches", format_median_tile(median_top_acres, median_top_price), "Acreage | Price")
 
-if st.button("View all properties →", use_container_width=True):
+if st.button("View All Properties", width="stretch"):
     st.switch_page("pages/2_properties.py")
+if st.button("View Favorites", width="stretch"):
+    st.switch_page("pages/3_favorites.py")
     
 # ---------- Quick Top Matches ----------
-st.subheader("Top matches (quick view)")
+st.subheader("Top Matches Snapshot")
+quick_sort = st.selectbox(
+    "Sort Quick View",
+    options=["Newest", "Price Low to High", "Acres High to Low", "Favorites First"],
+    index=0,
+)
+render_active_chips(
+    [
+        f"Top Matches: {len(top_matches)}",
+        f"Favorites: {favorites_count}",
+        f"Criteria: {default_min_acres:g}-{default_max_acres:g} ac",
+        f"Max Price: ${int(default_max_price):,}",
+    ]
+)
+st.caption(f"Showing {min(len(top_matches), 5)} of {len(top_matches)} Top Matches")
 
 if not top_matches:
     st.info("No top matches right now. Check Properties for everything found.")
 else:
-    def key_dt(it: Dict[str, Any]) -> str:
-        return it.get("found_utc") or ""
+    if quick_sort == "Newest":
+        top_sorted = sorted(top_matches, key=lambda it: it.get("found_utc") or "", reverse=True)
+    elif quick_sort == "Price Low to High":
+        top_sorted = sorted(
+            top_matches,
+            key=lambda it: _safe_float(it.get("price")) if _safe_float(it.get("price")) is not None else float("inf"),
+        )
+    elif quick_sort == "Acres High to Low":
+        top_sorted = sorted(
+            top_matches,
+            key=lambda it: _safe_float(it.get("acres")) if _safe_float(it.get("acres")) is not None else float("-inf"),
+            reverse=True,
+        )
+    else:
+        top_sorted = sorted(
+            top_matches,
+            key=lambda it: (
+                1 if str(it.get("listing_id") or it.get("url") or "") in favorite_ids else 0,
+                it.get("found_utc") or "",
+            ),
+            reverse=True,
+        )
+    top_sorted = top_sorted[:5]
+    cols = st.columns(1)
 
-    top_sorted = sorted(top_matches, key=key_dt, reverse=True)[:5]
-
-    for it in top_sorted:
+    for idx, it in enumerate(top_sorted):
+        listing_id = str(it.get("listing_id") or it.get("url") or "")
+        is_fav = listing_id in favorite_ids
+        favorite_created_at = favorite_records.get(listing_id)
         title = it.get("title") or f"{it.get('source', 'Land')} listing"
         url = it.get("url") or ""
         price = it.get("price")
         acres = it.get("acres")
         thumb = it.get("thumbnail")
 
-        with st.container(border=True):
-            if thumb:
-                st.image(thumb, use_container_width=True)
+        with cols[idx % len(cols)]:
+            with st.container(border=True):
+                render_thumb_or_placeholder(thumb)
 
-            bits = []
-            if acres is not None:
-                try:
-                    bits.append(f"{float(acres):g} acres")
-                except Exception:
-                    bits.append(f"{acres} acres")
-            if price is not None:
-                try:
-                    bits.append(f"${int(price):,}")
-                except Exception:
-                    bits.append(str(price))
+                bits = []
+                if acres is not None:
+                    try:
+                        bits.append(f"{float(acres):g} acres")
+                    except Exception:
+                        bits.append(f"{acres} acres")
+                if price is not None:
+                    try:
+                        bits.append(f"${int(price):,}")
+                    except Exception:
+                        bits.append(str(price))
 
-            st.write(f"**{title}**")
-            render_badges_dashboard(it)
+                st.write(f"**{title}**")
+                if is_fav:
+                    st.caption("♥ Saved")
+                    if favorite_created_at:
+                        st.caption(f"Saved on {format_last_updated_et(favorite_created_at)}")
+                render_badges_dashboard(it)
 
-            if bits:
-                st.caption(" • ".join(bits))
-            if url:
-                st.link_button("Open listing ↗", url, use_container_width=True)
+                if bits:
+                    st.caption(" • ".join(bits))
+                fav_label = "♥ Saved" if is_fav else "♡ Save"
+                if st.button(fav_label, key=f"dash_fav_{listing_id}", width="stretch"):
+                    if is_fav:
+                        ok, err = remove_favorite(listing_id)
+                        if not ok:
+                            st.error(err)
+                            continue
+                        st.toast("Removed from favorites")
+                    else:
+                        ok, err = add_favorite(listing_id)
+                        if not ok:
+                            st.error(err)
+                            continue
+                        st.toast("Saved to favorites")
+                    st.rerun()
+                if url:
+                    st.link_button("Open listing ↗", url, width="stretch")
 # ============================================================
 # Overview Calculations (Safe)
 # ============================================================
@@ -476,15 +602,21 @@ INACTIVE_STATUSES = {
     "unavailable",
     "sold",
     "pending",
-    "off market",
+    "off_market",
     "removed",
-    "under contract",
-    "contingent",
+    "under_contract",
 }
 
 inactive_count = len([it for it in items if get_status(it) in INACTIVE_STATUSES])
 
 unknown_count = len([it for it in items if get_status(it) == "unknown"])
+recent_status_changes = [
+    it
+    for it in items
+    if (it.get("last_seen_utc") == last_updated)
+    and (it.get("found_utc") != last_updated)
+    and (get_status(it) in {"under_contract", "pending", "sold", "off_market"})
+]
 
 # ---- Match counts ----
 top_count = len(top_matches)
@@ -536,4 +668,13 @@ with st.expander("Overview", expanded=False):
     st.write("### Sources")
     for src, count in sorted(source_counts.items(), key=lambda x: (-x[1], x[0].lower())):
         st.caption(f"{src}: {count}")
+    st.write("")
+    st.write("### Recently Changed Status")
+    if not recent_status_changes:
+        st.caption("No newly changed unavailable listings in the latest run.")
+    else:
+        for it in recent_status_changes[:8]:
+            title = it.get("title") or "Listing"
+            status = get_status(it).replace("_", " ").upper()
+            st.caption(f"{status}: {title}")
 st.caption("Tip: Use Properties to search, filter, and view all listings.")

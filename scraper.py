@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
@@ -10,6 +10,11 @@ from bs4 import BeautifulSoup
 from supabase import create_client
 
 from dotenv import load_dotenv
+from scrapers import pipeline as scraper_pipeline
+from scrapers.sites.landandfarm import extract_landandfarm_listings
+from scrapers.sites.landsearch import extract_from_landsearch_next as extract_landsearch_next
+from scrapers.sites.landwatch import extract_landwatch_listings
+
 load_dotenv()
 
 # =========================
@@ -29,8 +34,7 @@ SUPABASE_SERVICE_ROLE_KEY = get_env("SUPABASE_SERVICE_ROLE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 # ====== YOUR SETTINGS ======
-START_URLS = [
-    # ---- LandSearch (county pages, NO filters) ----
+LANDSEARCH_URLS = [
     "https://www.landsearch.com/properties/king-george-va",
     "https://www.landsearch.com/properties/westmoreland-county-va",
     "https://www.landsearch.com/properties/stafford-county-va",
@@ -38,6 +42,40 @@ START_URLS = [
     "https://www.landsearch.com/properties/frederick-county-md",
     "https://www.landsearch.com/properties/anne-arundel-county-md",
     "https://www.landsearch.com/properties/king-william-county-va",
+]
+
+LANDWATCH_URLS = [
+    "https://www.landwatch.com/virginia-land-for-sale/king-george",
+    "https://www.landwatch.com/virginia-land-for-sale/westmoreland-county",
+    "https://www.landwatch.com/virginia-land-for-sale/caroline-county",
+    "https://www.landwatch.com/virginia-land-for-sale/stafford-county",
+    "https://www.landwatch.com/maryland-land-for-sale/caroline-county",
+    "https://www.landwatch.com/maryland-land-for-sale/frederick-county",
+    "https://www.landwatch.com/maryland-land-for-sale/anne-arundel-county",
+    "https://www.landwatch.com/maryland-land-for-sale/montgomery-county",
+]
+
+LANDANDFARM_URLS = [
+    "https://www.landandfarm.com/search/virginia/king-george-county-land-for-sale/",
+    "https://www.landandfarm.com/search/virginia/westmoreland-county-land-for-sale/",
+    "https://www.landandfarm.com/search/virginia/caroline-county-land-for-sale/",
+    "https://www.landandfarm.com/search/virginia/stafford-county-land-for-sale/",
+    "https://www.landandfarm.com/search/maryland/caroline-county-land-for-sale/",
+    "https://www.landandfarm.com/search/maryland/frederick-county-land-for-sale/",
+    "https://www.landandfarm.com/search/maryland/anne-arundel-county-land-for-sale/",
+    "https://www.landandfarm.com/search/maryland/montgomery-county-land-for-sale/",
+]
+
+ENABLE_LANDWATCH = False
+ENABLE_LANDANDFARM = False
+
+START_URLS = [
+    # ---- LandSearch (county pages, NO filters) ----
+    *LANDSEARCH_URLS,
+    # ---- LandWatch (disabled by default while debugging 403 blocks) ----
+    *(LANDWATCH_URLS if ENABLE_LANDWATCH else []),
+    # ---- Land & Farm ----
+    *(LANDANDFARM_URLS if ENABLE_LANDANDFARM else []),
 ]
 
 MIN_ACRES = 10.0
@@ -49,9 +87,17 @@ DETAIL_ENRICH_LIMIT = 80
 # ===========================
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
 }
 
 TIMEOUT = 40
@@ -70,7 +116,14 @@ BAD_TITLE_SET = {
     "landwatch listing",
 }
 
-STATUS_VALUES = {"available", "under_contract", "pending", "sold", "unknown"}
+STATUS_VALUES = {
+    "available",
+    "under_contract",
+    "pending",
+    "sold",
+    "off_market",
+    "unknown",
+}
 
 LEASE_KEYWORDS = {
     "lease",
@@ -92,7 +145,15 @@ def is_lease_listing(it: Dict[str, Any]) -> bool:
 
 # ------------------- Fetch -------------------
 def fetch_html(url: str) -> str:
-    r = session.get(url, timeout=TIMEOUT)
+    host = urlparse(url).netloc.lower()
+    headers = None
+    if "landwatch.com" in host:
+        headers = {
+            **HEADERS,
+            "Referer": "https://www.landwatch.com/",
+            "Sec-Fetch-Site": "same-origin",
+        }
+    r = session.get(url, timeout=TIMEOUT, headers=headers)
     r.raise_for_status()
     return r.text
 
@@ -201,17 +262,154 @@ def parse_acres(value: Any) -> Optional[float]:
 
 
 # ------------------- Status detection (STRICT) -------------------
-def detect_status(text: str) -> str:
-    t = (text or "").lower()
+def normalize_status(value: Any) -> str:
+    t = str(value or "").strip().lower()
+    if not t:
+        return "unknown"
 
-    if re.search(r"\bsold\b", t):
+    t = re.sub(r"[_\-]+", " ", t)
+    t = re.sub(r"\s+", " ", t).strip()
+
+    if re.search(r"\b(sold|closed|sale completed)\b", t):
         return "sold"
-    if re.search(r"\bunder\s+contract\b", t):
-        return "under_contract"
-    if re.search(r"\bpending\b", t):
+    if re.search(r"\b(pending|sale pending)\b", t):
         return "pending"
-    if re.search(r"\bavailable\b", t) or re.search(r"\bfor\s+sale\b", t) or re.search(r"\bactive\b", t):
+    if re.search(r"\b(under contract|in contract|under agreement)\b", t):
+        return "under_contract"
+    if re.search(
+        r"\b(off market|offmarket|withdrawn|removed|inactive|canceled|cancelled|expired|no longer available|not available)\b",
+        t,
+    ):
+        return "off_market"
+
+    if re.search(r"(schema\.org/instock|\bin stock\b)", t):
         return "available"
+    if re.search(r"(schema\.org/soldout|\bsold out\b|\bout of stock\b|schema\.org/discontinued)", t):
+        return "off_market"
+
+    if re.search(r"\b(available|active)\b", t):
+        return "available"
+
+    return "unknown"
+
+
+def detect_status(text: str) -> str:
+    t = (text or "").strip()
+    if not t:
+        return "unknown"
+
+    # Strict priority: sold -> under_contract -> pending -> off_market/removed.
+    if re.search(r"\b(sold|closed|sale completed)\b", t, flags=re.IGNORECASE):
+        return "sold"
+    if re.search(r"\b(under\s+contract|in\s+contract|under\s+agreement)\b", t, flags=re.IGNORECASE):
+        return "under_contract"
+    if re.search(r"\b(pending|sale pending)\b", t, flags=re.IGNORECASE):
+        return "pending"
+    if re.search(
+        r"\b(off[\s\-]?market|removed|withdrawn|inactive|canceled|cancelled|expired|no longer available|not available)\b",
+        t,
+        flags=re.IGNORECASE,
+    ):
+        return "off_market"
+
+    # Only trust available/active when shown as a status label.
+    if re.search(
+        r"(?:listing\s*status|property\s*status|sale\s*status|transaction\s*status|availability|status)\s*[:\-]\s*(?:\bactive\b|\bavailable\b)",
+        t,
+        flags=re.IGNORECASE,
+    ):
+        return "available"
+    if re.fullmatch(r"\s*(?:\bactive\b|\bavailable\b)\s*", t, flags=re.IGNORECASE):
+        return "available"
+
+    return "unknown"
+
+
+def extract_status_from_next_data(next_data: dict) -> Optional[str]:
+    status_keys = {
+        "status",
+        "listingstatus",
+        "propertystatus",
+        "salestatus",
+        "transactionstatus",
+        "availability",
+    }
+
+    for d in walk(next_data):
+        if not isinstance(d, dict):
+            continue
+
+        for k, v in d.items():
+            key = str(k).strip().lower().replace("_", "").replace("-", "")
+            if key not in status_keys:
+                continue
+
+            if isinstance(v, str):
+                s = detect_status(v)
+                if s != "unknown":
+                    return s
+
+            if isinstance(v, (dict, list)):
+                for nested in walk(v):
+                    if not isinstance(nested, dict):
+                        continue
+                    for nv in nested.values():
+                        if not isinstance(nv, str):
+                            continue
+                        s = detect_status(nv)
+                        if s != "unknown":
+                            return s
+
+    return None
+
+
+def extract_status_from_dict(d: dict) -> str:
+    status_keys = {
+        "status",
+        "listingstatus",
+        "salestatus",
+        "transactionstatus",
+        "state",
+        "availability",
+        "label",
+        "badge",
+        "badges",
+    }
+    allowed = {"available", "under_contract", "pending", "sold", "off_market", "unknown"}
+
+    def _normalize_result(raw: str) -> str:
+        s = (raw or "unknown").strip().lower()
+        return s if s in allowed else "unknown"
+
+    for k, v in d.items():
+        key = str(k).strip().lower().replace("_", "").replace("-", "")
+        if key not in status_keys:
+            continue
+
+        if isinstance(v, str):
+            s = _normalize_result(detect_status(v))
+            if s != "unknown":
+                return s
+
+        elif isinstance(v, list):
+            for part in v:
+                if isinstance(part, str):
+                    s = _normalize_result(detect_status(part))
+                    if s != "unknown":
+                        return s
+                elif isinstance(part, dict):
+                    for sub_v in part.values():
+                        if isinstance(sub_v, str):
+                            s = _normalize_result(detect_status(sub_v))
+                            if s != "unknown":
+                                return s
+
+        elif isinstance(v, dict):
+            for sub_v in v.values():
+                if isinstance(sub_v, str):
+                    s = _normalize_result(detect_status(sub_v))
+                    if s != "unknown":
+                        return s
 
     return "unknown"
 
@@ -219,6 +417,9 @@ def detect_status(text: str) -> str:
 # ------------------- Helpers -------------------
 def to_row(it: Dict[str, Any], run_utc: str) -> Dict[str, Any]:
     listing_id = it.get("listing_id") or it.get("url")
+    status = detect_status(str(it.get("status") or ""))
+    if status not in STATUS_VALUES:
+        status = "unknown"
     return {
         "listing_id": listing_id,
         "title": it.get("title"),
@@ -226,7 +427,7 @@ def to_row(it: Dict[str, Any], run_utc: str) -> Dict[str, Any]:
         "source": it.get("source"),
         "price": it.get("price"),
         "acres": it.get("acres"),
-        "status": it.get("status") or "unknown",
+        "status": status,
         "thumbnail": it.get("thumbnail"),
         "found_utc": it.get("found_utc") or run_utc,
         "derived_state": it.get("derived_state"),
@@ -243,7 +444,7 @@ def _chunks(lst, size=500):
 
 
 def upsert_to_supabase(items: List[Dict[str, Any]], run_utc: str) -> int:
-    rows = [to_row(it, run_utc) for it in items if it.get("url")]
+    rows = [scraper_pipeline.to_row(it, run_utc) for it in items if it.get("url")]
     if not rows:
         return 0
 
@@ -260,6 +461,61 @@ def record_scrape_run(run_utc: str, written: int, enriched: int) -> None:
         {"run_utc": run_utc, "written": int(
             written), "enriched": int(enriched)}
     ).execute()
+
+
+def mark_stale_listings_inactive(run_utc: str, stale_days: int = 14) -> int:
+    try:
+        run_dt = datetime.fromisoformat(run_utc)
+    except Exception:
+        run_dt = datetime.now(timezone.utc)
+
+    stale_cutoff_utc = (run_dt - timedelta(days=stale_days)).isoformat()
+
+    stale_rows: List[Dict[str, Any]] = []
+    page_size = 1000
+    start = 0
+    while True:
+        resp = (
+            supabase.table("listings")
+            .select("listing_id,status")
+            .eq("is_active", True)
+            .lt("last_seen_utc", stale_cutoff_utc)
+            .range(start, start + page_size - 1)
+            .execute()
+        )
+        batch = resp.data or []
+        if not batch:
+            break
+        stale_rows.extend(batch)
+        if len(batch) < page_size:
+            break
+        start += page_size
+
+    stale_ids = [str(r.get("listing_id")) for r in stale_rows if r.get("listing_id")]
+    if not stale_ids:
+        return 0
+
+    for chunk in _chunks(stale_ids, size=500):
+        supabase.table("listings").update({"is_active": False}).eq("is_active", True).in_(
+            "listing_id", chunk
+        ).execute()
+
+    # Only mark off_market when status is null/empty/unknown/available.
+    for chunk in _chunks(stale_ids, size=500):
+        supabase.table("listings").update({"status": "off_market"}).eq("is_active", False).eq(
+            "status", "unknown"
+        ).in_("listing_id", chunk).execute()
+        supabase.table("listings").update({"status": "off_market"}).eq("is_active", False).eq(
+            "status", "available"
+        ).in_("listing_id", chunk).execute()
+        supabase.table("listings").update({"status": "off_market"}).eq("is_active", False).eq(
+            "status", ""
+        ).in_("listing_id", chunk).execute()
+        supabase.table("listings").update({"status": "off_market"}).eq("is_active", False).is_(
+            "status", "null"
+        ).in_("listing_id", chunk).execute()
+
+    return len(stale_ids)
 
 
 def get_next_data_json(html: str) -> Optional[dict]:
@@ -336,13 +592,79 @@ def is_top_match_now(it: Dict[str, Any], min_a: float, max_a: float, max_p: int)
         acres = it.get("acres")
         price = it.get("price")
         status = (it.get("status") or "unknown").lower()
-        if status in {"under_contract", "pending", "sold"}:
+        if status != "available":
             return False
         if acres is None or price is None:
             return False
         return (min_a <= float(acres) <= max_a) and (int(price) <= int(max_p))
     except Exception:
         return False
+
+
+def _collect_status_like_dom_text(soup: BeautifulSoup) -> List[str]:
+    out: List[str] = []
+    seen = set()
+    key_re = re.compile(r"(status|badge|pill|label|availability)", flags=re.IGNORECASE)
+    for el in soup.find_all(True):
+        classes = " ".join(el.get("class") or [])
+        ident = str(el.get("id") or "")
+        attrs_blob = f"{classes} {ident}"
+        if not key_re.search(attrs_blob):
+            continue
+        txt = el.get_text(" ", strip=True)
+        txt = re.sub(r"\s+", " ", txt).strip()
+        if not txt or len(txt) > 120:
+            continue
+        key = txt.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(txt)
+    return out
+
+
+def _collect_status_like_jsonld_values(blocks: List[dict]) -> List[str]:
+    out: List[str] = []
+    seen = set()
+    status_keys = {
+        "status",
+        "listingstatus",
+        "propertystatus",
+        "salestatus",
+        "transactionstatus",
+        "availability",
+        "availabilitystarts",
+        "availabilityends",
+    }
+    for block in blocks:
+        for d in walk(block):
+            if not isinstance(d, dict):
+                continue
+            for k, v in d.items():
+                key = str(k).strip().lower().replace("_", "").replace("-", "")
+                if key not in status_keys:
+                    continue
+                if isinstance(v, str):
+                    txt = re.sub(r"\s+", " ", v).strip()
+                    if not txt:
+                        continue
+                    lk = txt.lower()
+                    if lk in seen:
+                        continue
+                    seen.add(lk)
+                    out.append(txt)
+                elif isinstance(v, dict):
+                    for sub_v in v.values():
+                        if isinstance(sub_v, str):
+                            txt = re.sub(r"\s+", " ", sub_v).strip()
+                            if not txt:
+                                continue
+                            lk = txt.lower()
+                            if lk in seen:
+                                continue
+                            seen.add(lk)
+                            out.append(txt)
+    return out
 
 
 def enrich_from_detail_page(url: str) -> Dict[str, Any]:
@@ -369,18 +691,32 @@ def enrich_from_detail_page(url: str) -> Dict[str, Any]:
 
     thumb = meta("og:image", "property") or meta("twitter:image", "name")
 
-    status_text = " ".join(
-        [
-            meta("og:description", "property"),
-            meta("twitter:description", "name"),
-            soup.get_text(" ", strip=True)[:20000],
-        ]
-    )
-    status = detect_status(status_text)
+    blocks = get_json_ld(html)
+    status = "unknown"
+    next_data = get_next_data_json(html)
+    if next_data and "landsearch.com" in urlparse(url).netloc.lower():
+        next_status = extract_status_from_next_data(next_data)
+        if next_status:
+            status = next_status
+    if status == "unknown":
+        status_candidates: List[str] = []
+        status_candidates.extend(_collect_status_like_dom_text(soup))
+        status_candidates.extend(
+            [
+                meta("og:description", "property"),
+                meta("twitter:description", "name"),
+            ]
+        )
+        status_candidates.extend(_collect_status_like_jsonld_values(blocks))
+        for candidate in status_candidates:
+            s = detect_status(candidate)
+            if s != "unknown":
+                status = s
+                break
 
     price = None
     acres = None
-    for block in get_json_ld(html):
+    for block in blocks:
         for d in walk(block):
             if not isinstance(d, dict):
                 continue
@@ -461,6 +797,7 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
         )
 
         thumb = try_thumbnail_from_dict(d)
+        status = extract_status_from_dict(d)
 
         items.append(
             {
@@ -470,7 +807,7 @@ def extract_from_landsearch_next(base_url: str, next_data: dict) -> List[Dict[st
                 "price": price,
                 "acres": acres,
                 "thumbnail": thumb,
-                "status": "unknown",
+                "status": status,
             }
         )
 
@@ -629,13 +966,17 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
 
     if "landsearch.com" in host and next_data:
-        items.extend(extract_from_landsearch_next(url, next_data))
+        items.extend(extract_landsearch_next(url, next_data))
+    elif "landwatch.com" in host:
+        items.extend(extract_landwatch_listings(url, html))
+    elif "landandfarm.com" in host:
+        items.extend(extract_landandfarm_listings(url, html))
+    else:
+        if json_ld_blocks:
+            items.extend(extract_from_jsonld(url, json_ld_blocks, source_name))
 
-    if json_ld_blocks:
-        items.extend(extract_from_jsonld(url, json_ld_blocks, source_name))
-
-    if not items:
-        items.extend(extract_from_html_fallback(url, html, source_name))
+        if not items:
+            items.extend(extract_from_html_fallback(url, html, source_name))
 
     items = [it for it in items if not is_lease_listing(it)]
 
@@ -736,34 +1077,13 @@ def main():
 
         all_items.extend(batch)
 
-    seen = set()
-    final: List[Dict[str, Any]] = []
-    for x in all_items:
-        u = x.get("url")
-        if not u or u in seen:
-            continue
-        seen.add(u)
-
-        prev = old_map.get(u, {})
-        x["found_utc"] = prev.get("found_utc") or run_utc
-        x["ever_top_match"] = bool(prev.get("ever_top_match", False))
-
-        if is_bad_title(x.get("title")):
-            x["title"] = f"{x.get('source','Listing')} listing"
-
-        x["status"] = "unknown"
-
-        if is_lease_listing(x):
-            continue
-
-        final.append(x)
-
-    final.sort(key=lambda it: it.get("found_utc") or "", reverse=True)
-    final.sort(
-        key=lambda it: (
-            0 if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE) else 1,
-            0 if should_enrich(it) else 1,
-        )
+    final = scraper_pipeline.finalize_scraped_items(
+        all_items,
+        old_map,
+        run_utc,
+        MIN_ACRES,
+        MAX_ACRES,
+        MAX_PRICE,
     )
 
     enriched = 0
@@ -791,17 +1111,12 @@ def main():
 
             enriched += 1
 
-    final = [it for it in final if not is_lease_listing(it)]
-
-    for it in final:
-        s = (it.get("status") or "unknown").lower()
-        if s not in STATUS_VALUES:
-            it["status"] = "unknown"
-
-    for it in final:
-        if not it.get("ever_top_match"):
-            if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE):
-                it["ever_top_match"] = True
+    final = scraper_pipeline.finalize_enriched_items(
+        final,
+        MIN_ACRES,
+        MAX_ACRES,
+        MAX_PRICE,
+    )
 
     if len(final) == 0 and os.path.exists(DATA_FILE):
         print("⚠️ Scrape returned 0 listings. Keeping existing items, updating last_attempted_utc.")
@@ -812,9 +1127,17 @@ def main():
             json.dump(old_file, f, indent=2)
         return
 
+    source_counts: Dict[str, int] = {}
+    for it in final:
+        source = str(it.get("source") or "Unknown")
+        source_counts[source] = source_counts.get(source, 0) + 1
+
     written = upsert_to_supabase(final, run_utc)
+    stale_marked = mark_stale_listings_inactive(run_utc, stale_days=14)
     record_scrape_run(run_utc, written, enriched)
     print(f"Upserted {written} listings to Supabase. Enriched: {enriched}.")
+    print(f"Source counts: {source_counts}")
+    print(f"Marked {stale_marked} stale listings inactive.")
 
     # Optional debug snapshot
     out = {

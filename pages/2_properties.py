@@ -6,7 +6,15 @@ from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urlparse
 
 import streamlit as st
-from data_access import get_listings, get_system_state
+from data_access import (
+    add_favorite,
+    get_app_settings,
+    get_favorite_records,
+    get_favorite_listing_ids,
+    get_listings,
+    get_system_state,
+    remove_favorite,
+)
 
 
 
@@ -28,7 +36,10 @@ CAPTION = "What's meant for you is already in motion."
 
 # ---------- Load data ----------
 items: List[Dict[str, Any]] = get_listings() or []
-criteria = {}
+favorite_ids = get_favorite_listing_ids()
+favorite_records = get_favorite_records()
+app_settings = get_app_settings() or {}
+criteria = (app_settings.get("criteria") if isinstance(app_settings, dict) else {}) or {}
 state = get_system_state()
 last_updated = state.get("last_updated_utc")
 last_attempted = state.get("last_attempted_utc")
@@ -142,6 +153,7 @@ st.markdown(
 .kb-pill--sold           { background: rgba(239, 68, 68, 0.14);  border-color: rgba(239, 68, 68, 0.32); }
 .kb-pill--off_market     { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
 .kb-pill--unknown        { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
+.kb-pill--favorite       { background: rgba(244, 63, 94, 0.16); border-color: rgba(244, 63, 94, 0.35); }
 
 /* Placeholder */
 .kb-ph {
@@ -226,6 +238,13 @@ def pill(text: str, variant: str) -> str:
     return f"<span class='kb-pill kb-pill--{variant}'>{text}</span>"
 
 
+def render_active_chips(chips: List[str]) -> None:
+    if not chips:
+        return
+    html = "".join([pill(c, "found") for c in chips])
+    st.markdown(f"<div class='kb-badges'>{html}</div>", unsafe_allow_html=True)
+
+
 # ============================================================
 # Header + Last updated
 # ============================================================
@@ -236,19 +255,27 @@ st.write("")
 
 
 st.info("Updates run automatically every 3 hours. ")
+if st.button("Return to Dashboard", width="stretch"):
+    st.switch_page("dashboard.py")
+if st.button("Return to Favorites", width="stretch"):
+    st.switch_page("pages/3_favorites.py")
 
 # ✅ Search stays top-of-page
 search_query = st.text_input(
     "Search (title / location / source)",
-    value="",
+    value=st.session_state.get("props_search_query", ""),
     placeholder="Try: king george, port royal, landwatch, 20 acres…",
+    key="props_search_query",
 )
 
 
 # ---------- Defaults ----------
-default_max_price = int(criteria.get("max_price", 600000) or 600000)
-default_min_acres = float(criteria.get("min_acres", 10.0) or 10.0)
-default_max_acres = float(criteria.get("max_acres", 50.0) or 50.0)
+MIN_ACRES = 10.0
+MAX_ACRES = 50.0
+MAX_PRICE = 600_000
+default_max_price = int(criteria.get("max_price", MAX_PRICE) or MAX_PRICE)
+default_min_acres = float(criteria.get("min_acres", MIN_ACRES) or MIN_ACRES)
+default_max_acres = float(criteria.get("max_acres", MAX_ACRES) or MAX_ACRES)
 
 
 # ============================================================
@@ -260,7 +287,6 @@ STATUS_LABEL = {
     "under_contract": "UNDER CONTRACT",
     "pending": "PENDING",
     "sold": "SOLD",
-    "contingent": "CONTINGENT",
     "off_market": "OFF MARKET",
     "unknown": "STATUS UNKNOWN",
 }
@@ -278,12 +304,12 @@ def get_status(it: Dict[str, Any]) -> str:
     if "pending" in s:
         return "pending"
     if "contingent" in s:
-        return "contingent"
+        return "under_contract"
     if "under contract" in s or "active under contract" in s or s == "contract" or " contract" in s:
         return "under_contract"
-    if "off market" in s or "removed" in s or "unavailable" in s:
+    if "off market" in s or "removed" in s or "unavailable" in s or re.search(r"\binactive\b", s):
         return "off_market"
-    if "available" in s or "active" in s:
+    if re.search(r"\bavailable\b", s) or re.search(r"\bactive\b", s):
         return "available"
 
     return "unknown"
@@ -318,6 +344,8 @@ def is_new(it: Dict[str, Any]) -> bool:
 
 # ✅ MATCH RULES: only AVAILABLE can be Top
 def is_top_match(it: Dict[str, Any], min_a: float, max_a: float, max_p: int) -> bool:
+    if it.get("is_active") is not True:
+        return False
     if get_status(it) != "available":
         return False
     return meets_acres(it, min_a, max_a) and meets_price(it, max_p)
@@ -530,26 +558,71 @@ for it in items:
 
 state_to_counties_sorted: Dict[str, List[str]] = {k: sorted(list(v)) for k, v in state_to_counties.items()}
 
+STATUS_FILTER_OPTIONS = ["available", "under_contract", "pending", "sold", "off_market", "unknown"]
+if "props_selected_states" not in st.session_state:
+    st.session_state["props_selected_states"] = states
+if "props_status_filter" not in st.session_state:
+    st.session_state["props_status_filter"] = STATUS_FILTER_OPTIONS[:]
+if "props_sort_mode" not in st.session_state:
+    st.session_state["props_sort_mode"] = "Favorites First"
+if "props_search_query" not in st.session_state:
+    st.session_state["props_search_query"] = ""
+
 with st.expander("Filters", expanded=False):
-    show_top_only = st.toggle("Show top matches", value=True)
-    show_new_only = st.toggle("New only", value=False)
-    sort_newest = st.toggle("Newest first", value=True)
-    show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5)
+    if st.button("Reset Filters", key="props_reset_filters", width="stretch"):
+        st.session_state["props_show_top_only"] = True
+        st.session_state["props_show_new_only"] = False
+        st.session_state["props_show_favorites_only"] = False
+        st.session_state["props_hide_unknown"] = False
+        st.session_state["props_group_duplicates"] = False
+        st.session_state["props_sort_mode"] = "Favorites First"
+        st.session_state["props_show_n"] = 50
+        st.session_state["props_max_price"] = default_max_price
+        st.session_state["props_min_acres"] = default_min_acres
+        st.session_state["props_max_acres"] = default_max_acres
+        st.session_state["props_status_filter"] = STATUS_FILTER_OPTIONS[:]
+        st.session_state["props_selected_states"] = states
+        st.session_state["props_selected_counties"] = []
+        st.session_state["props_search_query"] = ""
+        st.rerun()
+
+    show_top_only = st.toggle("Show top matches", value=True, key="props_show_top_only")
+    show_new_only = st.toggle("New only", value=False, key="props_show_new_only")
+    show_favorites_only = st.toggle("Favorites only", value=False, key="props_show_favorites_only")
+    hide_unknown = st.toggle("Hide unknown status", value=False, key="props_hide_unknown")
+    group_duplicates = st.toggle("Group duplicates", value=False, key="props_group_duplicates")
+    sort_mode = st.selectbox(
+        "Sort",
+        options=["Favorites First", "Top Matches First", "Newest", "Price Low to High", "Acres High to Low"],
+        key="props_sort_mode",
+    )
+    show_n = st.slider("Show how many", min_value=5, max_value=200, value=50, step=5, key="props_show_n")
 
     st.write("")
-    max_price = st.number_input("Max price (Top match)", min_value=0, value=default_max_price, step=10000)
-    min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0)
-    max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0)
+    max_price = st.number_input("Max price (Top match)", min_value=0, value=default_max_price, step=10000, key="props_max_price")
+    min_acres = st.number_input("Min acres", min_value=0.0, value=default_min_acres, step=1.0, key="props_min_acres")
+    max_acres = st.number_input("Max acres", min_value=0.0, value=default_max_acres, step=1.0, key="props_max_acres")
+    status_filter = st.multiselect(
+        "Statuses",
+        options=STATUS_FILTER_OPTIONS,
+        default=STATUS_FILTER_OPTIONS,
+        key="props_status_filter",
+    )
 
     st.write("")
     st.markdown("**Location**")
 
     colA, colB = st.columns(2)
+    valid_states = [s for s in st.session_state.get("props_selected_states", states) if s in states]
+    if not valid_states and states:
+        valid_states = states[:]
+    st.session_state["props_selected_states"] = valid_states
     with colA:
         selected_states = st.multiselect(
             "State",
             options=states,
             default=states if states else [],
+            key="props_selected_states",
         )
 
     # counties limited to selected states
@@ -557,6 +630,13 @@ with st.expander("Filters", expanded=False):
     for st_ in selected_states:
         counties_for_selected_states.extend(state_to_counties_sorted.get(st_, []))
     counties_for_selected_states = sorted(set(counties_for_selected_states))
+    valid_counties = [
+        c for c in st.session_state.get("props_selected_counties", counties_for_selected_states)
+        if c in counties_for_selected_states
+    ]
+    if not valid_counties and counties_for_selected_states:
+        valid_counties = counties_for_selected_states[:]
+    st.session_state["props_selected_counties"] = valid_counties
 
     with colB:
         selected_counties = st.multiselect(
@@ -564,9 +644,10 @@ with st.expander("Filters", expanded=False):
             options=counties_for_selected_states,
             default=counties_for_selected_states,
             disabled=(len(counties_for_selected_states) == 0),
+            key="props_selected_counties",
         )
 
-    show_debug = st.toggle("Show debug", value=False)
+    show_debug = st.toggle("Show debug", value=False, key="props_show_debug")
 
     if show_debug:
         st.write("### Debug (first 12 items)")
@@ -603,6 +684,51 @@ def passes_location(it: Dict[str, Any]) -> bool:
 loc_items = [it for it in items if passes_location(it)]
 
 
+def duplicate_fingerprint(it: Dict[str, Any]) -> tuple:
+    t = re.sub(r"[^a-z0-9 ]+", " ", str(it.get("title") or "").lower())
+    t = re.sub(r"\s+", " ", t).strip()
+    t = t[:90]
+    try:
+        p = int(float(it.get("price"))) if it.get("price") not in (None, "") else None
+    except Exception:
+        p = None
+    try:
+        a = round(float(it.get("acres")), 2) if it.get("acres") not in (None, "") else None
+    except Exception:
+        a = None
+    return (
+        t,
+        p,
+        a,
+        (get_county(it) or "").lower(),
+        (get_state(it) or "").lower(),
+    )
+
+
+def group_duplicate_items(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    grouped: Dict[tuple, Dict[str, Any]] = {}
+    for it in rows:
+        key = duplicate_fingerprint(it)
+        src = str(it.get("source") or "Unknown").strip() or "Unknown"
+        if key not in grouped:
+            cp = dict(it)
+            cp["_group_sources"] = {src}
+            grouped[key] = cp
+            continue
+        existing = grouped[key]
+        existing["_group_sources"].add(src)
+        # keep item with thumbnail if current representative has none
+        if not existing.get("thumbnail") and it.get("thumbnail"):
+            for k, v in it.items():
+                existing[k] = v
+            existing["_group_sources"].add(src)
+    out: List[Dict[str, Any]] = []
+    for it in grouped.values():
+        it["_group_sources"] = sorted(list(it.get("_group_sources", [])))
+        out.append(it)
+    return out
+
+
 # ============================================================
 # Details (location-scoped)
 # ============================================================
@@ -619,11 +745,12 @@ for it in loc_items:
 with st.expander("Details", expanded=False):
     st.caption(f"Criteria: ${max_price:,.0f} max • {min_acres:g}–{max_acres:g} acres")
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("All listings", f"{len(loc_items)}")
     c2.metric("Available", f"{len(available_loc)}")
     c3.metric("Top matches", f"{len(top_matches_all)}")
     c4.metric("New top matches", f"{len(new_top_matches_all)}")
+    c5.metric("Favorites", f"{len(favorite_ids)}")
 
     st.write("")
     st.markdown("**Sources**")
@@ -652,14 +779,66 @@ if show_new_only:
 if show_top_only:
     filtered = [it for it in filtered if is_top_match(it, min_acres, max_acres, max_price)]
 
+# Favorites only
+if show_favorites_only:
+    filtered = [it for it in filtered if str(it.get("listing_id") or it.get("url") or "") in favorite_ids]
+
+if status_filter:
+    filtered = [it for it in filtered if get_status(it) in set(status_filter)]
+if hide_unknown:
+    filtered = [it for it in filtered if get_status(it) != "unknown"]
+if group_duplicates:
+    filtered = group_duplicate_items(filtered)
+
 
 def sort_key(it: Dict[str, Any]):
-    tier = 2 if is_top_match(it, min_acres, max_acres, max_price) else 1
-    return (tier, parse_dt(it))
+    def _num(val: Any, fallback: float) -> float:
+        try:
+            if val in (None, ""):
+                return fallback
+            return float(val)
+        except Exception:
+            return fallback
+
+    listing_id = str(it.get("listing_id") or it.get("url") or "")
+    fav = listing_id in favorite_ids
+    top = is_top_match(it, min_acres, max_acres, max_price)
+    price = _num(it.get("price"), float("inf"))
+    acres = _num(it.get("acres"), float("-inf"))
+    found = parse_dt(it)
+    if sort_mode == "Favorites First":
+        return (1 if fav else 0, 1 if top else 0, found)
+    if sort_mode == "Top Matches First":
+        return (1 if top else 0, 1 if fav else 0, found)
+    if sort_mode == "Newest":
+        return (found,)
+    if sort_mode == "Price Low to High":
+        return (-price, 1 if fav else 0, 1 if top else 0)
+    return (1 if fav else 0, 1 if top else 0, acres)
 
 
-if sort_newest:
-    filtered = sorted(filtered, key=sort_key, reverse=True)
+filtered = sorted(filtered, key=sort_key, reverse=True)
+
+active_chips: List[str] = [f"Showing {len(filtered)} of {len(loc_items)}"]
+if show_top_only:
+    active_chips.append("Top Matches")
+if show_new_only:
+    active_chips.append("New")
+if show_favorites_only:
+    active_chips.append("Favorites")
+if hide_unknown:
+    active_chips.append("Hide Unknown")
+if group_duplicates:
+    active_chips.append("Grouped")
+if search_query.strip():
+    active_chips.append(f"Search: {search_query.strip()}")
+if status_filter and len(status_filter) < len(STATUS_FILTER_OPTIONS):
+    active_chips.append("Status Filter")
+active_chips.append(f"Sort: {sort_mode}")
+active_chips.append(f"{min_acres:g}-{max_acres:g} ac")
+active_chips.append(f"Max ${int(max_price):,}")
+render_active_chips(active_chips)
+st.caption(f"Summary: {len(available_loc)} available, {len(top_matches_all)} top matches, {len(favorite_ids)} favorites")
 
 filtered = filtered[:show_n]
 
@@ -698,9 +877,13 @@ def render_placeholder():
 # ============================================================
 
 def listing_card(it: Dict[str, Any]):
+    listing_id = str(it.get("listing_id") or it.get("url") or "")
+    is_fav = listing_id in favorite_ids
+    favorite_created_at = favorite_records.get(listing_id)
     title = it.get("title") or f"{it.get('source', 'Land')} listing"
     url = it.get("url") or ""
     source = it.get("source") or ""
+    grouped_sources = it.get("_group_sources") if isinstance(it.get("_group_sources"), list) else None
     price = it.get("price")
     acres = it.get("acres")
     thumb = it.get("thumbnail")
@@ -722,6 +905,9 @@ def listing_card(it: Dict[str, Any]):
     else:
         pills.append(pill("FOUND", "found"))
 
+    if is_fav:
+        pills.append(pill("FAVORITE", "favorite"))
+
     status_variant = status if status in {"available", "under_contract", "pending", "sold", "off_market"} else "unknown"
     pills.append(pill(STATUS_LABEL.get(status, "STATUS UNKNOWN"), status_variant))
 
@@ -731,20 +917,26 @@ def listing_card(it: Dict[str, Any]):
 
     with st.container(border=True):
         if thumb:
-            st.image(thumb, use_container_width=True)
+            st.image(thumb, width="stretch")
         else:
             render_placeholder()
 
         st.subheader(title)
+        if is_fav:
+            st.caption("♥ Saved")
         st.markdown(f"<div class='kb-badges'>{''.join(pills)}</div>", unsafe_allow_html=True)
 
         meta_bits: List[str] = []
         if loc_line:
             meta_bits.append(loc_line)
-        if source:
+        if grouped_sources:
+            meta_bits.append(" / ".join(grouped_sources))
+        elif source:
             meta_bits.append(source)
         if meta_bits:
             st.caption(" • ".join(meta_bits))
+        if favorite_created_at and is_fav:
+            st.caption(f"Saved on {format_last_updated_et(favorite_created_at)}")
 
         if price is None or price == "":
             st.write("**Price:** —")
@@ -763,7 +955,22 @@ def listing_card(it: Dict[str, Any]):
                 st.write(f"**Acres:** {acres}")
 
         if url:
-            st.link_button("Open listing ↗", url, use_container_width=True)
+            st.link_button("Open listing ↗", url, width="stretch")
+        fav_label = "♥ Saved" if is_fav else "♡ Save"
+        if st.button(fav_label, key=f"props_fav_{listing_id}", width="stretch"):
+            if is_fav:
+                ok, err = remove_favorite(listing_id)
+                if not ok:
+                    st.error(err)
+                    return
+                st.toast("Removed from favorites")
+            else:
+                ok, err = add_favorite(listing_id)
+                if not ok:
+                    st.error(err)
+                    return
+                st.toast("Saved to favorites")
+            st.rerun()
 
 
 # Grid (2 columns)
