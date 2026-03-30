@@ -974,7 +974,7 @@ def listing_card(it: Dict[str, Any]):
 
 
 # Grid (2 columns)
-cols = st.columns(1)
+cols = st.columns(2)
 for idx, it in enumerate(filtered):
     with cols[idx % 2]:
         listing_card(it)

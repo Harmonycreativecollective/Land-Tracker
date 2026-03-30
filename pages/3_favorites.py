@@ -296,7 +296,7 @@ if st.button("Return to Dashboard", width="stretch"):
 if st.button("Return to Properties", width="stretch"):
     st.switch_page("pages/2_properties.py")
 
-cols = st.columns(1)
+cols = st.columns(2)
 for idx, it in enumerate(favorite_items):
     listing_id = str(it.get("listing_id") or it.get("url") or "")
     is_fav = listing_id in favorite_ids
