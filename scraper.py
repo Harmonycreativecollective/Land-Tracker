@@ -10,6 +10,10 @@ from bs4 import BeautifulSoup
 from supabase import create_client
 
 from dotenv import load_dotenv
+from scrapers import pipeline as scraper_pipeline
+from scrapers.sites.landsearch import extract_from_landsearch_next as extract_landsearch_next
+from scrapers.sites.landwatch import extract_landwatch_listings
+
 load_dotenv()
 
 # =========================
@@ -29,8 +33,7 @@ SUPABASE_SERVICE_ROLE_KEY = get_env("SUPABASE_SERVICE_ROLE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 # ====== YOUR SETTINGS ======
-START_URLS = [
-    # ---- LandSearch (county pages, NO filters) ----
+LANDSEARCH_URLS = [
     "https://www.landsearch.com/properties/king-george-va",
     "https://www.landsearch.com/properties/westmoreland-county-va",
     "https://www.landsearch.com/properties/stafford-county-va",
@@ -38,6 +41,26 @@ START_URLS = [
     "https://www.landsearch.com/properties/frederick-county-md",
     "https://www.landsearch.com/properties/anne-arundel-county-md",
     "https://www.landsearch.com/properties/king-william-county-va",
+]
+
+LANDWATCH_URLS = [
+    "https://www.landwatch.com/virginia-land-for-sale/king-george",
+    "https://www.landwatch.com/virginia-land-for-sale/westmoreland-county",
+    "https://www.landwatch.com/virginia-land-for-sale/caroline-county",
+    "https://www.landwatch.com/virginia-land-for-sale/stafford-county",
+    "https://www.landwatch.com/maryland-land-for-sale/caroline-county",
+    "https://www.landwatch.com/maryland-land-for-sale/frederick-county",
+    "https://www.landwatch.com/maryland-land-for-sale/anne-arundel-county",
+    "https://www.landwatch.com/maryland-land-for-sale/montgomery-county",
+]
+
+ENABLE_LANDWATCH = False
+
+START_URLS = [
+    # ---- LandSearch (county pages, NO filters) ----
+    *LANDSEARCH_URLS,
+    # ---- LandWatch (disabled by default while debugging 403 blocks) ----
+    *(LANDWATCH_URLS if ENABLE_LANDWATCH else []),
 ]
 
 MIN_ACRES = 10.0
@@ -49,9 +72,17 @@ DETAIL_ENRICH_LIMIT = 80
 # ===========================
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
 }
 
 TIMEOUT = 40
@@ -99,7 +130,15 @@ def is_lease_listing(it: Dict[str, Any]) -> bool:
 
 # ------------------- Fetch -------------------
 def fetch_html(url: str) -> str:
-    r = session.get(url, timeout=TIMEOUT)
+    host = urlparse(url).netloc.lower()
+    headers = None
+    if "landwatch.com" in host:
+        headers = {
+            **HEADERS,
+            "Referer": "https://www.landwatch.com/",
+            "Sec-Fetch-Site": "same-origin",
+        }
+    r = session.get(url, timeout=TIMEOUT, headers=headers)
     r.raise_for_status()
     return r.text
 
@@ -390,7 +429,7 @@ def _chunks(lst, size=500):
 
 
 def upsert_to_supabase(items: List[Dict[str, Any]], run_utc: str) -> int:
-    rows = [to_row(it, run_utc) for it in items if it.get("url")]
+    rows = [scraper_pipeline.to_row(it, run_utc) for it in items if it.get("url")]
     if not rows:
         return 0
 
@@ -912,13 +951,15 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
 
     if "landsearch.com" in host and next_data:
-        items.extend(extract_from_landsearch_next(url, next_data))
+        items.extend(extract_landsearch_next(url, next_data))
+    elif "landwatch.com" in host:
+        items.extend(extract_landwatch_listings(url, html))
+    else:
+        if json_ld_blocks:
+            items.extend(extract_from_jsonld(url, json_ld_blocks, source_name))
 
-    if json_ld_blocks:
-        items.extend(extract_from_jsonld(url, json_ld_blocks, source_name))
-
-    if not items:
-        items.extend(extract_from_html_fallback(url, html, source_name))
+        if not items:
+            items.extend(extract_from_html_fallback(url, html, source_name))
 
     items = [it for it in items if not is_lease_listing(it)]
 
@@ -1019,35 +1060,13 @@ def main():
 
         all_items.extend(batch)
 
-    seen = set()
-    final: List[Dict[str, Any]] = []
-    for x in all_items:
-        u = x.get("url")
-        if not u or u in seen:
-            continue
-        seen.add(u)
-
-        prev = old_map.get(u, {})
-        x["found_utc"] = prev.get("found_utc") or run_utc
-        x["ever_top_match"] = bool(prev.get("ever_top_match", False))
-
-        if is_bad_title(x.get("title")):
-            x["title"] = f"{x.get('source','Listing')} listing"
-
-        s = detect_status(str(x.get("status") or ""))
-        x["status"] = s if s in STATUS_VALUES else "unknown"
-
-        if is_lease_listing(x):
-            continue
-
-        final.append(x)
-
-    final.sort(key=lambda it: it.get("found_utc") or "", reverse=True)
-    final.sort(
-        key=lambda it: (
-            0 if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE) else 1,
-            0 if should_enrich(it) else 1,
-        )
+    final = scraper_pipeline.finalize_scraped_items(
+        all_items,
+        old_map,
+        run_utc,
+        MIN_ACRES,
+        MAX_ACRES,
+        MAX_PRICE,
     )
 
     enriched = 0
@@ -1075,17 +1094,12 @@ def main():
 
             enriched += 1
 
-    final = [it for it in final if not is_lease_listing(it)]
-
-    for it in final:
-        s = (it.get("status") or "unknown").lower()
-        if s not in STATUS_VALUES:
-            it["status"] = "unknown"
-
-    for it in final:
-        if not it.get("ever_top_match"):
-            if is_top_match_now(it, MIN_ACRES, MAX_ACRES, MAX_PRICE):
-                it["ever_top_match"] = True
+    final = scraper_pipeline.finalize_enriched_items(
+        final,
+        MIN_ACRES,
+        MAX_ACRES,
+        MAX_PRICE,
+    )
 
     if len(final) == 0 and os.path.exists(DATA_FILE):
         print("⚠️ Scrape returned 0 listings. Keeping existing items, updating last_attempted_utc.")
