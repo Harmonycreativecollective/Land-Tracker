@@ -11,6 +11,7 @@ from supabase import create_client
 
 from dotenv import load_dotenv
 from scrapers import pipeline as scraper_pipeline
+from scrapers.sites.landandfarm import extract_landandfarm_listings
 from scrapers.sites.landsearch import extract_from_landsearch_next as extract_landsearch_next
 from scrapers.sites.landwatch import extract_landwatch_listings
 
@@ -54,13 +55,27 @@ LANDWATCH_URLS = [
     "https://www.landwatch.com/maryland-land-for-sale/montgomery-county",
 ]
 
+LANDANDFARM_URLS = [
+    "https://www.landandfarm.com/search/virginia/king-george-county-land-for-sale/",
+    "https://www.landandfarm.com/search/virginia/westmoreland-county-land-for-sale/",
+    "https://www.landandfarm.com/search/virginia/caroline-county-land-for-sale/",
+    "https://www.landandfarm.com/search/virginia/stafford-county-land-for-sale/",
+    "https://www.landandfarm.com/search/maryland/caroline-county-land-for-sale/",
+    "https://www.landandfarm.com/search/maryland/frederick-county-land-for-sale/",
+    "https://www.landandfarm.com/search/maryland/anne-arundel-county-land-for-sale/",
+    "https://www.landandfarm.com/search/maryland/montgomery-county-land-for-sale/",
+]
+
 ENABLE_LANDWATCH = False
+ENABLE_LANDANDFARM = True
 
 START_URLS = [
     # ---- LandSearch (county pages, NO filters) ----
     *LANDSEARCH_URLS,
     # ---- LandWatch (disabled by default while debugging 403 blocks) ----
     *(LANDWATCH_URLS if ENABLE_LANDWATCH else []),
+    # ---- Land & Farm ----
+    *(LANDANDFARM_URLS if ENABLE_LANDANDFARM else []),
 ]
 
 MIN_ACRES = 10.0
@@ -954,6 +969,8 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
         items.extend(extract_landsearch_next(url, next_data))
     elif "landwatch.com" in host:
         items.extend(extract_landwatch_listings(url, html))
+    elif "landandfarm.com" in host:
+        items.extend(extract_landandfarm_listings(url, html))
     else:
         if json_ld_blocks:
             items.extend(extract_from_jsonld(url, json_ld_blocks, source_name))
@@ -1110,10 +1127,16 @@ def main():
             json.dump(old_file, f, indent=2)
         return
 
+    source_counts: Dict[str, int] = {}
+    for it in final:
+        source = str(it.get("source") or "Unknown")
+        source_counts[source] = source_counts.get(source, 0) + 1
+
     written = upsert_to_supabase(final, run_utc)
     stale_marked = mark_stale_listings_inactive(run_utc, stale_days=14)
     record_scrape_run(run_utc, written, enriched)
     print(f"Upserted {written} listings to Supabase. Enriched: {enriched}.")
+    print(f"Source counts: {source_counts}")
     print(f"Marked {stale_marked} stale listings inactive.")
 
     # Optional debug snapshot
