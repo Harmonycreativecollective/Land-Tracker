@@ -67,7 +67,7 @@ LANDANDFARM_URLS = [
 ]
 
 ENABLE_LANDWATCH = False
-ENABLE_LANDANDFARM = True
+ENABLE_LANDANDFARM = False
 
 START_URLS = [
     # ---- LandSearch (county pages, NO filters) ----
