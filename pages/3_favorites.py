@@ -53,6 +53,8 @@ def get_status(it: Dict[str, Any]) -> str:
         return "under_contract"
     if "off market" in s or "removed" in s or "unavailable" in s or re.search(r"\binactive\b", s):
         return "off_market"
+    if "auction" in s:
+        return "auction"
     if re.search(r"\bavailable\b", s) or re.search(r"\bactive\b", s):
         return "available"
     return "unknown"
@@ -186,7 +188,7 @@ st.markdown(
 st.title("Favorites")
 st.caption(f"Last updated: {format_last_updated_et(last_updated)}")
 
-STATUS_FILTER_OPTIONS = ["available", "under_contract", "pending", "sold", "off_market", "unknown"]
+STATUS_FILTER_OPTIONS = ["available", "under_contract", "pending", "sold", "off_market", "auction", "unknown"]
 if "fav_search_query" not in st.session_state:
     st.session_state["fav_search_query"] = ""
 if "fav_status_filter" not in st.session_state:

@@ -178,6 +178,8 @@ def get_status(it: Dict[str, Any]) -> str:
         return "under_contract"
     if "off market" in s or "removed" in s or "unavailable" in s or re.search(r"\binactive\b", s):
         return "off_market"
+    if "auction" in s:
+        return "auction"
     if re.search(r"\bavailable\b", s) or re.search(r"\bactive\b", s):
         return "available"
 

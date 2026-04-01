@@ -152,6 +152,7 @@ st.markdown(
 .kb-pill--pending        { background: rgba(249, 115, 22, 0.16); border-color: rgba(249, 115, 22, 0.35); }
 .kb-pill--sold           { background: rgba(239, 68, 68, 0.14);  border-color: rgba(239, 68, 68, 0.32); }
 .kb-pill--off_market     { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
+.kb-pill--auction        { background: rgba(14, 165, 233, 0.14); border-color: rgba(14, 165, 233, 0.30); }
 .kb-pill--unknown        { background: rgba(100, 116, 139, 0.14); border-color: rgba(100, 116, 139, 0.30); }
 .kb-pill--favorite       { background: rgba(244, 63, 94, 0.16); border-color: rgba(244, 63, 94, 0.35); }
 
@@ -288,6 +289,7 @@ STATUS_LABEL = {
     "pending": "PENDING",
     "sold": "SOLD",
     "off_market": "OFF MARKET",
+    "auction": "AUCTION",
     "unknown": "STATUS UNKNOWN",
 }
 
@@ -309,6 +311,8 @@ def get_status(it: Dict[str, Any]) -> str:
         return "under_contract"
     if "off market" in s or "removed" in s or "unavailable" in s or re.search(r"\binactive\b", s):
         return "off_market"
+    if "auction" in s:
+        return "auction"
     if re.search(r"\bavailable\b", s) or re.search(r"\bactive\b", s):
         return "available"
 
@@ -558,7 +562,7 @@ for it in items:
 
 state_to_counties_sorted: Dict[str, List[str]] = {k: sorted(list(v)) for k, v in state_to_counties.items()}
 
-STATUS_FILTER_OPTIONS = ["available", "under_contract", "pending", "sold", "off_market", "unknown"]
+STATUS_FILTER_OPTIONS = ["available", "under_contract", "pending", "sold", "off_market", "auction", "unknown"]
 if "props_selected_states" not in st.session_state:
     st.session_state["props_selected_states"] = states
 if "props_status_filter" not in st.session_state:
@@ -908,7 +912,7 @@ def listing_card(it: Dict[str, Any]):
     if is_fav:
         pills.append(pill("FAVORITE", "favorite"))
 
-    status_variant = status if status in {"available", "under_contract", "pending", "sold", "off_market"} else "unknown"
+    status_variant = status if status in {"available", "under_contract", "pending", "sold", "off_market", "auction"} else "unknown"
     pills.append(pill(STATUS_LABEL.get(status, "STATUS UNKNOWN"), status_variant))
 
     # Card location line: prefer County if we have it, else show place/city

@@ -21,6 +21,7 @@ STATUS_VALUES = {
     "pending",
     "sold",
     "off_market",
+    "auction",
     "unknown",
 }
 
@@ -158,6 +159,8 @@ def normalize_status(value: Any) -> str:
         t,
     ):
         return "off_market"
+    if re.search(r"\bauction\b", t):
+        return "auction"
 
     if re.search(r"(schema\.org/instock|\bin stock\b)", t):
         return "available"
@@ -182,12 +185,18 @@ def detect_status(text: str) -> str:
         return "under_contract"
     if re.search(r"\b(pending|sale pending)\b", t, flags=re.IGNORECASE):
         return "pending"
+    if re.search(r"\bauction\b", t, flags=re.IGNORECASE):
+        return "auction"
     if re.search(
         r"\b(off[\s\-]?market|removed|withdrawn|inactive|canceled|cancelled|expired|no longer available|not available)\b",
         t,
         flags=re.IGNORECASE,
     ):
         return "off_market"
+    if re.search(r"(schema\.org/soldout|\bsold out\b|\bout of stock\b|schema\.org/discontinued)", t, flags=re.IGNORECASE):
+        return "off_market"
+    if re.search(r"(schema\.org/instock|\bin stock\b|\bactive\s+sale\b)", t, flags=re.IGNORECASE):
+        return "available"
 
     if re.search(
         r"(?:listing\s*status|property\s*status|sale\s*status|transaction\s*status|availability|status)\s*[:\-]\s*(?:\bactive\b|\bavailable\b)",
