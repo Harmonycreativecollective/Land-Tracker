@@ -12,7 +12,7 @@ from supabase import create_client
 from dotenv import load_dotenv
 from scrapers import pipeline as scraper_pipeline
 from scrapers.sites.landandfarm import extract_landandfarm_listings
-from scrapers.sites.landsearch import extract_from_landsearch_next as extract_landsearch_next
+from scrapers.sites.landsearch import extract_landsearch_listings
 from scrapers.sites.landwatch import extract_landwatch_listings
 
 load_dotenv()
@@ -974,8 +974,8 @@ def extract_listings(url: str, html: str) -> List[Dict[str, Any]]:
 
     items: List[Dict[str, Any]] = []
 
-    if "landsearch.com" in host and next_data:
-        items.extend(extract_landsearch_next(url, next_data))
+    if "landsearch.com" in host:
+        items.extend(extract_landsearch_listings(url, html, next_data))
     elif "landwatch.com" in host:
         items.extend(extract_landwatch_listings(url, html))
     elif "landandfarm.com" in host:
