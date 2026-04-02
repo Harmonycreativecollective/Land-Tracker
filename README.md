@@ -162,3 +162,21 @@ System is production-stable and ready for:
 - URL paste / add listing feature
 - Cross-site canonical deduplication (LandSearch + LandWatch)
 - Optional custom domain mapping
+
+## Experimental Work
+
+### Playwright Integration
+Started: 2026-03-29  
+Branch: playwright-experiments  
+
+Playwright is being explored to handle scraping for sources that block standard HTTP requests (LandWatch, LandAndFarm).
+
+Current status (as of 2026-03-29):
+- LandSearch remains stable and request-based
+- Playwright setup and smoke testing in progress
+- Browser-based scraping is not yet integrated into production logic
+
+Notes:
+- LandWatch and LandAndFarm remain disabled by default
+- Playwright is a long-term enhancement, not an urgent fix
+- No impact to current Top Match logic or existing scraper behavior
