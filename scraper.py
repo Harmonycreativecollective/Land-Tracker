@@ -676,6 +676,61 @@ def _collect_status_like_jsonld_values(blocks: List[dict]) -> List[str]:
     return out
 
 
+def _extract_trusted_status_from_availability(blocks: List[dict]) -> str:
+    for block in blocks:
+        for d in walk(block):
+            if not isinstance(d, dict):
+                continue
+
+            offers = d.get("offers")
+            if isinstance(offers, dict):
+                availability = str(offers.get("availability") or "").strip().lower()
+                if not availability:
+                    continue
+                if "schema.org/instock" in availability or availability.endswith("/instock"):
+                    return "available"
+                if any(token in availability for token in ("schema.org/soldout", "soldout", "outofstock", "discontinued")):
+                    return "off_market"
+
+            availability = str(d.get("availability") or "").strip().lower()
+            if not availability:
+                continue
+            if "schema.org/instock" in availability or availability.endswith("/instock"):
+                return "available"
+            if any(token in availability for token in ("schema.org/soldout", "soldout", "outofstock", "discontinued")):
+                return "off_market"
+
+    return "unknown"
+
+
+
+def _extract_trusted_status_from_landsearch_detail(soup: BeautifulSoup, blocks: List[dict]) -> str:
+    for el in soup.select(".property-status__item.-status"):
+        txt = re.sub(r"\s+", " ", el.get_text(" ", strip=True)).strip().lower()
+        if txt == "active sale" or txt == "active":
+            return "available"
+        if txt == "pending":
+            return "pending"
+        if txt == "under contract":
+            return "under_contract"
+        if txt == "sold":
+            return "sold"
+        if txt in {"off market", "removed", "inactive"}:
+            return "off_market"
+
+    structured_status = _extract_trusted_status_from_availability(blocks)
+    if structured_status != "unknown":
+        return structured_status
+
+    for p in soup.select(".property-meta__copy > p"):
+        txt = re.sub(r"\s+", " ", p.get_text(" ", strip=True)).strip().lower()
+        if "available for sale" in txt:
+            return "available"
+
+    return "unknown"
+
+
+
 def enrich_from_detail_page(url: str) -> Dict[str, Any]:
     try:
         html = fetch_html(url)
@@ -707,21 +762,10 @@ def enrich_from_detail_page(url: str) -> Dict[str, Any]:
         next_status = extract_status_from_next_data(next_data)
         if next_status:
             status = next_status
+    if status == "unknown" and "landsearch.com" in urlparse(url).netloc.lower():
+        status = _extract_trusted_status_from_landsearch_detail(soup, blocks)
     if status == "unknown":
-        status_candidates: List[str] = []
-        status_candidates.extend(_collect_status_like_dom_text(soup))
-        status_candidates.extend(
-            [
-                meta("og:description", "property"),
-                meta("twitter:description", "name"),
-            ]
-        )
-        status_candidates.extend(_collect_status_like_jsonld_values(blocks))
-        for candidate in status_candidates:
-            s = detect_status(candidate)
-            if s != "unknown":
-                status = s
-                break
+        status = _extract_trusted_status_from_availability(blocks)
 
     price = None
     acres = None

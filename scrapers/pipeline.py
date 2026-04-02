@@ -3,6 +3,35 @@ from typing import Any, Dict, List
 from scrapers.common import STATUS_VALUES, dedupe_by_url, detect_status, is_bad_title, is_lease_listing, is_top_match_now, should_enrich
 
 
+def _status_unknown(item: Dict[str, Any]) -> bool:
+    return (item.get("status") in (None, "", "unknown"))
+
+
+def _missing_title_and_status(item: Dict[str, Any]) -> bool:
+    return is_bad_title(item.get("title")) and _status_unknown(item)
+
+
+def _likely_top_match_candidate(item: Dict[str, Any], min_acres: float, max_acres: float, max_price: int) -> bool:
+    try:
+        acres = item.get("acres")
+        price = item.get("price")
+        if acres is None or price is None:
+            return False
+        return min_acres <= float(acres) <= max_acres and int(price) <= int(max_price)
+    except Exception:
+        return False
+
+
+def _enrichment_priority(item: Dict[str, Any], min_acres: float, max_acres: float, max_price: int) -> tuple:
+    return (
+        0 if is_bad_title(item.get("title")) else 1,
+        0 if _status_unknown(item) else 1,
+        0 if _missing_title_and_status(item) else 1,
+        0 if _likely_top_match_candidate(item, min_acres, max_acres, max_price) else 1,
+        0 if should_enrich(item) else 1,
+    )
+
+
 def finalize_scraped_items(
     all_items: List[Dict[str, Any]],
     old_map: Dict[str, Dict[str, Any]],
@@ -39,7 +68,7 @@ def finalize_scraped_items(
     final.sort(
         key=lambda item: (
             0 if is_top_match_now(item, min_acres, max_acres, max_price) else 1,
-            0 if should_enrich(item) else 1,
+            *_enrichment_priority(item, min_acres, max_acres, max_price),
         )
     )
     return final
